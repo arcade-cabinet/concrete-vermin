@@ -53,6 +53,7 @@ import { pushShake } from "./screenShake";
 import { useGameStore } from "./store";
 import type {
   DamageEvent,
+  EventBarkSnapshot,
   ProjectileSnapshot,
   SplashSnapshot,
   VerminSnapshot,
@@ -99,6 +100,13 @@ export class GameRunner {
       ttlS: 0,
     }));
   private modifierFlashes: import("./store").ModifierFlashSnapshot[] = [];
+  // Mid-mission event dispatch — each event fires at most once per
+  // mission run. We track ids of fired events here so we don't double-
+  // fire across consecutive ticks where the trigger condition still
+  // holds (e.g., kill-count >= N stays true forever after).
+  private firedEventIds: Set<string> = new Set();
+  private eventBarks: EventBarkSnapshot[] = [];
+  private static readonly EVENT_BARK_TTL_S = 5;
   // Weapon state — the player carries one weapon for the whole mission.
   private readonly tunedWeapon: ReturnType<typeof applyLoadout>;
   // Ammo + reload state. mag tracks the active mag's remaining shells;
@@ -367,6 +375,9 @@ export class GameRunner {
     }
     lifecycleSystem(this.gw.world, this.now);
 
+    // 7.5 Mid-mission dynamic event triggers.
+    this.dispatchMissionEvents();
+
     // 8. Encounter / mission progression.
     const encActive = this.pendingSpawns.some((s) => !s.spawned);
     const verminAlive = this.countAliveVermin() > 0;
@@ -421,6 +432,93 @@ export class GameRunner {
       if (l && l.deadAt === 0) n++;
     }
     return n;
+  }
+
+  /**
+   * Walk the mission's event list and fire any whose trigger condition
+   * is now satisfied and which haven't fired yet. Each event fires at
+   * most once per run.
+   */
+  private dispatchMissionEvents(): void {
+    if (this.ended) return;
+    for (const ev of this.mission.events) {
+      if (this.firedEventIds.has(ev.id)) continue;
+      let fire = false;
+      switch (ev.trigger.kind) {
+        case "at-encounter-start":
+          fire = this.encounterIndex >= ev.trigger.index;
+          break;
+        case "at-kill-count":
+          fire = this.kills >= ev.trigger.threshold;
+          break;
+        case "at-time":
+          fire = this.now >= ev.trigger.seconds;
+          break;
+      }
+      if (!fire) continue;
+      this.firedEventIds.add(ev.id);
+      this.applyMissionEffect(ev);
+    }
+    // Evict expired barks before publishSnapshot picks them up.
+    if (this.eventBarks.length > 0) {
+      this.eventBarks = this.eventBarks.filter(
+        (b) => this.now - b.at < GameRunner.EVENT_BARK_TTL_S,
+      );
+    }
+  }
+
+  private applyMissionEffect(ev: import("../sim/factories/mission").MissionEvent): void {
+    const eff = ev.effect;
+    switch (eff.kind) {
+      case "boss-bark": {
+        this.eventBarks.push({ id: ev.id, kind: "boss", text: eff.text, at: this.now });
+        useGameStore.getState().announceForScreenReader(eff.text, "polite");
+        break;
+      }
+      case "environmental-hazard": {
+        this.eventBarks.push({
+          id: ev.id,
+          kind: "hazard",
+          text: eff.label,
+          ...(eff.detail ? { detail: eff.detail } : {}),
+          at: this.now,
+        });
+        const sr = eff.detail ? `${eff.label}. ${eff.detail}` : eff.label;
+        useGameStore.getState().announceForScreenReader(sr, "assertive");
+        break;
+      }
+      case "surprise-wave": {
+        // Synthesize a one-encounter spec on the fly and run it through
+        // composeEncounter so the spawn schedule + zone math match the
+        // normal encounter pipeline. Re-uses the active rng fork keyed
+        // by the event id so seeded replays remain deterministic.
+        const synth = {
+          id: `event:${ev.id}`,
+          isCheckpoint: false,
+          spawns: [{ variant: eff.variant, count: eff.count, pattern: eff.pattern }],
+        };
+        const composed = composeEncounter(
+          synth as unknown as Parameters<typeof composeEncounter>[0],
+          this.gw.rng.fork(`event:${ev.id}`),
+        );
+        const newSpawns: PendingSpawn[] = [];
+        for (const sched of composed.schedules) {
+          for (const tick of sched.schedule) {
+            newSpawns.push({
+              variantId: sched.variant,
+              timing: tick,
+              activeStartedAt: this.now,
+              zone: this.zone,
+            });
+          }
+        }
+        this.pendingSpawns = this.pendingSpawns.concat(newSpawns);
+        const text = `Surprise wave — ${eff.count}× ${eff.variant.replace(/[-_]/g, " ")}.`;
+        this.eventBarks.push({ id: ev.id, kind: "wave", text, at: this.now });
+        useGameStore.getState().announceForScreenReader(text, "assertive");
+        break;
+      }
+    }
   }
 
   private applyContactDamage(amount: number): void {
@@ -505,6 +603,7 @@ export class GameRunner {
       splashes,
       muzzleFlashes: this.muzzleFlashPool.liveSnapshot(),
       modifierFlashes: this.modifierFlashes.slice(),
+      eventBarks: this.eventBarks.slice(),
       damageEvents: this.damageEventPool.liveSnapshot(),
       now: this.now,
       score: { total, multiplier },

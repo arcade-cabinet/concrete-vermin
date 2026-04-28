@@ -39,6 +39,41 @@ export const mission06: Mission = defineMission({
       ],
     },
   ],
+  events: [
+    {
+      id: "warm-water-warning",
+      trigger: { kind: "at-time", seconds: 4 },
+      effect: { kind: "boss-bark", text: "Pawnbroker: \"If the water boils, run.\"" },
+    },
+    {
+      id: "pipe-burst",
+      trigger: { kind: "at-kill-count", threshold: 6 },
+      effect: {
+        kind: "environmental-hazard",
+        label: "PIPE BURST",
+        detail: "Steam vents the tunnel. Sight lines drop.",
+      },
+    },
+    {
+      id: "deeper-encounter-bark",
+      trigger: { kind: "at-encounter-start", index: 1 },
+      effect: { kind: "boss-bark", text: "DiSalvo's tag is in the deeper water. Don't dive for it." },
+    },
+    {
+      id: "roach-flood-extra",
+      trigger: { kind: "at-kill-count", threshold: 14 },
+      effect: { kind: "surprise-wave", variant: "roach-radioactive", count: 3, pattern: "pop-from-vent" },
+    },
+    {
+      id: "current-shifts",
+      trigger: { kind: "at-time", seconds: 32 },
+      effect: {
+        kind: "environmental-hazard",
+        label: "CURRENT REVERSES",
+        detail: "Fish push toward the player line.",
+      },
+    },
+  ],
   seed: 1979_02_06,
   cashAward: 300,
 });
