@@ -52,12 +52,26 @@ const applyEffects = (
   return out;
 };
 
-const heuristic = (state: WorldState, goal: WorldState): number => {
+// Admissible heuristic: count of unsatisfied goal keys × the cheapest
+// available action cost. Capped at 0 so it never overestimates when an
+// action satisfies multiple goal keys at once (which would otherwise
+// break A*'s "cheapest-plan" guarantee for non-uniform costs).
+const heuristic = (state: WorldState, goal: WorldState, minCost: number): number => {
   let h = 0;
   for (const k in goal) {
     if (state[k] !== goal[k]) h++;
   }
-  return h;
+  return h * minCost;
+};
+
+// Canonicalize state for closed-set keys: sorted property order so
+// equivalent states reached via different effect orders collapse to
+// the same key.
+const stateKey = (s: WorldState): string => {
+  const keys = Object.keys(s).sort();
+  const parts: string[] = [];
+  for (const k of keys) parts.push(`${k}=${String(s[k])}`);
+  return parts.join("|");
 };
 
 interface Node {
@@ -94,13 +108,21 @@ export function plan(
 
   if (stateMatches(start, goal)) return { actions: [], cost: 0 };
 
+  // Cheapest action cost — used by the admissible heuristic. If any
+  // action has cost <= 0, fall back to 0 (always admissible).
+  let minCost = Number.POSITIVE_INFINITY;
+  for (const a of actions) {
+    if (a.cost < minCost) minCost = a.cost;
+  }
+  if (!Number.isFinite(minCost) || minCost < 0) minCost = 0;
+
   let seqCounter = 0;
   const startNode: Node = {
     state: start,
     parent: null,
     action: null,
     g: 0,
-    f: heuristic(start, goal),
+    f: heuristic(start, goal, minCost),
     seq: seqCounter++,
   };
 
@@ -128,7 +150,7 @@ export function plan(
       return { actions: reconstruct(current), cost: current.g };
     }
 
-    const key = JSON.stringify(current.state);
+    const key = stateKey(current.state);
     const prev = closed.get(key);
     if (prev !== undefined && prev <= current.g) continue;
     closed.set(key, current.g);
@@ -137,7 +159,7 @@ export function plan(
       if (!stateMatches(current.state, action.preconditions)) continue;
       const nextState = applyEffects(current.state, action.effects);
       const g = current.g + action.cost;
-      const f = g + heuristic(nextState, goal);
+      const f = g + heuristic(nextState, goal, minCost);
       open.push({
         state: nextState,
         parent: current,

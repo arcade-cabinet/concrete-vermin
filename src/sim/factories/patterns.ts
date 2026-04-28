@@ -43,19 +43,26 @@ const SKY_Y = 0.1;
 const SPAWN_COUNT_CAP = 64;
 
 const jitter = (rng: Rng, amplitude: number): number => (rng.next() * 2 - 1) * amplitude;
+const clamp01 = (n: number): number => (n < 0 ? 0 : n > 1 ? 1 : n);
 
 const patternFns: Record<SpawnPattern, (count: number, rng: Rng) => SpawnTimingRecord[]> = {
   "left-flood": (count, rng) =>
     Array.from({ length: count }, (_, i) => ({
       delayS: i * STAGGER_S,
-      position: { x: 0 + jitter(rng, 0.04), y: FLOOD_BOTTOM_Y + jitter(rng, 0.04) },
+      position: {
+        x: clamp01(0 + jitter(rng, 0.04)),
+        y: clamp01(FLOOD_BOTTOM_Y + jitter(rng, 0.04)),
+      },
       velocity: { x: 1, y: 0 },
       index: i,
     })),
   "right-flood": (count, rng) =>
     Array.from({ length: count }, (_, i) => ({
       delayS: i * STAGGER_S,
-      position: { x: 1 - jitter(rng, 0.04), y: FLOOD_BOTTOM_Y + jitter(rng, 0.04) },
+      position: {
+        x: clamp01(1 - jitter(rng, 0.04)),
+        y: clamp01(FLOOD_BOTTOM_Y + jitter(rng, 0.04)),
+      },
       velocity: { x: -1, y: 0 },
       index: i,
     })),
@@ -93,8 +100,8 @@ const patternFns: Record<SpawnPattern, (count: number, rng: Rng) => SpawnTimingR
       return {
         delayS: i * STAGGER_S * 0.6,
         position: {
-          x: fromLeft ? 0 + jitter(rng, 0.05) : 1 - jitter(rng, 0.05),
-          y: FLOOD_BOTTOM_Y + jitter(rng, 0.06),
+          x: clamp01(fromLeft ? 0 + jitter(rng, 0.05) : 1 - jitter(rng, 0.05)),
+          y: clamp01(FLOOD_BOTTOM_Y + jitter(rng, 0.06)),
         },
         velocity: { x: fromLeft ? 1 : -1, y: 0 },
         index: i,

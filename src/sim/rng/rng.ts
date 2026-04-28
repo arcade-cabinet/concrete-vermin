@@ -11,7 +11,7 @@ export interface Rng {
   int(min: number, max: number): number;
   pick<T>(arr: readonly T[]): T;
   weighted<T>(items: readonly T[], weights: readonly number[]): T;
-  shuffle<T>(arr: T[]): T[];
+  shuffle<T>(arr: readonly T[]): T[];
   gaussian(): number;
   chance(p: number): boolean;
   /** Spawn an independent child RNG seeded from this one. The label keeps
@@ -44,15 +44,18 @@ function makeRng(seed: number, restoreState?: string): Rng {
 
   const next = (): number => generator.quick();
 
-  const shuffle = <T>(arr: T[]): T[] => {
-    for (let i = arr.length - 1; i > 0; i--) {
+  // Copy first — sim flows pass shared content arrays around and an
+  // in-place shuffle would leak state across pure calls.
+  const shuffle = <T>(arr: readonly T[]): T[] => {
+    const out = arr.slice();
+    for (let i = out.length - 1; i > 0; i--) {
       const j = Math.floor(next() * (i + 1));
-      const a = arr[i] as T;
-      const b = arr[j] as T;
-      arr[i] = b;
-      arr[j] = a;
+      const a = out[i] as T;
+      const b = out[j] as T;
+      out[i] = b;
+      out[j] = a;
     }
-    return arr;
+    return out;
   };
 
   return {

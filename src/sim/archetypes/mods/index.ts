@@ -226,12 +226,35 @@ const MOD_DATA: ReadonlyArray<z.input<typeof weaponModSchema>> = [
   },
 ];
 
-export const MOD_REGISTRY: ReadonlyMap<string, Readonly<WeaponMod>> = new Map(
+// Internal mutable map kept private — `get`/`size`/iteration go through
+// the frozen view below. This prevents callers from .set()/.delete()ing
+// at runtime (ReadonlyMap is a compile-time-only protection).
+const _MOD_MAP = new Map<string, Readonly<WeaponMod>>(
   MOD_DATA.map((d) => [d.id, Object.freeze(weaponModSchema.parse(d))]),
 );
 
+export const MOD_REGISTRY: Readonly<{
+  size: number;
+  get(id: string): Readonly<WeaponMod> | undefined;
+  has(id: string): boolean;
+  values(): IterableIterator<Readonly<WeaponMod>>;
+}> = Object.freeze({
+  get size() {
+    return _MOD_MAP.size;
+  },
+  get(id: string) {
+    return _MOD_MAP.get(id);
+  },
+  has(id: string) {
+    return _MOD_MAP.has(id);
+  },
+  values() {
+    return _MOD_MAP.values();
+  },
+});
+
 export function getMod(id: string): Readonly<WeaponMod> | undefined {
-  return MOD_REGISTRY.get(id);
+  return _MOD_MAP.get(id);
 }
 
 export const MAX_LOADOUT_SLOTS = 3;

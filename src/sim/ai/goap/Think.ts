@@ -38,8 +38,10 @@ export class Think<Owner, World> extends CompositeGoal<Owner> {
         best = ev;
       }
     }
-    if (!best) return null;
+    // Honor the cadence even when no evaluator wins — otherwise step()
+    // re-polls every tick because hasSubgoals() stays false.
     this.lastArbitrationAt = ctx.now;
+    if (!best) return null;
     this.removeAllSubgoals(ctx);
     this.addSubgoal(best.setGoal(this.owner, world));
     return best.id;

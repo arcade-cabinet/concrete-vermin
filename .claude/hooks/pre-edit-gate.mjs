@@ -61,14 +61,13 @@ const reject = (msg) => {
   process.exit(2); // 2 = block tool call
 };
 
-const isInSim = path.includes("/src/sim/");
-// Only the purity test itself is allowed to reference these patterns
-// in regex literals — that's how it scans for violations. Every other
-// sim test still goes through the gate.
-const isPurityTest = /\/src\/sim\/__tests__\/purity\.test\.ts$/.test(path);
-const isInRender = path.includes("/src/render/");
-const isInUi = path.includes("/src/ui/");
-const isCrtFile = path.endsWith("src/render/effects/crt.ts");
+// Normalize Windows backslashes so the segment patterns work everywhere.
+const normalizedPath = path.replace(/\\/g, "/");
+const isInSim = /(^|\/)src\/sim\//.test(normalizedPath);
+const isPurityTest = /(^|\/)src\/sim\/__tests__\/purity\.test\.ts$/.test(normalizedPath);
+const isInRender = /(^|\/)src\/render\//.test(normalizedPath);
+const isInUi = /(^|\/)src\/ui\//.test(normalizedPath);
+const isCrtFile = normalizedPath.endsWith("src/render/effects/crt.ts");
 
 // 1. Sim-purity
 if (isInSim && !isPurityTest) {
