@@ -175,23 +175,27 @@ const ABILITY_BY_AFFLICTION: Record<Affliction, AIConfig["ability"]> = {
 };
 
 export function tuneAIForTraits(base: AIConfig, traits: VerminTraitSet): AIConfig {
+  // Layer trait adjustments onto the caller's base config rather than
+  // recomputing absolutes — archetype-level brain tuning (e.g. a boss
+  // with longer reaction delay) must survive trait composition.
   const aggression = clamp(
     base.aggression * 0.25 + AGGRESSION_LEVEL[traits.aggression] * 0.75,
     0,
     1,
   );
-  const reaction = clamp(
-    REACTION_BY_AGGRESSION[traits.aggression] * (traits.affliction === "rabid" ? 0.7 : 1),
+  const traitReactionMul =
+    REACTION_BY_AGGRESSION[traits.aggression] / REACTION_BY_AGGRESSION.curious;
+  const reactionDelayS = clamp(
+    base.reactionDelayS * traitReactionMul * (traits.affliction === "rabid" ? 0.7 : 1),
     0.05,
     1,
   );
-  const jitter = clamp(JITTER_BY_SPEED[traits.speedMod], 0, 1);
-  return {
-    aggression,
-    reactionDelayS: reaction,
-    jitter,
-    ability: ABILITY_BY_AFFLICTION[traits.affliction],
-  };
+  const traitJitterMul = JITTER_BY_SPEED[traits.speedMod] / JITTER_BY_SPEED.normal;
+  const jitter = clamp(base.jitter * traitJitterMul, 0, 1);
+  // Affliction overrides ability when present; otherwise inherit base.
+  const ability =
+    traits.affliction === "none" ? base.ability : ABILITY_BY_AFFLICTION[traits.affliction];
+  return { aggression, reactionDelayS, jitter, ability };
 }
 
 export function mergeTraits(

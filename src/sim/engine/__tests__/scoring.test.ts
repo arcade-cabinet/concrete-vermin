@@ -29,7 +29,7 @@ const baseKill: KillEvent = {
 describe("recordKill", () => {
   it("plain kill: base * multiplier, +0.1 multiplier, no flashes", () => {
     const after = recordKill(initialScoreState, baseKill, 1);
-    expect(after.total).toBe(30 * 1.1); // base 30 * (1+0) * 1.1
+    expect(after.total).toBe(30 * 1.1);
     expect(after.multiplier).toBeCloseTo(MULTIPLIER_BASE + MULTIPLIER_KILL_DELTA);
     expect(after.modifierFlashes).toEqual([]);
   });

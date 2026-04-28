@@ -51,12 +51,19 @@ export interface Encounter {
   schedules: ReadonlyArray<Readonly<EncounterSpawnSchedule>>;
 }
 
-export function composeEncounter(spec: EncounterSpec, rng: Rng): Encounter {
+export function composeEncounter(spec: EncounterSpec, rng: Rng): Readonly<Encounter> {
   const validated = encounterSpecSchema.parse(spec);
+  const occurrence = new Map<string, number>();
   const schedules = validated.spawns.map((spawn) => {
-    const child = rng.fork(`encounter:${validated.id}:${spawn.variant}`);
-    const schedule = planSpawnPattern(spawn.pattern, spawn.count, child).map((r) =>
-      Object.freeze(r),
+    // Same variant can appear multiple times in one encounter with
+    // different (pattern, count). Include all three plus an occurrence
+    // counter so duplicate spec entries still get distinct streams.
+    const key = `${spawn.variant}:${spawn.pattern}:${spawn.count}`;
+    const idx = occurrence.get(key) ?? 0;
+    occurrence.set(key, idx + 1);
+    const child = rng.fork(`encounter:${validated.id}:${key}:${idx}`);
+    const schedule = Object.freeze(
+      planSpawnPattern(spawn.pattern, spawn.count, child).map((r) => Object.freeze(r)),
     );
     return Object.freeze({
       variant: spawn.variant,
@@ -64,10 +71,10 @@ export function composeEncounter(spec: EncounterSpec, rng: Rng): Encounter {
       schedule,
     });
   });
-  return {
+  return Object.freeze({
     id: validated.id,
     duration: validated.duration,
     isCheckpoint: validated.isCheckpoint,
     schedules: Object.freeze(schedules),
-  };
+  });
 }

@@ -95,23 +95,13 @@ export function accumulate(stats: RunStats, event: RunEvent): RunStats {
       if (recentKillTimes.length >= HOT_MOMENT_KILLS) {
         const startAt = recentKillTimes[0] as number;
         const last = hotMoments[hotMoments.length - 1];
-        // Three cases:
-        // 1. No previous moment OR previous moment ended > cooldown ago
-        //    AND startAt is past the cooldown gate → append new moment.
-        // 2. Previous moment is still "live" (its window overlaps ours)
-        //    → extend it (replace-tail with updated endAt + kill count).
-        // 3. Previous moment ended within cooldown → swallow this kill
-        //    (don't spam new moments while the cooldown is in effect).
-        if (last && startAt < last.endAt + HOT_MOMENT_COOLDOWN_S) {
-          // Continuous run — extend the trailing moment.
+        if (last && startAt <= last.endAt) {
           hotMoments = [
             ...hotMoments.slice(0, -1),
-            {
-              startAt: last.startAt,
-              endAt: event.at,
-              kills: last.kills + 1,
-            },
+            { startAt: last.startAt, endAt: event.at, kills: last.kills + 1 },
           ];
+        } else if (last && event.at < last.endAt + HOT_MOMENT_COOLDOWN_S) {
+          // suppress: cooldown hasn't elapsed since the last moment ended
         } else {
           hotMoments = [...hotMoments, { startAt, endAt: event.at, kills: recentKillTimes.length }];
         }

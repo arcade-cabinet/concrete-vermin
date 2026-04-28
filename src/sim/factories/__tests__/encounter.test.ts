@@ -164,8 +164,6 @@ describe("composeEncounter", () => {
   });
 
   it("uses forked rngs so sibling spawns don't disturb each other", () => {
-    // Swapping the order of spawns should not change a given variant's
-    // schedule, because each variant has its own forked rng stream.
     const spec1 = {
       id: "e",
       spawns: [

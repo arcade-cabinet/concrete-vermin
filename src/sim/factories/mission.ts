@@ -19,7 +19,7 @@ export const WEAPON_ARCHETYPES = [
   "revolver",
   "smg",
   "sawed-off",
-  "flame",
+  "flamethrower",
   "tesla",
 ] as const;
 export type WeaponArchetype = (typeof WEAPON_ARCHETYPES)[number];

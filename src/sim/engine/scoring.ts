@@ -46,8 +46,8 @@ export interface ScoreState {
   multiplierGraceUntil: number;
   noReloadStreak: number;
   lastArchetypeKilled: ArchetypeId | null;
-  varietyChain: ArchetypeId[];
-  modifierFlashes: ModifierFlash[];
+  varietyChain: ReadonlyArray<ArchetypeId>;
+  modifierFlashes: ReadonlyArray<ModifierFlash>;
 }
 
 export interface KillEvent {
@@ -103,8 +103,8 @@ export const initialScoreState: Readonly<ScoreState> = Object.freeze({
   multiplierGraceUntil: 0,
   noReloadStreak: 0,
   lastArchetypeKilled: null,
-  varietyChain: [],
-  modifierFlashes: [],
+  varietyChain: Object.freeze([]) as ReadonlyArray<ArchetypeId>,
+  modifierFlashes: Object.freeze([]) as ReadonlyArray<ModifierFlash>,
 });
 
 // ─── Helpers ──────────────────────────────────────────────────────────────
@@ -117,7 +117,7 @@ const noReloadBonusPct = (streak: number): number => {
   return Math.min(STYLE_NO_RELOAD_CAP_PCT, fives * STYLE_NO_RELOAD_PER_5_PCT);
 };
 
-const varietyBonusPct = (chain: ArchetypeId[], next: ArchetypeId): number => {
+const varietyBonusPct = (chain: ReadonlyArray<ArchetypeId>, next: ArchetypeId): number => {
   // Last-4 window including the new kill: variety bonus if 3+ unique.
   const window = [...chain.slice(-3), next];
   const unique = new Set(window).size;

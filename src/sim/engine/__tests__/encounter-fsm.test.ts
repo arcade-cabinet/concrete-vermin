@@ -27,9 +27,9 @@ describe("encounter-fsm", () => {
 
   it("ARMING → ACTIVE after armingDurationS elapses (tick)", () => {
     const a = step(baseFsm(), { kind: "camera-arrived" }, 0);
-    const b = step(a.next, { kind: "tick" }, 0.5); // not yet
+    const b = step(a.next, { kind: "tick" }, 0.5);
     expect(b.next.phase).toBe("ARMING");
-    const c = step(b.next, { kind: "tick" }, 1.0); // exactly at boundary
+    const c = step(b.next, { kind: "tick" }, 1.0);
     expect(c.next.phase).toBe("ACTIVE");
     expect(c.next.activeStartedAt).toBe(1.0);
   });
