@@ -6,6 +6,13 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 Releases are managed by [release-please](https://github.com/googleapis/release-please).
 
+## [1.13.0](https://github.com/arcade-cabinet/concrete-vermin/compare/v1.12.1...v1.13.0) (2026-04-28)
+
+
+### Features
+
+* **ux:** responsive HUD + safe-area + 44px touch targets + DPR-aware reticle ([#36](https://github.com/arcade-cabinet/concrete-vermin/issues/36)) ([0f0869b](https://github.com/arcade-cabinet/concrete-vermin/commit/0f0869b5b2b9d2d52ae544a1be7f294b01b92e1e))
+
 ## [1.12.1](https://github.com/arcade-cabinet/concrete-vermin/compare/v1.12.0...v1.12.1) (2026-04-28)
 
 
