@@ -4,8 +4,17 @@
 import { readFileSync } from "node:fs";
 
 let input = "";
-try { input = readFileSync(0, "utf-8"); } catch { process.exit(0); }
-let event; try { event = JSON.parse(input); } catch { process.exit(0); }
+try {
+  input = readFileSync(0, "utf-8");
+} catch {
+  process.exit(0);
+}
+let event;
+try {
+  event = JSON.parse(input);
+} catch {
+  process.exit(0);
+}
 
 const path = event?.tool_input?.file_path ?? event?.tool_input?.filePath ?? "";
 if (!path) process.exit(0);
@@ -19,7 +28,7 @@ try {
   if (lineCount > 600) {
     warn(
       `${path} is ${lineCount} lines. Consider whether responsibilities are still cohesive. ` +
-      `STANDARDS.md §8 (warning, not blocking).`
+        `STANDARDS.md §8 (warning, not blocking).`,
     );
   }
 } catch {
