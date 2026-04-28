@@ -1,0 +1,35 @@
+{
+  "ban_patterns": [
+    {
+      "pattern": "#00f0ff",
+      "flags": "i",
+      "globs": ["src/**/*.{ts,tsx,js,jsx,mjs,css,svg,html}"],
+      "message": "Brand gate: POC neon cyan (#00f0ff) banned. Palette: sodium amber + brick + asphalt + subway tile. STANDARDS.md §4."
+    },
+    {
+      "pattern": "#ff00ff",
+      "flags": "i",
+      "globs": ["src/**/*.{ts,tsx,js,jsx,mjs,css,svg,html}"],
+      "message": "Brand gate: neon magenta (#ff00ff) banned. STANDARDS.md §4."
+    },
+    {
+      "pattern": "#39ff14",
+      "flags": "i",
+      "globs": ["src/**/*.{ts,tsx,js,jsx,mjs,css,svg,html}"],
+      "message": "Brand gate: neon green (#39ff14) banned. STANDARDS.md §4."
+    },
+    {
+      "pattern": "#ff2a2a",
+      "flags": "i",
+      "globs": ["src/**/*.{ts,tsx,js,jsx,mjs,css,svg,html}"],
+      "message": "Brand gate: POC neon red (#ff2a2a) banned. Use brick #7a2818. STANDARDS.md §4."
+    },
+    {
+      "pattern": "#ffd700",
+      "flags": "i",
+      "globs": ["src/**/*.{ts,tsx,js,jsx,mjs,css,svg,html}"],
+      "message": "Brand gate: POC neon gold (#ffd700) banned. Use sodium #d4943a. STANDARDS.md §4."
+    }
+  ],
+  "forbidden_bash": []
+}
