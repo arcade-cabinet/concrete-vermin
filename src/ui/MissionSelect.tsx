@@ -400,8 +400,8 @@ function SecretRail({
             aria-pressed={isSelected}
             aria-label={
               unlocked
-                ? `Secret mission: ${label}${isSelected ? ", selected" : ""}`
-                : "Secret mission, locked, S-grade required"
+                ? `Secret mission: ${label}`
+                : `Secret mission ${m.id.replace(/^[a-z]+-secret-/, "").replace(/-/g, " ")}, locked, S-grade required`
             }
             onClick={() => unlocked && onSelect(m.id)}
             style={{
