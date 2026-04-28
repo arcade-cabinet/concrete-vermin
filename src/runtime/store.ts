@@ -75,6 +75,8 @@ export interface Settings {
   reducedMotion: boolean;
   /** AAA contrast: bumps body text to pure cream, dims accent backdrops. */
   highContrast: boolean;
+  /** Vibration on hit / kill / boss-damage via @capacitor/haptics. */
+  haptics: boolean;
 }
 
 export interface GameState {
@@ -86,6 +88,7 @@ export interface GameState {
   setMuted: (m: boolean) => void;
   setReducedMotion: (on: boolean) => void;
   setHighContrast: (on: boolean) => void;
+  setHaptics: (on: boolean) => void;
   reticle: { x: number; y: number };
   score: { total: number; multiplier: number };
   player: { ammoCurrent: number; ammoMax: number; livesRemaining: number };
@@ -133,12 +136,14 @@ export const useGameStore = create<GameState>((set) => ({
     muted: false,
     reducedMotion: false,
     highContrast: false,
+    haptics: true,
   },
   setCrtOverlay: (on) => set((s) => ({ settings: { ...s.settings, crtOverlay: on } })),
   setMasterVolumeDb: (db) => set((s) => ({ settings: { ...s.settings, masterVolumeDb: db } })),
   setMuted: (muted) => set((s) => ({ settings: { ...s.settings, muted } })),
   setReducedMotion: (on) => set((s) => ({ settings: { ...s.settings, reducedMotion: on } })),
   setHighContrast: (on) => set((s) => ({ settings: { ...s.settings, highContrast: on } })),
+  setHaptics: (on) => set((s) => ({ settings: { ...s.settings, haptics: on } })),
   reticle: { x: 240, y: 200 },
   score: { total: 0, multiplier: 1 },
   player: { ammoCurrent: 6, ammoMax: 6, livesRemaining: 3 },

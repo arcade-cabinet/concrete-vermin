@@ -1,5 +1,6 @@
 import { useEffect } from "react";
 import { setMasterVolumeDb, setMute } from "../audio/setup";
+import { setHapticsEnabled } from "../platform/haptics";
 import { useGameStore } from "../runtime/store";
 import { Briefing } from "./Briefing";
 import { FirstLaunchOverlay } from "./FirstLaunchOverlay";
@@ -22,9 +23,11 @@ export function App() {
   const startMission = useGameStore((s) => s.startMission);
   const masterVolumeDb = useGameStore((s) => s.settings.masterVolumeDb);
   const muted = useGameStore((s) => s.settings.muted);
+  const haptics = useGameStore((s) => s.settings.haptics);
 
   useEffect(() => setMasterVolumeDb(masterVolumeDb), [masterVolumeDb]);
   useEffect(() => setMute(muted), [muted]);
+  useEffect(() => setHapticsEnabled(haptics), [haptics]);
 
   useEffect(() => {
     loadPlayerProgress();
