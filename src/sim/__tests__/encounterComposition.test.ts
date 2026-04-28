@@ -95,6 +95,17 @@ describe("encounter composition uniqueness", () => {
     }
   });
 
+  it("at most one tutorial mission exists in the canonical catalog", () => {
+    // Tutorial flag carves out reduced-palette + reduced-difficulty
+    // allowances; a second tutorial would silently bypass the
+    // composition / variety / distinguishing gates above.
+    const tutorials = ALL.filter((m) => m.tutorial);
+    expect(
+      tutorials.length,
+      `multiple tutorial missions: ${tutorials.map((m) => m.id).join(", ")}`,
+    ).toBeLessThanOrEqual(1);
+  });
+
   it("every non-tutorial mission carries at least one distinguishing variant or pattern within its act", () => {
     // Tutorial missions (m.tutorial === true) intentionally use a
     // reduced palette so a non-gamer can pass on first try. Every
