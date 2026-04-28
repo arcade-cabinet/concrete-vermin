@@ -33,6 +33,21 @@ html.cv-high-contrast {
      the asphalt darker (already pure black-grey, so no shift). */
   color-scheme: dark;
 }
+
+/* Page-transition fade. data-phase-root opt-in. Reduced-motion via
+   the prefers-reduced-motion media query zeroes the duration. */
+@keyframes cv-phase-in {
+  from { opacity: 0; transform: translateY(6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+[data-phase-root] {
+  animation: cv-phase-in 220ms cubic-bezier(0.16, 1, 0.3, 1);
+  will-change: opacity, transform;
+}
+@media (prefers-reduced-motion: reduce) {
+  [data-phase-root] { animation-duration: 0ms; }
+}
+html.cv-reduced-motion [data-phase-root] { animation-duration: 0ms; }
 `;
 
 /**

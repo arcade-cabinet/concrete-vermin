@@ -9,14 +9,17 @@ import {
 import { setHapticsEnabled } from "../platform/haptics";
 import { useGameStore } from "../runtime/store";
 import { Briefing } from "./Briefing";
+import { Credits } from "./Credits";
 import { FirstLaunchOverlay } from "./FirstLaunchOverlay";
 import { GameStage } from "./GameStage";
 import { GlobalStyles } from "./GlobalStyles";
 import { HUD } from "./HUD";
+import { MainMenu } from "./MainMenu";
 import { MissionResult } from "./MissionResult";
 import { MissionSelect } from "./MissionSelect";
 import { PauseMenu } from "./PauseMenu";
 import { PawnShop } from "./PawnShop";
+import { ToastHost } from "./Toast";
 import { SrLiveRegion } from "./SrLiveRegion";
 import { srMissionComplete, srMissionFailed, srMissionStart } from "../runtime/sr-only";
 import { usePlayerProgress } from "./PlayerProgress";
@@ -114,6 +117,9 @@ export function App() {
     <div style={{ width: "100%", height: "100%" }}>
       <GlobalStyles />
       <SrLiveRegion />
+      <ToastHost />
+      {phase === "main-menu" ? <MainMenu /> : null}
+      {phase === "credits" ? <Credits /> : null}
       {phase === "briefing" ? <Briefing /> : null}
       {phase === "mission-select" ? (
         <MissionSelect onPickMission={() => setPhase("pawn-shop")} />

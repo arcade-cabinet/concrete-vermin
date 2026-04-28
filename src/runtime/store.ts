@@ -11,7 +11,15 @@ import { create } from "zustand";
  * the heavy ECS query on every frame.
  */
 
-export type MissionPhase = "briefing" | "mission-select" | "pawn-shop" | "playing" | "won" | "lost";
+export type MissionPhase =
+  | "main-menu"
+  | "briefing"
+  | "mission-select"
+  | "pawn-shop"
+  | "playing"
+  | "won"
+  | "lost"
+  | "credits";
 
 export interface VerminSnapshot {
   id: number;
@@ -179,7 +187,7 @@ export interface GameState {
 }
 
 export const useGameStore = create<GameState>((set) => ({
-  phase: "briefing",
+  phase: "main-menu",
   viewport: { width: 480, height: 270 },
   settings: {
     crtOverlay: false,

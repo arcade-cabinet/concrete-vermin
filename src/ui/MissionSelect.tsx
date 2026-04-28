@@ -12,21 +12,47 @@ const ACT_LABELS: Record<ActId, string> = {
   above: "ACT III — ABOVE",
 };
 
-function MissionTile({
-  missionId,
-  title,
-  unlocked,
-  completed,
-  selected,
-  onSelect,
-}: {
+// 1979 NYC subway-line color metaphor — each act gets a line color
+// reminiscent of the IRT/BMT bullets. Sodium-warm, not cyberpunk neon.
+const ACT_LINE_COLOR: Record<ActId, string> = {
+  streets: COLOR.sodium,
+  underworld: COLOR.eliteGreen,
+  above: COLOR.flashSodiumLight,
+};
+
+const ACT_BULLET_LABEL: Record<ActId, string> = {
+  streets: "S",
+  underworld: "U",
+  above: "A",
+};
+
+interface StopProps {
   missionId: string;
+  index: number;
+  total: number;
   title: string;
   unlocked: boolean;
   completed: boolean;
   selected: boolean;
+  isBoss: boolean;
+  lineColor: string;
   onSelect: () => void;
-}) {
+}
+
+function MissionStop({
+  missionId,
+  index,
+  total,
+  title,
+  unlocked,
+  completed,
+  selected,
+  isBoss,
+  lineColor,
+  onSelect,
+}: StopProps) {
+  const dotColor = completed ? lineColor : unlocked ? COLOR.cream : COLOR.mute;
+  const lineMute = COLOR.borderMute;
   return (
     <button
       type="button"
@@ -35,26 +61,76 @@ function MissionTile({
       data-testid={`mission-tile-${missionId}`}
       data-arrow-nav-item="mission"
       aria-pressed={selected}
-      aria-label={`${title}${completed ? ", completed" : unlocked ? "" : ", locked"}`}
+      aria-label={`${title}${completed ? ", completed" : unlocked ? "" : ", locked"}${isBoss ? ", boss" : ""}`}
       style={{
-        background: selected ? COLOR.sodium : "transparent",
-        color: selected ? COLOR.bgConcreteDark : unlocked ? COLOR.cream : COLOR.mute,
-        border: `1px solid ${unlocked ? COLOR.sodium : COLOR.borderMute}`,
-        padding: "12px 14px",
+        position: "relative",
+        display: "grid",
+        gridTemplateColumns: "32px 1fr",
+        alignItems: "center",
+        gap: 12,
+        background: selected ? `${lineColor}22` : "transparent",
+        color: unlocked ? COLOR.cream : COLOR.mute,
+        border: `1px solid ${selected ? lineColor : "transparent"}`,
+        padding: "10px 14px 10px 8px",
         textAlign: "left",
         fontFamily: TYPE.faceMono,
         fontSize: 13,
         cursor: unlocked ? "pointer" : "not-allowed",
-        // Touch-target floor (44 CSS px height); width responsive on
-        // narrow viewports so tiles aren't clipped on a 320 px portrait.
         minHeight: 44,
-        minWidth: 220,
+        minWidth: 240,
       }}
     >
-      <div style={{ letterSpacing: 1 }}>
-        {completed ? "✓ " : unlocked ? "" : "🔒 "}
-        {title}
-      </div>
+      {/* Subway-line stem: vertical bar from previous to next stop. */}
+      <span
+        aria-hidden="true"
+        style={{
+          position: "absolute",
+          left: 22,
+          top: index === 0 ? "50%" : 0,
+          bottom: index === total - 1 ? "50%" : 0,
+          width: 2,
+          background: lineColor,
+          opacity: unlocked ? 1 : 0.3,
+        }}
+      />
+      {/* Stop bullet — filled when completed, ringed when current/unlocked, hollow + locked icon otherwise. */}
+      <span
+        aria-hidden="true"
+        style={{
+          position: "relative",
+          width: isBoss ? 22 : 16,
+          height: isBoss ? 22 : 16,
+          borderRadius: "50%",
+          background: completed ? lineColor : selected ? `${lineColor}88` : COLOR.bgAsphalt,
+          border: `2px solid ${unlocked ? lineColor : lineMute}`,
+          justifySelf: "center",
+          boxShadow: selected ? `0 0 12px ${lineColor}99` : "none",
+          // Pulse on the current selected stop.
+          animation: selected ? "cv-stop-pulse 1.4s ease-in-out infinite" : undefined,
+        }}
+      />
+      <span style={{ display: "flex", flexDirection: "column", gap: 2 }}>
+        <span style={{ display: "flex", alignItems: "center", gap: 8 }}>
+          <span style={{ color: dotColor, letterSpacing: "0.05em", fontWeight: 600 }}>
+            {!unlocked ? "🔒 " : completed ? "✓ " : ""}
+            {title}
+          </span>
+          {isBoss ? (
+            <span
+              style={{
+                background: COLOR.brick,
+                color: COLOR.cream,
+                fontSize: 9,
+                letterSpacing: "0.2em",
+                padding: "1px 6px",
+                fontFamily: TYPE.faceDisplay,
+              }}
+            >
+              BOSS
+            </span>
+          ) : null}
+        </span>
+      </span>
     </button>
   );
 }
@@ -71,6 +147,7 @@ export function MissionSelect({ onPickMission }: { onPickMission: (id: string) =
   return (
     <div
       data-testid="mission-select"
+      data-phase-root="mission-select"
       ref={gridRef}
       style={{
         position: "fixed",
@@ -84,36 +161,111 @@ export function MissionSelect({ onPickMission }: { onPickMission: (id: string) =
         fontFamily: TYPE.faceDisplay,
       }}
     >
-      <header style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline" }}>
-        <h2 style={{ color: COLOR.sodium, margin: 0, letterSpacing: 2 }}>SELECT MISSION</h2>
+      <header
+        style={{
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "baseline",
+          flexWrap: "wrap",
+          gap: 12,
+        }}
+      >
+        <div>
+          <h2 style={{ color: COLOR.sodium, margin: 0, letterSpacing: "0.2em", fontSize: "1.6rem" }}>
+            SELECT LINE · STOP
+          </h2>
+          <p style={{ color: COLOR.creamDim, fontFamily: TYPE.faceMono, fontSize: 11, margin: "4px 0 0", letterSpacing: "0.15em" }}>
+            METRO TRANSIT AUTHORITY · 1979
+          </p>
+        </div>
         <div style={{ fontFamily: TYPE.faceMono, fontSize: 14 }}>
-          <span style={{ color: COLOR.sodium }}>CASH</span> ${cash.toLocaleString()}
+          <span style={{ color: COLOR.sodium }}>CASH</span>{" "}
+          <span style={{ color: COLOR.cream }}>${cash.toLocaleString()}</span>
         </div>
       </header>
 
-      {ACT_IDS.map((act) => (
-        <section key={act} style={{ marginTop: 24 }}>
-          <h3 style={{ color: COLOR.brick, letterSpacing: 1, fontSize: 16, margin: "8px 0" }}>
-            {ACT_LABELS[act]}
-          </h3>
-          <div style={{ display: "flex", flexWrap: "wrap", gap: 10 }}>
-            {listMissionsByAct(act).map((m) => (
-              <MissionTile
-                key={m.id}
-                missionId={m.id}
-                title={m.id
-                  .replace(/^[a-z]+-\d+-/, "")
-                  .replace(/-/g, " ")
-                  .toUpperCase()}
-                unlocked={isMissionUnlocked(m.id, completed)}
-                completed={completed.includes(m.id)}
-                selected={selected === m.id}
-                onSelect={() => select(m.id)}
-              />
-            ))}
-          </div>
-        </section>
-      ))}
+      <div
+        style={{
+          display: "grid",
+          gridTemplateColumns: narrow ? "1fr" : "repeat(3, 1fr)",
+          gap: 24,
+          marginTop: 24,
+        }}
+      >
+        {ACT_IDS.map((act) => {
+          const lineColor = ACT_LINE_COLOR[act];
+          const stops = listMissionsByAct(act);
+          return (
+            <section key={act}>
+              <h3
+                style={{
+                  color: lineColor,
+                  letterSpacing: "0.2em",
+                  fontSize: 13,
+                  margin: "0 0 12px",
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 8,
+                  fontFamily: TYPE.faceMono,
+                }}
+              >
+                <span
+                  aria-hidden="true"
+                  style={{
+                    width: 22,
+                    height: 22,
+                    borderRadius: "50%",
+                    background: lineColor,
+                    color: COLOR.bgAsphalt,
+                    display: "inline-flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    fontWeight: 800,
+                    fontFamily: TYPE.faceDisplay,
+                    fontSize: 13,
+                    boxShadow: `0 0 10px ${lineColor}55`,
+                  }}
+                >
+                  {ACT_BULLET_LABEL[act]}
+                </span>
+                {ACT_LABELS[act]}
+              </h3>
+              <div style={{ display: "flex", flexDirection: "column" }}>
+                {stops.map((m, i) => {
+                  const isBoss = m.encounters.some((e) =>
+                    e.spawns.some((s) => s.pattern === "boss-scripted"),
+                  );
+                  return (
+                    <MissionStop
+                      key={m.id}
+                      missionId={m.id}
+                      index={i}
+                      total={stops.length}
+                      title={m.id
+                        .replace(/^[a-z]+-\d+-/, "")
+                        .replace(/-/g, " ")
+                        .toUpperCase()}
+                      unlocked={isMissionUnlocked(m.id, completed)}
+                      completed={completed.includes(m.id)}
+                      selected={selected === m.id}
+                      isBoss={isBoss}
+                      lineColor={lineColor}
+                      onSelect={() => select(m.id)}
+                    />
+                  );
+                })}
+              </div>
+            </section>
+          );
+        })}
+      </div>
+
+      <style>{`
+        @keyframes cv-stop-pulse {
+          0%, 100% { box-shadow: 0 0 8px currentColor; }
+          50% { box-shadow: 0 0 18px currentColor; }
+        }
+      `}</style>
 
       <footer
         style={{
@@ -121,11 +273,13 @@ export function MissionSelect({ onPickMission }: { onPickMission: (id: string) =
           display: "flex",
           flexDirection: narrow ? "column" : "row",
           gap: 12,
+          paddingTop: 16,
+          borderTop: `1px dashed ${COLOR.borderMute}`,
         }}
       >
         <button
           type="button"
-          onClick={() => setPhase("briefing")}
+          onClick={() => setPhase("main-menu")}
           style={{
             background: "transparent",
             color: COLOR.sodium,
@@ -133,12 +287,13 @@ export function MissionSelect({ onPickMission }: { onPickMission: (id: string) =
             minWidth: 44,
             minHeight: 44,
             padding: "12px 18px",
-            fontFamily: "inherit",
-            letterSpacing: 1,
+            fontFamily: TYPE.faceMono,
+            letterSpacing: "0.2em",
+            fontSize: 13,
             cursor: "pointer",
           }}
         >
-          ← BACK
+          ← MAIN MENU
         </button>
         <button
           type="button"
@@ -151,10 +306,13 @@ export function MissionSelect({ onPickMission }: { onPickMission: (id: string) =
             minWidth: 44,
             minHeight: 44,
             padding: "12px 22px",
-            fontFamily: "inherit",
-            letterSpacing: 1,
+            fontFamily: TYPE.faceMono,
+            letterSpacing: "0.25em",
+            fontSize: 14,
+            fontWeight: 700,
             cursor: "pointer",
             opacity: isMissionUnlocked(selected, completed) ? 1 : 0.5,
+            boxShadow: isMissionUnlocked(selected, completed) ? `0 0 14px ${COLOR.sodium}66` : "none",
           }}
         >
           DEPLOY · {MISSIONS.find((m) => m.id === selected)?.weapon.toUpperCase()}

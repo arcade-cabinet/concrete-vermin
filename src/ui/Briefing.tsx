@@ -4,15 +4,14 @@ import { ensureAudio } from "../audio/setup";
 import { useGameStore } from "../runtime/store";
 import { COLOR, TYPE } from "../theme/tokens";
 
+const THREATS: ReadonlyArray<string> = ["RATS", "CLOSE QUARTERS", "FAMILY SHOTGUN"];
+
 /**
- * Briefing splash. The player's first 15 seconds — explain the goal in
- * one sentence, then auto-advance. Player-journey gate (CLAUDE.md §8).
+ * Player-journey gate: 15-second hook. Newspaper-clipping aesthetic —
+ * dateline, headline, body, threat assessment chips, Begin CTA.
  */
 export function Briefing() {
   const setPhase = useGameStore((s) => s.setPhase);
-
-  // Autofocus Begin so a keyboard player can press Enter immediately
-  // and a screen-reader announces the primary action.
   const beginRef = useRef<HTMLButtonElement>(null);
   useEffect(() => {
     beginRef.current?.focus();
@@ -21,6 +20,7 @@ export function Briefing() {
   return (
     <div
       data-testid="briefing"
+      data-phase-root="briefing"
       style={{
         position: "fixed",
         inset: 0,
@@ -28,31 +28,128 @@ export function Briefing() {
         flexDirection: "column",
         alignItems: "center",
         justifyContent: "center",
-        gap: "clamp(16px, 4vw, 32px)",
         background: COLOR.bgAsphalt,
         color: COLOR.cream,
         fontFamily: TYPE.faceDisplay,
-        textAlign: "center",
-        // Respect safe areas so the Begin button is always reachable
-        // on notched/gestured devices regardless of orientation.
         padding:
           "calc(32px + env(safe-area-inset-top)) calc(24px + env(safe-area-inset-right)) " +
           "calc(32px + env(safe-area-inset-bottom)) calc(24px + env(safe-area-inset-left))",
       }}
     >
-      <h1
+      <article
         style={{
-          color: COLOR.sodium,
-          fontSize: TYPE.display.size,
-          margin: 0,
-          letterSpacing: 2,
+          // Newsprint-like clipping: parchment fill, slight rotation,
+          // hard drop-shadow. Max-width keeps the column tight (column
+          // measure ≈ 520 px reads naturally).
+          background: "#e8dcc4",
+          color: "#1a1715",
+          padding: "clamp(20px, 4vw, 36px) clamp(24px, 5vw, 44px)",
+          maxWidth: 580,
+          width: "100%",
+          transform: "rotate(-0.6deg)",
+          boxShadow: `8px 10px 0 ${COLOR.bgConcreteDark}, 16px 18px 28px ${COLOR.bgAsphalt}cc`,
+          fontFamily: '"Special Elite", "Courier Prime", monospace',
+          position: "relative",
         }}
       >
-        CONCRETE VERMIN
-      </h1>
-      <p style={{ fontSize: "clamp(1rem, 2vw, 1.4rem)", maxWidth: 520, margin: 0 }}>
-        Bodega backroom. Eight rats. Drag to aim, tap to fire.
-      </p>
+        <div
+          aria-hidden="true"
+          style={{
+            display: "flex",
+            justifyContent: "space-between",
+            fontSize: 11,
+            letterSpacing: "0.18em",
+            color: "#5a4838",
+            borderBottom: "1px solid #5a4838",
+            paddingBottom: 6,
+            marginBottom: 14,
+          }}
+        >
+          <span>BED-STUY · BROOKLYN</span>
+          <span>SUMMER 1979 · 10¢</span>
+        </div>
+
+        <h1
+          style={{
+            fontFamily: '"Big Shoulders Display", Impact, sans-serif',
+            fontSize: "clamp(2rem, 6vw, 3.4rem)",
+            margin: 0,
+            color: "#1a1715",
+            letterSpacing: "-0.01em",
+            lineHeight: 0.92,
+            textTransform: "uppercase",
+          }}
+        >
+          BODEGA OVERRUN
+        </h1>
+        <h2
+          style={{
+            fontFamily: '"Big Shoulders Display", Impact, sans-serif',
+            fontSize: "clamp(1rem, 2.4vw, 1.4rem)",
+            margin: "6px 0 18px",
+            color: "#7a2818",
+            letterSpacing: "0.02em",
+            fontStyle: "italic",
+            fontWeight: 500,
+          }}
+        >
+          Pawnbroker hands his nephew the family shotgun
+        </h2>
+
+        <p
+          style={{
+            fontSize: "clamp(0.95rem, 1.8vw, 1.05rem)",
+            lineHeight: 1.55,
+            margin: "0 0 16px",
+          }}
+        >
+          The backroom of <strong>Mangione's News &amp; Tobacco</strong> has been
+          moving since dawn. Eight, by the count of the kid sweeping up. The
+          old man hands you the shotgun your father carried.{" "}
+          <em>Drag to aim, tap to fire.</em>
+        </p>
+
+        <section
+          aria-label="Threat assessment"
+          style={{
+            display: "flex",
+            flexWrap: "wrap",
+            gap: 8,
+            marginTop: 14,
+            paddingTop: 12,
+            borderTop: "1px dashed #7a2818",
+          }}
+        >
+          <span
+            style={{
+              fontFamily: '"Big Shoulders Display", Impact, sans-serif',
+              color: "#7a2818",
+              fontSize: 11,
+              letterSpacing: "0.2em",
+              alignSelf: "center",
+            }}
+          >
+            THREAT ASSESSMENT
+          </span>
+          {THREATS.map((t) => (
+            <span
+              key={t}
+              style={{
+                background: "#7a2818",
+                color: "#e8dcc4",
+                fontFamily: '"Big Shoulders Display", Impact, sans-serif',
+                padding: "2px 10px",
+                fontSize: 11,
+                letterSpacing: "0.18em",
+                borderRadius: 1,
+              }}
+            >
+              {t}
+            </span>
+          ))}
+        </section>
+      </article>
+
       <button
         type="button"
         ref={beginRef}
@@ -62,21 +159,23 @@ export function Briefing() {
           setPhase("mission-select");
         }}
         style={{
+          marginTop: 28,
           background: COLOR.sodium,
           color: COLOR.bgAsphalt,
           border: "none",
-          // Touch-target floor: 44 CSS px on every dimension.
-          minWidth: 44,
-          minHeight: 44,
-          padding: "12px 28px",
-          fontFamily: "inherit",
-          fontSize: "1.2rem",
-          letterSpacing: 2,
+          minWidth: 220,
+          minHeight: 52,
+          padding: "14px 32px",
+          fontFamily: TYPE.faceMono,
+          fontSize: 14,
+          letterSpacing: "0.25em",
           cursor: "pointer",
           textTransform: "uppercase",
+          fontWeight: 700,
+          boxShadow: `0 0 18px ${COLOR.sodium}55`,
         }}
       >
-        Begin
+        ▸ Begin
       </button>
     </div>
   );

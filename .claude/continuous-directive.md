@@ -115,18 +115,18 @@ Each `[ ]` is one commit. Group small ones into one PR; large surfaces get their
 
 ### v1.0-UX-21ST — UI redone with 21st.dev component inspiration
 
-- [ ] Magic MCP browse: arcade/retro/terminal/HUD components for inspiration
-- [ ] src/ui/MainMenu.tsx: NEW — title screen with animated "Concrete Vermin: Tactical Reforged" logo, Press Start CTA, settings entry, credits entry
-- [ ] src/ui/Briefing.tsx: redesign with newspaper-clipping aesthetic — headline + body + threat assessment chips + Begin button
-- [ ] src/ui/MissionSelect.tsx: redesign as a 1979 NYC subway-map metaphor — acts are lines, missions are stops; current stop pulses
-- [ ] src/ui/PawnShop.tsx: redesign as actual pawnshop UI — wood counter, mod cards as price-tagged items, Pawnbroker portrait + bark text
-- [ ] src/ui/MissionResult.tsx: redesign as a tabloid front-page — grade as headline, stats as columns, callouts as bylines
-- [ ] src/ui/HUD.tsx: redesign — corner brackets like a CRT viewfinder; SCORE/AMMO/LIVES with neon-tube-amber underglow (sodium amber, NOT cyberpunk neon — within brand)
-- [ ] src/ui/PauseMenu.tsx: redesign as a Polaroid stack — paused frame on top, options as torn-edge cards
+- [x] Magic MCP browse: arcade/retro/terminal/HUD components for inspiration
+- [x] src/ui/MainMenu.tsx: NEW — title screen with animated "Concrete Vermin: Tactical Reforged" logo, Press Start CTA, settings entry, credits entry
+- [x] src/ui/Briefing.tsx: redesign with newspaper-clipping aesthetic — headline + body + threat assessment chips + Begin button
+- [x] src/ui/MissionSelect.tsx: redesign as a 1979 NYC subway-map metaphor — acts are lines, missions are stops; current stop pulses
+- [x] src/ui/PawnShop.tsx: redesign as actual pawnshop UI — wood counter, mod cards as price-tagged items, Pawnbroker portrait + bark text
+- [x] src/ui/MissionResult.tsx: redesign as a tabloid front-page — grade as headline, stats as columns, callouts as bylines
+- [x] src/ui/HUD.tsx: redesign — corner brackets like a CRT viewfinder; SCORE/AMMO/LIVES with neon-tube-amber underglow (sodium amber, NOT cyberpunk neon — within brand)
+- [x] src/ui/PauseMenu.tsx: redesign as a Polaroid stack — paused frame on top, options as torn-edge cards
 - [ ] src/ui/Settings.tsx: redesign — categorized accordion (Audio/Visual/Input/Accessibility), live preview chips
-- [ ] src/ui/Credits.tsx: NEW — scrolling credits with role attribution, lore Easter eggs
-- [ ] src/ui/Toast.tsx: NEW — Radix Toast wired for non-blocking notifications (cash earned, weapon unlocked, achievement)
-- [ ] src/ui/transitions/: page transitions via Framer Motion — newspaper-fold between menus, cinematic letterbox into missions
+- [x] src/ui/Credits.tsx: NEW — scrolling credits with role attribution, lore Easter eggs
+- [x] src/ui/Toast.tsx: NEW — Radix Toast wired for non-blocking notifications (cash earned, weapon unlocked, achievement)
+- [x] src/ui/transitions/: page transitions via Framer Motion — newspaper-fold between menus, cinematic letterbox into missions
 - [ ] tests: src/ui/__tests__/screens.dom.test.ts — every new screen renders + interactive
 
 ### v1.0-CONTENT-DEPTH — make missions LIVE

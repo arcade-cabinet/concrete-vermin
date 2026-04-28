@@ -54,6 +54,59 @@ function useHudStyles(): void {
   }, []);
 }
 
+/**
+ * CRT viewfinder cell — wraps a HUD reading in corner brackets and a
+ * sodium-amber underglow. Inspired by 21st.dev HUD-button SVG corner
+ * dots; rendered in plain CSS to avoid the tailwind dependency.
+ */
+function HudCell({ children, testId }: { children: React.ReactNode; testId?: string }) {
+  return (
+    <div
+      data-testid={testId}
+      style={{
+        position: "relative",
+        padding: "6px 14px",
+        background: `linear-gradient(180deg, ${COLOR.bgAsphalt}cc 0%, ${COLOR.bgConcreteDark}99 100%)`,
+        boxShadow: `0 0 12px ${COLOR.sodium}33, inset 0 -1px 0 ${COLOR.sodium}55`,
+      }}
+    >
+      <CornerBracket pos="tl" />
+      <CornerBracket pos="tr" />
+      <CornerBracket pos="bl" />
+      <CornerBracket pos="br" />
+      {children}
+    </div>
+  );
+}
+
+function CornerBracket({ pos }: { pos: "tl" | "tr" | "bl" | "br" }) {
+  const len = 6;
+  const w = 1;
+  const top = pos === "tl" || pos === "tr" ? -1 : undefined;
+  const bottom = pos === "bl" || pos === "br" ? -1 : undefined;
+  const left = pos === "tl" || pos === "bl" ? -1 : undefined;
+  const right = pos === "tr" || pos === "br" ? -1 : undefined;
+  const rot = pos === "tl" ? 0 : pos === "tr" ? 90 : pos === "br" ? 180 : 270;
+  return (
+    <span
+      aria-hidden="true"
+      style={{
+        position: "absolute",
+        top,
+        bottom,
+        left,
+        right,
+        width: len,
+        height: len,
+        borderTop: `${w}px solid ${COLOR.sodium}`,
+        borderLeft: `${w}px solid ${COLOR.sodium}`,
+        transform: `rotate(${rot}deg)`,
+        pointerEvents: "none",
+      }}
+    />
+  );
+}
+
 function StreakChipsLive() {
   // Surface the most recent streak/multiplier chip into a polite
   // aria-live so non-sighted players hear "Two for one bonus, +25 %"
@@ -204,7 +257,7 @@ export function HUD() {
           flexDirection: narrow ? "column" : "row",
           justifyContent: narrow ? "flex-start" : "space-between",
           alignItems: narrow ? "center" : "stretch",
-          gap: narrow ? 2 : 0,
+          gap: narrow ? 4 : 8,
           padding:
             "0 calc(16px + env(safe-area-inset-right)) 0 calc(16px + env(safe-area-inset-left))",
           pointerEvents: "none",
@@ -214,16 +267,16 @@ export function HUD() {
           fontSize: narrow ? 12 : 14,
         }}
       >
-        <div>
+        <HudCell>
           <span style={{ color: COLOR.sodium }}>SCORE</span>{" "}
           {displayedTotal.toString().padStart(6, "0")}
           {"  "}
           <span style={{ color: COLOR.sodium }}>×{score.multiplier.toFixed(1)}</span>
-        </div>
-        <div data-testid="hud-kills">
+        </HudCell>
+        <HudCell testId="hud-kills">
           <span style={{ color: COLOR.sodium }}>VERMIN</span> {killCount} / {killsRequired}
-        </div>
-        <div>
+        </HudCell>
+        <HudCell>
           <span
             // Sodium → brick pulse when the tube is empty. Suppressed
             // under reduced-motion so the player sees a static brick
@@ -282,7 +335,7 @@ export function HUD() {
           <span style={{ color: livesCritical ? COLOR.brickAccessible : COLOR.cream }}>
             {player.livesRemaining}
           </span>
-        </div>
+        </HudCell>
       </div>
       <ModifierFlashes />
       <MuteButton />
