@@ -6,6 +6,13 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 Releases are managed by [release-please](https://github.com/googleapis/release-please).
 
+## [1.15.0](https://github.com/arcade-cabinet/concrete-vermin/compare/v1.14.0...v1.15.0) (2026-04-28)
+
+
+### Features
+
+* **ux:** pause menu + settings dialog + a11y (focus rings, autofocus, aria-live, aria-label, high-contrast) ([#40](https://github.com/arcade-cabinet/concrete-vermin/issues/40)) ([324dbd5](https://github.com/arcade-cabinet/concrete-vermin/commit/324dbd59bd7a201dea8ee8b9f936eb9e03445bd1))
+
 ## [1.14.0](https://github.com/arcade-cabinet/concrete-vermin/compare/v1.13.0...v1.14.0) (2026-04-28)
 
 
