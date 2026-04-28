@@ -6,6 +6,13 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 Releases are managed by [release-please](https://github.com/googleapis/release-please).
 
+## [1.3.0](https://github.com/arcade-cabinet/concrete-vermin/compare/v1.2.0...v1.3.0) (2026-04-28)
+
+
+### Features
+
+* **render:** sodium amber muzzle flash burst on fire (80ms ttl) ([#11](https://github.com/arcade-cabinet/concrete-vermin/issues/11)) ([8d8ed29](https://github.com/arcade-cabinet/concrete-vermin/commit/8d8ed29240aec6e37787508c65a77b0910c2b008))
+
 ## [1.2.0](https://github.com/arcade-cabinet/concrete-vermin/compare/v1.1.0...v1.2.0) (2026-04-28)
 
 
