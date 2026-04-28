@@ -88,19 +88,19 @@ Each `[ ]` is one commit. Group small ones into one PR; large surfaces get their
 - [x] src/render/Stage.tsx: halftone grain overlay (subtle, 4% opacity) for EC-Comics texture
 - [x] src/runtime/screenShake.ts: per-event shake amplitude (kill 4px, boss-hit 8px, boss-death 16px), respects reduced-motion
 - [x] src/render/HudOverlay.tsx: floating damage numbers on hit (+score amount, sodium-amber, 400ms ttl, rises 24px)
-- [ ] src/render/effects/parallax.ts: 3-layer parallax (far brick, mid streetlight, near vermin) tied to subtle camera drift
+- [x] src/render/effects/parallax.ts: 3-layer parallax (far brick, mid streetlight, near vermin) tied to subtle camera drift
 - [x] tests: src/runtime/__tests__/screenShake.test.ts + src/render/__tests__/actLighting.test.ts — amplitude scaling, decay, dedupe, reduced-motion zeroes it; per-act palette lookup
-- [ ] visual: pnpm screenshots — diff committed alongside
+- [x] visual: pnpm screenshots — diff committed alongside
 
 ### v1.0-INPUT-POLISH — feels good on every device
 
-- [ ] src/ui/GameStage.tsx: aim assist (5px snap to nearest vermin in radius), settings-toggleable, default ON for touch
-- [ ] src/ui/GameStage.tsx: tap-to-fire on pointerDown for touch (no drag required for trivial taps)
-- [ ] src/input/gamepad.ts: Gamepad API support — left stick = aim, right trigger = fire, left bumper = reload, options = pause
-- [ ] src/runtime/store.ts: settings.aimAssist boolean (default: detect touch device → true)
-- [ ] src/runtime/store.ts: settings.invertY for gamepad
-- [ ] tests: src/input/__tests__/gamepad.test.ts — virtual gamepad event → store action mapping
-- [ ] tests: src/ui/__tests__/aimAssist.test.ts — snap behavior, off respects setting
+- [x] src/ui/GameStage.tsx: aim assist (5px snap to nearest vermin in radius), settings-toggleable, default ON for touch
+- [x] src/ui/GameStage.tsx: tap-to-fire on pointerDown for touch (no drag required for trivial taps)
+- [x] src/input/gamepad.ts: Gamepad API support — left stick = aim, right trigger = fire, left bumper = reload, options = pause
+- [x] src/runtime/store.ts: settings.aimAssist boolean (default: detect touch device → true)
+- [x] src/runtime/store.ts: settings.invertY for gamepad
+- [x] tests: src/input/__tests__/gamepad.test.ts — virtual gamepad event → store action mapping
+- [x] tests: src/input/__tests__/aimAssist.test.ts — snap behavior, off respects setting
 
 ### v1.0-A11Y-FINISH — WCAG 2.1 AA across every screen
 

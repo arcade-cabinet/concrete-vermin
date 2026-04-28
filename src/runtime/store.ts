@@ -94,6 +94,14 @@ export interface Settings {
   highContrast: boolean;
   /** Vibration on hit / kill / boss-damage via @capacitor/haptics. */
   haptics: boolean;
+  /**
+   * Snap reticle to the nearest vermin within a small radius. Defaults
+   * to true when the device is touch-only, false otherwise; the user
+   * can override either way through the settings dialog.
+   */
+  aimAssist: boolean;
+  /** Gamepad: invert the Y axis for stick aiming. */
+  invertY: boolean;
 }
 
 export interface GameState {
@@ -109,6 +117,8 @@ export interface GameState {
   setReducedMotion: (on: boolean) => void;
   setHighContrast: (on: boolean) => void;
   setHaptics: (on: boolean) => void;
+  setAimAssist: (on: boolean) => void;
+  setInvertY: (on: boolean) => void;
   reticle: { x: number; y: number };
   score: { total: number; multiplier: number };
   player: { ammoCurrent: number; ammoMax: number; livesRemaining: number };
@@ -178,6 +188,14 @@ export const useGameStore = create<GameState>((set) => ({
     reducedMotion: false,
     highContrast: false,
     haptics: true,
+    // Detect touch-only / coarse-pointer devices and default aim assist
+    // on for them (helps the median touchscreen player); leaves desktop
+    // mouse input precise by default.
+    aimAssist:
+      typeof window !== "undefined" &&
+      typeof window.matchMedia === "function" &&
+      window.matchMedia("(pointer: coarse)").matches,
+    invertY: false,
   },
   setCrtOverlay: (on) => set((s) => ({ settings: { ...s.settings, crtOverlay: on } })),
   setMasterVolumeDb: (db) => set((s) => ({ settings: { ...s.settings, masterVolumeDb: db } })),
@@ -188,6 +206,8 @@ export const useGameStore = create<GameState>((set) => ({
   setReducedMotion: (on) => set((s) => ({ settings: { ...s.settings, reducedMotion: on } })),
   setHighContrast: (on) => set((s) => ({ settings: { ...s.settings, highContrast: on } })),
   setHaptics: (on) => set((s) => ({ settings: { ...s.settings, haptics: on } })),
+  setAimAssist: (on) => set((s) => ({ settings: { ...s.settings, aimAssist: on } })),
+  setInvertY: (on) => set((s) => ({ settings: { ...s.settings, invertY: on } })),
   reticle: { x: 240, y: 200 },
   score: { total: 0, multiplier: 1 },
   player: { ammoCurrent: 6, ammoMax: 6, livesRemaining: 3 },

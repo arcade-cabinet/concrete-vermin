@@ -3,6 +3,7 @@ import { useCallback } from "react";
 import { useGameStore } from "../runtime/store";
 import { COLOR, pixi } from "../theme/colors";
 import { actLightFor } from "./effects/actLighting";
+import { allParallaxOffsets } from "./effects/parallax";
 
 const ASPHALT = pixi(COLOR.bgConcreteDark);
 const BRICK = pixi(COLOR.brick);
@@ -21,19 +22,20 @@ export function Stage() {
   const stageW = useGameStore((s) => s.viewport.width);
   const stageH = useGameStore((s) => s.viewport.height);
   const act = useGameStore((s) => s.missionAct);
+  const now = useGameStore((s) => s.now);
+  const reducedMotion = useGameStore((s) => s.settings.reducedMotion);
   const palette = actLightFor(act);
+  const par = allParallaxOffsets(now, reducedMotion);
 
-  const draw = useCallback(
+  // Far layer: brick wall + asphalt + sidewalk lip.
+  const drawFar = useCallback(
     (g: PixiGraphics) => {
       g.clear();
-      // Asphalt ground.
       g.rect(0, 0, stageW, stageH).fill(ASPHALT);
       const wallH = stageH * 0.55;
       g.rect(0, wallH, stageW, stageH * 0.15).fill({ color: ASPHALT_LIGHT, alpha: 0.4 });
-      // Brick wall band — base color (act may tint it cooler/sicker).
       const brickBase = palette.brickTint ?? BRICK;
       g.rect(0, 0, stageW, wallH).fill(brickBase);
-      // Brick hatch pattern.
       for (let y = 0; y < wallH; y += BRICK_H) {
         const rowOffset = (Math.floor(y / BRICK_H) % 2) * (BRICK_W / 2);
         for (let x = -BRICK_W; x < stageW + BRICK_W; x += BRICK_W) {
@@ -46,7 +48,16 @@ export function Stage() {
       }
       g.rect(0, wallH - 1, stageW, 1).fill(SHADOW);
       g.rect(0, wallH, stageW, 2).fill(SIDEWALK_SHADOW);
-      // Streetlight pool — color from per-act palette.
+    },
+    [stageW, stageH, palette],
+  );
+
+  // Mid layer: streetlight pool + ground pool. Drifts on its own
+  // parallax track so the bulb sweeps slightly relative to the wall.
+  const drawMid = useCallback(
+    (g: PixiGraphics) => {
+      g.clear();
+      const wallH = stageH * 0.55;
       const lightX = stageW / 2;
       const lightY = wallH * 0.25;
       for (let i = 6; i >= 0; i--) {
@@ -60,13 +71,19 @@ export function Stage() {
         const alpha = 0.04 + (1 - i / 5) * 0.12;
         g.ellipse(lightX, poolY, r, r * 0.32).fill({ color: palette.light, alpha });
       }
-      // Per-act color wash overlay (darker, atmospheric tint).
+    },
+    [stageW, stageH, palette],
+  );
+
+  // Overlay (no parallax): wash tint + halftone grain. Both are
+  // screen-space — they should not move with the camera or the
+  // dot-grid would crawl.
+  const drawOverlay = useCallback(
+    (g: PixiGraphics) => {
+      g.clear();
       if (palette.washAlpha > 0) {
         g.rect(0, 0, stageW, stageH).fill({ color: palette.wash, alpha: palette.washAlpha });
       }
-      // Halftone grain — sparse 1-px dot grid at 4% alpha gives EC-Comics
-      // texture without visible regularity. Even spacing, alternating
-      // offset rows so the eye reads it as noise.
       const HG = 6;
       const grainAlpha = 0.04;
       for (let gy = 0; gy < stageH; gy += HG) {
@@ -79,5 +96,15 @@ export function Stage() {
     [stageW, stageH, palette],
   );
 
-  return <pixiGraphics draw={draw} />;
+  return (
+    <pixiContainer>
+      <pixiContainer x={par.far.dx} y={par.far.dy}>
+        <pixiGraphics draw={drawFar} />
+      </pixiContainer>
+      <pixiContainer x={par.mid.dx} y={par.mid.dy}>
+        <pixiGraphics draw={drawMid} />
+      </pixiContainer>
+      <pixiGraphics draw={drawOverlay} />
+    </pixiContainer>
+  );
 }
