@@ -118,8 +118,6 @@ function DbSlider({
       min={min}
       max={max}
       step={1}
-      aria-label={ariaLabel}
-      aria-describedby={ariaDescribedBy}
       style={{
         position: "relative",
         display: "flex",
@@ -133,6 +131,7 @@ function DbSlider({
       </Slider.Track>
       <Slider.Thumb
         aria-label={ariaLabel}
+        aria-describedby={ariaDescribedBy}
         style={{ display: "block", width: 14, height: 14, background: COLOR.sodium, borderRadius: "50%", cursor: "pointer" }}
       />
     </Slider.Root>
