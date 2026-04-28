@@ -27,6 +27,17 @@ export default defineConfig({
     ],
     exclude: ["e2e/**", "node_modules/**", "**/*.dom.test.*", "**/*.browser.test.*"],
     passWithNoTests: true,
+    coverage: {
+      provider: "v8",
+      include: ["src/sim/**", "src/ecs/**", "src/runtime/**", "src/audio/**"],
+      exclude: ["**/__tests__/**", "**/*.test.ts", "**/*.test.tsx"],
+      thresholds: {
+        lines: 85,
+        functions: 80,
+        branches: 75,
+      },
+      reporter: ["text", "lcov"],
+    },
   },
   resolve: {
     alias: {

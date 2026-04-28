@@ -28,6 +28,13 @@ export const COLOR = Object.freeze({
   brickAccessible: "#e35a3a",
   piss: "#a89344",
   eliteGreen: "#5c6b2e",
+  /**
+   * AA-passing eliteGreen variant for TEXT on bgAsphalt (7.6:1 computed).
+   * The raw eliteGreen fails 4.5:1 as foreground on dark backgrounds.
+   * Use this for act headers, labels, and other readable text.
+   * Decorative fills (dots, halos) keep the original eliteGreen.
+   */
+  eliteGreenAccessible: "#90ac50",
 
   // Type
   cream: "#e8dcc4",
