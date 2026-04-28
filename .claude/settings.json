@@ -76,6 +76,18 @@
         ]
       }
     ],
+    "UserPromptSubmit": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash ${CLAUDE_PROJECT_DIR}/.claude/hooks/pat-on-back-trap.sh",
+            "timeout": 10
+          }
+        ]
+      }
+    ],
     "PreCompact": [
       {
         "matcher": "",
