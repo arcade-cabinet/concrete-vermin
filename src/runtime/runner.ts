@@ -1,3 +1,4 @@
+import { playShotgun, playVerminDeath, playVerminHit, playVerminSpawn } from "../audio/sfx";
 import { fireWeapon } from "../ecs/actions";
 import {
   aiSystem,
@@ -93,12 +94,15 @@ export class GameRunner {
     this.now += dt;
 
     // 1. Spawn pending vermin whose delay has elapsed.
+    const spawnedBefore = this.pendingSpawns.filter((p) => p.spawned).length;
     spawnSystem(
       this.gw.world,
       this.gw.rng.fork(`spawn:${this.now.toFixed(3)}`),
       this.now,
       this.pendingSpawns,
     );
+    const spawnedAfter = this.pendingSpawns.filter((p) => p.spawned).length;
+    for (let i = 0; i < spawnedAfter - spawnedBefore; i++) playVerminSpawn();
 
     // 2. AI replans/drives velocity.
     aiSystem(this.gw.world, this.gw.rng.fork(`ai:${this.now.toFixed(3)}`), this.now, this.zone);
@@ -138,6 +142,7 @@ export class GameRunner {
       });
       this.pendingShot = null;
       shotFired = true;
+      playShotgun();
     }
     // Prune expired muzzle flashes regardless of whether we just fired.
     this.muzzleFlashes = this.muzzleFlashes.filter((m) => this.now - m.firedAt < m.ttlS);
@@ -154,6 +159,10 @@ export class GameRunner {
     );
     const newKills = events.filter((e) => e.kind === "kill").length;
     this.kills += newKills;
+    for (const e of events) {
+      if (e.kind === "kill") playVerminDeath();
+      else playVerminHit();
+    }
 
     // Misses — only count if we fired AND nothing was hit.
     const localMissCount = shotFired && events.length === 0 ? 1 : 0;
