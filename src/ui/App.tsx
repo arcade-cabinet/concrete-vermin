@@ -2,6 +2,7 @@ import { useEffect } from "react";
 import { setMasterVolumeDb, setMute } from "../audio/setup";
 import { useGameStore } from "../runtime/store";
 import { Briefing } from "./Briefing";
+import { FirstLaunchOverlay } from "./FirstLaunchOverlay";
 import { GameStage } from "./GameStage";
 import { GlobalStyles } from "./GlobalStyles";
 import { HUD } from "./HUD";
@@ -82,6 +83,7 @@ export function App() {
           <GameStage />
           <HUD />
           <PauseMenu onRestart={restart} />
+          <FirstLaunchOverlay />
         </>
       ) : null}
       {phase === "won" || phase === "lost" ? (

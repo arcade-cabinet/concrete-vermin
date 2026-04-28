@@ -8,6 +8,7 @@ interface PersistedShape {
   activeMods: string[];
   completedMissionIds: string[];
   selectedMissionId: string;
+  firstLaunchSeen?: boolean;
 }
 
 function snapshot(p: PlayerProgress): PersistedShape {
@@ -17,6 +18,7 @@ function snapshot(p: PlayerProgress): PersistedShape {
     activeMods: [...p.activeMods],
     completedMissionIds: [...p.completedMissionIds],
     selectedMissionId: p.selectedMissionId,
+    firstLaunchSeen: p.firstLaunchSeen,
   };
 }
 
@@ -28,6 +30,9 @@ function applySnapshot(data: PersistedShape): void {
     activeMods: data.activeMods ?? [],
     completedMissionIds: data.completedMissionIds ?? [],
     selectedMissionId: data.selectedMissionId || "streets-01-bodega",
+    // Default false: a corrupted save / brand-new launch should still
+    // see the tutorial overlay once.
+    firstLaunchSeen: Boolean(data.firstLaunchSeen),
   });
 }
 

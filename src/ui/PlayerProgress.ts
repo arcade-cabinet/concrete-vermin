@@ -8,12 +8,19 @@ export interface PlayerProgress {
   activeMods: ReadonlyArray<string>;
   completedMissionIds: ReadonlyArray<string>;
   selectedMissionId: string;
+  /**
+   * False until the player has dismissed the first-launch tutorial
+   * overlay; persisted via PlayerProgressPersistence so the tooltip
+   * never re-appears on subsequent loads.
+   */
+  firstLaunchSeen: boolean;
   unlockMission: (id: string) => void;
   selectMission: (id: string) => void;
   awardCash: (amount: number) => void;
   spendCash: (amount: number) => boolean;
   unlockWeapon: (w: WeaponArchetype) => void;
   toggleMod: (modId: string) => void;
+  markFirstLaunchSeen: () => void;
   reset: () => void;
 }
 
@@ -34,6 +41,7 @@ export const usePlayerProgress = create<PlayerProgress>((set) => ({
   activeMods: [],
   completedMissionIds: [],
   selectedMissionId: FIRST_MISSION_ID,
+  firstLaunchSeen: false,
   unlockMission: (id) =>
     set((s) =>
       s.completedMissionIds.includes(id)
@@ -61,6 +69,7 @@ export const usePlayerProgress = create<PlayerProgress>((set) => ({
         ? s.activeMods.filter((m) => m !== modId)
         : [...s.activeMods, modId],
     })),
+  markFirstLaunchSeen: () => set({ firstLaunchSeen: true }),
   reset: () =>
     set({
       cash: INITIAL_CASH,
@@ -68,5 +77,6 @@ export const usePlayerProgress = create<PlayerProgress>((set) => ({
       activeMods: [],
       completedMissionIds: [],
       selectedMissionId: FIRST_MISSION_ID,
+      firstLaunchSeen: false,
     }),
 }));

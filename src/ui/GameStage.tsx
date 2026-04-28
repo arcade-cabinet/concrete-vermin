@@ -1,5 +1,5 @@
 import { Application, useTick } from "@pixi/react";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import "../render/extend";
 import { CRTOverlay } from "../render/CRTOverlay";
 import { MuzzleFlashLayer } from "../render/MuzzleFlashLayer";
@@ -11,6 +11,8 @@ import { VerminLayer } from "../render/VerminLayer";
 import { GameRunner } from "../runtime/runner";
 import { useGameStore } from "../runtime/store";
 import { COLOR } from "../theme/tokens";
+import { useScreenShake } from "./hooks/useScreenShake";
+import { LoadingSplash } from "./LoadingSplash";
 
 const STAGE_W = 480;
 const STAGE_H = 270;
@@ -18,8 +20,24 @@ const KILLS_REQUIRED = 8;
 const RETICLE_KEY_SPEED_PX = 220; // sim units per second when held
 const LONG_PRESS_MS = 350; // hold past this on press → reload, not fire
 
-function Loop({ runner }: { runner: GameRunner }) {
+// Pixi resolution cap. On retina mobile (dpr 3+), full-resolution
+// rasterization is needlessly expensive — capping at 2 saves ~40% GPU
+// work without a visible quality drop on a < 7" screen. Caller must
+// only read this once at mount; live-changing resolution requires a
+// renderer rebuild.
+const MAX_PIXI_RESOLUTION = 2;
+function clampedResolution(): number {
+  if (typeof window === "undefined") return 1;
+  return Math.min(window.devicePixelRatio || 1, MAX_PIXI_RESOLUTION);
+}
+
+function Loop({ runner, onReady }: { runner: GameRunner; onReady: () => void }) {
+  const firedRef = useRef(false);
   useTick(({ deltaTime }) => {
+    if (!firedRef.current) {
+      firedRef.current = true;
+      onReady();
+    }
     runner.step(deltaTime / 60);
   });
   return null;
@@ -31,6 +49,21 @@ export function GameStage() {
   const setReticle = useGameStore((s) => s.setReticle);
   const reticle = useGameStore((s) => s.reticle);
   const crtOn = useGameStore((s) => s.settings.crtOverlay);
+  const shake = useScreenShake();
+  const [pixiReady, setPixiReady] = useState(false);
+
+  // Reset the splash visibility every time the player re-enters the
+  // playing phase (next mission, restart). The Application unmounts +
+  // remounts on phase flip via the conditional render in App.
+  useEffect(() => {
+    if (phase !== "playing") setPixiReady(false);
+  }, [phase]);
+  // Pixi resolution is fixed for the lifetime of the Application; reading
+  // window once at mount is correct (live-changing it would require
+  // tearing down the renderer).
+  const resolutionRef = useRef<number>(0);
+  if (resolutionRef.current === 0) resolutionRef.current = clampedResolution();
+  const resolution = resolutionRef.current;
 
   // Pointer state for drag-to-aim + long-press detection.
   const pointerDownAt = useRef<number | null>(null);
@@ -229,6 +262,9 @@ export function GameStage() {
           width: "min(100vw, 96vh)",
           aspectRatio: `${STAGE_W} / ${STAGE_H}`,
           position: "relative",
+          // Screen-shake offset: <= 4 CSS px, decays over 80ms. Reduced-
+          // motion short-circuits to (0, 0) so this is a no-op there.
+          transform: `translate(${shake.dx}px, ${shake.dy}px)`,
         }}
       >
         <Application
@@ -236,7 +272,7 @@ export function GameStage() {
           height={STAGE_H}
           background={0x0d0c0a}
           autoDensity={true}
-          resolution={window.devicePixelRatio || 1}
+          resolution={resolution}
         >
           <Stage />
           <VerminLayer />
@@ -245,8 +281,11 @@ export function GameStage() {
           <SplashLayer />
           <ReticleLayer />
           {crtOn ? <CRTOverlay /> : null}
-          {runnerRef.current ? <Loop runner={runnerRef.current} /> : null}
+          {runnerRef.current ? (
+            <Loop runner={runnerRef.current} onReady={() => setPixiReady(true)} />
+          ) : null}
         </Application>
+        {!pixiReady ? <LoadingSplash message="Loading mission…" /> : null}
       </div>
     </div>
   );
