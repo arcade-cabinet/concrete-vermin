@@ -26,6 +26,7 @@ import {
   type SweepShape,
 } from "../src/sim/analysis";
 import { MISSIONS } from "../src/sim/content/missions";
+import { MISSION_THRESHOLDS } from "../src/sim/analysis/thresholds";
 
 const PROFILES = {
   smoke: { runs: 5, governors: ["median"] as const },
@@ -147,20 +148,38 @@ function cmdAutobalance(): void {
 function runProfile(profile: ProfileName): void {
   const cfg = PROFILES[profile];
   const seeds = seedsFor(cfg.runs);
-  let anyFail = false;
+  const failures: string[] = [];
+  const thresholds = new Map(MISSION_THRESHOLDS.map((t) => [t.missionId, t]));
   for (const g of cfg.governors as ReadonlyArray<Governor>) {
     stdout.write(`\n# Profile ${profile} · governor ${g} · ${cfg.runs} runs/mission\n`);
     const all = runAllMissions(seeds, g);
-    for (const s of all) stdout.write(formatSummary(s));
-    if (g === "median" && all.some((s) => s.clearRate < 0.4)) anyFail = true;
+    for (const s of all) {
+      stdout.write(formatSummary(s));
+      const t = thresholds.get(s.missionId);
+      if (!t) continue;
+      if (g === "median") {
+        if (s.clearRate < 0.4) failures.push(`${s.missionId}: median clear ${pct(s.clearRate)} < 40% floor`);
+        const dur = s.meanDurationS;
+        const lo = t.parDurationS - t.parDurationWindowS;
+        const hi = t.parDurationS + t.parDurationWindowS;
+        if (dur < lo || dur > hi) {
+          failures.push(`${s.missionId}: median duration ${dur.toFixed(0)}s outside par ${lo}-${hi}s`);
+        }
+      }
+      if (g === "trash" && s.clearRate < t.trashClearRateMin) {
+        failures.push(`${s.missionId}: trash clear ${pct(s.clearRate)} < ${pct(t.trashClearRateMin)} floor`);
+      }
+    }
   }
-  // Only the ci/standard/release profiles gate CI. smoke is a local
-  // dev affordance — it always exits 0 even when missions are out of
-  // spec, so devs can iterate without the harness breaking their flow.
-  if (anyFail && profile !== "smoke") {
-    stderr.write("\nFAIL: at least one mission missed the 40% median clear floor.\n");
+  if (failures.length > 0 && profile !== "smoke") {
+    stderr.write("\nFAIL: balance gate violations:\n");
+    for (const f of failures) stderr.write(`  - ${f}\n`);
     exit(1);
   }
+}
+
+function pct(n: number): string {
+  return `${(n * 100).toFixed(0)}%`;
 }
 
 function formatSummary(s: ReturnType<typeof runSeededBenchmark>): string {

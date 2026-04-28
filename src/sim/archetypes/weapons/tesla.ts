@@ -3,7 +3,7 @@ import { type WeaponArchetype, weaponArchetypeSchema } from "./_types";
 export const tesla: Readonly<WeaponArchetype> = Object.freeze(
   weaponArchetypeSchema.parse({
     id: "tesla",
-    damage: 5,
+    damage: 9,
     pellets: 1,
     fireRate: 1.5,
     magSize: 8,
