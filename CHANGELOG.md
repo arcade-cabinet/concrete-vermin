@@ -6,6 +6,13 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 Releases are managed by [release-please](https://github.com/googleapis/release-please).
 
+## [1.6.0](https://github.com/arcade-cabinet/concrete-vermin/compare/v1.5.0...v1.6.0) (2026-04-28)
+
+
+### Features
+
+* **hud:** modifier flash chips (HEADSHOT / 2-FOR-1 / VARIETY / NO RELOAD / MID-AIR) ([#17](https://github.com/arcade-cabinet/concrete-vermin/issues/17)) ([9e547f2](https://github.com/arcade-cabinet/concrete-vermin/commit/9e547f2ec3734e3051974fac41ecc7e39f8e746a))
+
 ## [1.5.0](https://github.com/arcade-cabinet/concrete-vermin/compare/v1.4.0...v1.5.0) (2026-04-28)
 
 
