@@ -26,7 +26,13 @@
     "cap:open:ios": "pnpm exec cap open ios",
     "cap:run:android": "pnpm exec cap run android",
     "cap:run:ios": "pnpm exec cap run ios",
-    "lore:print": "tsx scripts/lore-print.ts"
+    "lore:print": "tsx scripts/lore-print.ts",
+    "analysis:smoke": "tsx scripts/analysis-cli.ts smoke",
+    "analysis:benchmark": "tsx scripts/analysis-cli.ts benchmark",
+    "analysis:focus": "tsx scripts/analysis-cli.ts focus",
+    "analysis:sweep": "tsx scripts/analysis-cli.ts sweep",
+    "analysis:lock:quick": "tsx scripts/analysis-cli.ts lock:quick",
+    "analysis:autobalance": "tsx scripts/analysis-cli.ts autobalance"
   },
   "dependencies": {
     "@capacitor-community/sqlite": "^8.1.0",
