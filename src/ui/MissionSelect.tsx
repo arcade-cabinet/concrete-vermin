@@ -1,6 +1,7 @@
 import { useGameStore } from "../runtime/store";
 import { listMissionsByAct, MISSIONS } from "../sim/content/missions";
 import { ACT_IDS, type ActId } from "../sim/factories/mission";
+import { useArrowGridNav } from "./hooks/useArrowGridNav";
 import { useIsNarrow } from "./hooks/useViewport";
 import { isMissionUnlocked, usePlayerProgress } from "./PlayerProgress";
 import { COLOR, TYPE } from "../theme/tokens";
@@ -32,6 +33,9 @@ function MissionTile({
       onClick={unlocked ? onSelect : undefined}
       disabled={!unlocked}
       data-testid={`mission-tile-${missionId}`}
+      data-arrow-nav-item="mission"
+      aria-pressed={selected}
+      aria-label={`${title}${completed ? ", completed" : unlocked ? "" : ", locked"}`}
       style={{
         background: selected ? COLOR.sodium : "transparent",
         color: selected ? COLOR.bgConcreteDark : unlocked ? COLOR.cream : COLOR.mute,
@@ -62,10 +66,12 @@ export function MissionSelect({ onPickMission }: { onPickMission: (id: string) =
   const cash = usePlayerProgress((s) => s.cash);
   const setPhase = useGameStore((s) => s.setPhase);
   const narrow = useIsNarrow();
+  const gridRef = useArrowGridNav<HTMLDivElement>();
 
   return (
     <div
       data-testid="mission-select"
+      ref={gridRef}
       style={{
         position: "fixed",
         inset: 0,

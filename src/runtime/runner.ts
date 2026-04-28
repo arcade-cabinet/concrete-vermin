@@ -17,6 +17,7 @@ import {
   stopBossLeitmotif,
 } from "../audio/music";
 import { duckBus } from "../audio/setup";
+import { bossDisplayName, srBossSpawn } from "./sr-only";
 import { bossDamageHaptic, hitHaptic, killHaptic } from "../platform/haptics";
 import { fireWeapon } from "../ecs/actions";
 import {
@@ -206,10 +207,13 @@ export class GameRunner {
     // Boss spawn detection: scan freshly-spawned vermin for a boss
     // archetype id, fire the leitmotif once.
     if (!this.bossLeitmotifActive && spawnedAfter > spawnedBefore) {
-      const bossInWorld = this.bossAlive();
-      if (bossInWorld) {
+      const bossArche = this.bossArchetypeAlive();
+      if (bossArche) {
         startBossLeitmotif();
         this.bossLeitmotifActive = true;
+        useGameStore
+          .getState()
+          .announceForScreenReader(srBossSpawn(bossDisplayName(bossArche)).text, "assertive");
       }
     }
 
@@ -376,14 +380,14 @@ export class GameRunner {
     }
   }
 
-  private bossAlive(): boolean {
+  private bossArchetypeAlive(): string | null {
     for (const e of this.gw.world.query(Vermin, Lifecycle)) {
       const l = e.get(Lifecycle);
       const v = e.get(Vermin);
       if (!l || !v || l.deadAt > 0) continue;
-      if (v.archetypeId.startsWith("boss-")) return true;
+      if (v.archetypeId.startsWith("boss-")) return v.archetypeId;
     }
-    return false;
+    return null;
   }
 
   private countAliveVermin(): number {

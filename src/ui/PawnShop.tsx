@@ -1,6 +1,7 @@
 import { useMemo } from "react";
 import { MAX_LOADOUT_SLOTS, MOD_REGISTRY } from "../sim/archetypes/mods";
 import { getMission } from "../sim/content/missions";
+import { useArrowGridNav } from "./hooks/useArrowGridNav";
 import { useIsNarrow } from "./hooks/useViewport";
 import { usePlayerProgress } from "./PlayerProgress";
 import { COLOR, TYPE } from "../theme/tokens";
@@ -11,6 +12,7 @@ export function PawnShop({ onContinue, onBack }: { onContinue: () => void; onBac
   const activeMods = usePlayerProgress((s) => s.activeMods);
   const toggleMod = usePlayerProgress((s) => s.toggleMod);
   const narrow = useIsNarrow();
+  const gridRef = useArrowGridNav<HTMLDivElement>();
 
   const mission = useMemo(() => {
     try {
@@ -31,6 +33,7 @@ export function PawnShop({ onContinue, onBack }: { onContinue: () => void; onBac
   return (
     <div
       data-testid="pawn-shop"
+      ref={gridRef}
       style={{
         position: "fixed",
         inset: 0,
@@ -74,6 +77,9 @@ export function PawnShop({ onContinue, onBack }: { onContinue: () => void; onBac
                 }}
                 disabled={slotsFull}
                 data-testid={`mod-${mod.id}`}
+                data-arrow-nav-item="mod"
+                aria-pressed={equipped}
+                aria-label={`${mod.name}, ${mod.slot} slot, ${mod.cost} cash${equipped ? ", equipped" : ""}${slotsFull ? ", no slot available" : ""}`}
                 style={{
                   width: "100%",
                   display: "flex",

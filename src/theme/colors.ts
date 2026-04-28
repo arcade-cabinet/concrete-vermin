@@ -19,6 +19,13 @@ export const COLOR = Object.freeze({
   sodiumCool: "#b87a2a",
   brick: "#7a2818",
   brickHighlight: "#9a3820",
+  /**
+   * AA-passing brick variant for use as TEXT on bgAsphalt — the raw
+   * brick fails 4.5:1 (saturates dark). Use this for low-ammo, low-
+   * life, and other critical alerts. Decorative brick fills (chips,
+   * borders, brand surfaces) keep the original brick token.
+   */
+  brickAccessible: "#e35a3a",
   piss: "#a89344",
   eliteGreen: "#5c6b2e",
 
