@@ -395,7 +395,14 @@ function SecretRail({
             key={m.id}
             type="button"
             data-arrow-nav-item="mission"
+            data-testid={`secret-tile-${m.id}`}
             disabled={!unlocked}
+            aria-pressed={isSelected}
+            aria-label={
+              unlocked
+                ? `Secret mission: ${label}${isSelected ? ", selected" : ""}`
+                : "Secret mission, locked, S-grade required"
+            }
             onClick={() => unlocked && onSelect(m.id)}
             style={{
               background: isSelected ? `${lineColor}22` : "transparent",

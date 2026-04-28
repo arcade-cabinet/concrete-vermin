@@ -1,9 +1,9 @@
 import { describe, expect, it } from "vitest";
 import { MISSIONS, SECRET_MISSIONS } from "../content/missions";
-
-const ALL = [...MISSIONS, ...SECRET_MISSIONS];
 import { VARIANT_IDS } from "../content/variants";
 import { SPAWN_PATTERNS } from "../factories/patterns";
+
+const ALL = [...MISSIONS, ...SECRET_MISSIONS];
 
 describe("mission events catalog", () => {
   it("every mission declares 3-5 dynamic event triggers", () => {
