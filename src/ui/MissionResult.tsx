@@ -1,6 +1,7 @@
 import { useEffect, useRef } from "react";
 import { useGameStore } from "../runtime/store";
-import { pawnbrokerDebriefFor } from "../sim/content/lore";
+import { getMissionLore, pawnbrokerDebriefFor } from "../sim/content/lore";
+import { SECRET_MISSIONS } from "../sim/content/missions";
 import { useIsNarrow } from "./hooks/useViewport";
 import { usePlayerProgress } from "./PlayerProgress";
 import { COLOR, TYPE } from "../theme/tokens";
@@ -21,28 +22,39 @@ export function MissionResult() {
   const won = phase === "won";
   const narrow = useIsNarrow();
 
-  const awarded = useRef(false);
-  useEffect(() => {
-    if (awarded.current) return;
-    awarded.current = true;
-    if (won) {
-      const p = usePlayerProgress.getState();
-      p.awardCash(killCount * CASH_PER_KILL);
-      if (missionId) p.unlockMission(missionId);
-    }
-  }, [won, killCount, missionId]);
-
-  const ctaRef = useRef<HTMLButtonElement>(null);
-  useEffect(() => {
-    ctaRef.current?.focus();
-  }, []);
-
   // Quick grade calc from score band — same five-tier ladder used elsewhere.
   const grade = won ? gradeFromScore(score.total) : "F";
   const cashEarned = won ? killCount * CASH_PER_KILL : 0;
   const callouts = won ? winCallouts(grade, killCount) : lossCallouts(killCount);
   const outcome = won ? (grade === "S" || grade === "S+" ? "sGrade" : "win") : "loss";
   const debrief = missionId ? pawnbrokerDebriefFor(missionId, outcome) : null;
+  const sGradeEarned = won && (grade === "S" || grade === "S+");
+
+  // Idempotency: gate on `completedMissionIds.includes(missionId)`
+  // instead of a render-cycle ref. The ref guard is fragile under
+  // React 18 strict-mode double-invoke and across unmount/remount —
+  // both windows would let `awardCash` (which has no internal dedupe)
+  // fire twice. Reading from PlayerProgress on each render is cheap.
+  useEffect(() => {
+    if (!won || !missionId) return;
+    const p = usePlayerProgress.getState();
+    if (p.completedMissionIds.includes(missionId)) return;
+    p.awardCash(killCount * CASH_PER_KILL);
+    p.unlockMission(missionId);
+    if (sGradeEarned) p.markSGradeEarned(missionId);
+  }, [won, killCount, missionId, sGradeEarned]);
+
+  const ctaRef = useRef<HTMLButtonElement>(null);
+  useEffect(() => {
+    ctaRef.current?.focus();
+  }, []);
+
+  // Did this mission's S/S+ clear unlock a secret bonus mission? If so
+  // we surface a one-line callout above the BY THE PAWNBROKER byline.
+  const secretUnlock =
+    sGradeEarned && missionId
+      ? (SECRET_MISSIONS.find((m) => m.sGradeUnlockFrom === missionId) ?? null)
+      : null;
 
   return (
     <div
@@ -175,6 +187,28 @@ export function MissionResult() {
             </li>
           ))}
         </ul>
+
+        {secretUnlock ? (
+          <div
+            data-testid="secret-unlock-callout"
+            style={{
+              margin: "20px 0 0",
+              padding: "10px 14px",
+              border: "1px dashed #7a2818",
+              background: "rgba(212, 148, 58, 0.12)",
+              fontSize: 12,
+              letterSpacing: "0.1em",
+              color: "#1a1715",
+              fontFamily: '"Big Shoulders Display", Impact, sans-serif',
+              textTransform: "uppercase",
+            }}
+          >
+            <span aria-hidden="true" style={{ color: "#7a2818", marginRight: 8 }}>
+              ✦
+            </span>
+            Secret unlocked: {getMissionLore(secretUnlock.id).title}
+          </div>
+        ) : null}
 
         {debrief ? (
           <blockquote

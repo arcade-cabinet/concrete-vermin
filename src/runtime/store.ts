@@ -212,8 +212,71 @@ export interface GameState {
   resetCash: () => void;
 }
 
-export const useGameStore = create<GameState>((set) => ({
+/**
+ * Snapshot fields the runner publishes every frame via setSnapshot
+ * (plus the mission/score/phase scaffolding that startMission resets).
+ * Exported so test setups can reset the singleton store cleanly.
+ *
+ * Excludes fields the runner OWNS and re-publishes on every tick:
+ *   - `player` (ammoCurrent/Max/livesRemaining come from the active
+ *     weapon + mission, not from a static initial)
+ *
+ * Including those would let `startMission`'s spread silently stomp
+ * weapon-mod or shop-upgraded values during the one-frame window
+ * before the runner's first publishSnapshot().
+ */
+export const INITIAL_SNAPSHOT: Pick<
+  GameState,
+  | "phase"
+  | "now"
+  | "score"
+  | "vermin"
+  | "projectiles"
+  | "splashes"
+  | "muzzleFlashes"
+  | "modifierFlashes"
+  | "eventBarks"
+  | "damageEvents"
+  | "killCount"
+  | "killsRequired"
+  | "missionId"
+  | "missionAct"
+  | "missionStartedAt"
+  | "cashAwarded"
+  | "reloadProgress"
+  | "reloadDurationMs"
+  | "reticleRadius"
+  | "reticleShape"
+  | "reticle"
+> = {
   phase: "main-menu",
+  now: 0,
+  score: { total: 0, multiplier: 1 },
+  vermin: [],
+  projectiles: [],
+  splashes: [],
+  muzzleFlashes: [],
+  modifierFlashes: [],
+  eventBarks: [],
+  damageEvents: [],
+  killCount: 0,
+  killsRequired: 0,
+  missionId: "",
+  missionAct: "streets",
+  missionStartedAt: 0,
+  cashAwarded: 0,
+  reloadProgress: null,
+  reloadDurationMs: 1400,
+  reticleRadius: 8,
+  reticleShape: "cross",
+  reticle: { x: 240, y: 200 },
+};
+
+export const useGameStore = create<GameState>((set) => ({
+  ...INITIAL_SNAPSHOT,
+  // Runner-owned: re-published every tick, but needs an initial so the
+  // store has a defined shape before the first GameRunner constructs.
+  player: { ammoCurrent: 6, ammoMax: 6, livesRemaining: 3 },
   viewport: { width: 480, height: 270 },
   settings: {
     crtOverlay: false,
@@ -245,27 +308,7 @@ export const useGameStore = create<GameState>((set) => ({
   setHaptics: (on) => set((s) => ({ settings: { ...s.settings, haptics: on } })),
   setAimAssist: (on) => set((s) => ({ settings: { ...s.settings, aimAssist: on } })),
   setInvertY: (on) => set((s) => ({ settings: { ...s.settings, invertY: on } })),
-  reticle: { x: 240, y: 200 },
-  reticleRadius: 8,
-  reticleShape: "cross",
-  score: { total: 0, multiplier: 1 },
-  player: { ammoCurrent: 6, ammoMax: 6, livesRemaining: 3 },
-  vermin: [],
-  projectiles: [],
-  splashes: [],
-  muzzleFlashes: [],
-  modifierFlashes: [],
-  eventBarks: [],
-  now: 0,
-  reloadProgress: null,
-  reloadDurationMs: 1400,
-  cashAwarded: 0,
-  missionId: "",
-  missionAct: "streets",
-  missionStartedAt: 0,
-  killsRequired: 0,
-  killCount: 0,
-  damageEvents: [],
+  // (snapshot fields above come from INITIAL_SNAPSHOT spread)
   srAnnouncement: { text: "", urgency: "polite", id: 0 },
   announceForScreenReader: (text, urgency = "polite") =>
     set((s) => ({ srAnnouncement: { text, urgency, id: s.srAnnouncement.id + 1 } })),
@@ -275,21 +318,12 @@ export const useGameStore = create<GameState>((set) => ({
   setSnapshot: (snap) => set(snap),
   startMission: (id, killsRequired, act = "streets") =>
     set({
+      ...INITIAL_SNAPSHOT,
       missionId: id,
       missionAct: act,
       killsRequired,
-      killCount: 0,
       missionStartedAt: performance.now() / 1000,
       phase: "playing",
-      score: { total: 0, multiplier: 1 },
-      vermin: [],
-      projectiles: [],
-      splashes: [],
-      muzzleFlashes: [],
-      modifierFlashes: [],
-      eventBarks: [],
-      damageEvents: [],
-      now: 0,
     }),
   endMission: (won) => set({ phase: won ? "won" : "lost" }),
   awardCash: (amount) => set((s) => ({ cashAwarded: s.cashAwarded + Math.max(0, amount) })),

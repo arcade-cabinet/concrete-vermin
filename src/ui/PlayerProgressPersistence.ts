@@ -7,6 +7,7 @@ interface PersistedShape {
   unlockedWeapons: string[];
   activeMods: string[];
   completedMissionIds: string[];
+  sGradeMissionIds?: string[];
   selectedMissionId: string;
   firstLaunchSeen?: boolean;
   unlockedAchievements?: string[];
@@ -18,6 +19,7 @@ function snapshot(p: PlayerProgress): PersistedShape {
     unlockedWeapons: [...p.unlockedWeapons],
     activeMods: [...p.activeMods],
     completedMissionIds: [...p.completedMissionIds],
+    sGradeMissionIds: [...p.sGradeMissionIds],
     selectedMissionId: p.selectedMissionId,
     firstLaunchSeen: p.firstLaunchSeen,
     unlockedAchievements: [...p.unlockedAchievements],
@@ -31,6 +33,7 @@ function applySnapshot(data: PersistedShape): void {
     unlockedWeapons: (data.unlockedWeapons ?? ["shotgun"]) as any,
     activeMods: data.activeMods ?? [],
     completedMissionIds: data.completedMissionIds ?? [],
+    sGradeMissionIds: data.sGradeMissionIds ?? [],
     selectedMissionId: data.selectedMissionId || "streets-01-bodega",
     // Default false: a corrupted save / brand-new launch should still
     // see the tutorial overlay once.

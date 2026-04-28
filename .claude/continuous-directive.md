@@ -1,7 +1,22 @@
 # Continuous Work Directive — Concrete Vermin
 
-**Status:** ACTIVE
+**Status:** ACTIVE — but with an explicit post-PR halt (see below)
 **Owner:** Claude (this agent)
+
+## EXPLICIT HALT (user-issued, 2026-04-28)
+
+After the four currently-open PRs land on main and any review feedback on them is fully drained:
+- **#77** — secret missions S-grade unlock
+- **#78** — encounter composition uniqueness gate
+- **#79** — lifecycle background→foreground verified
+
+**STOP THE AUTONOMOUS LOOP.** Do not pick the next checkbox. Do not auto-open the next PR. Switch this directive's Status from `ACTIVE` to `RELEASED` and surface a planning report to the user covering:
+
+1. **Yuka-driven end-to-end governor** — proper player-modeling AI that drives the actual input pipeline (queueShot via the same path GameStage does), not the runner's internal API. Models steering / leading / threat-prio against vermin. Replaces the abstract analysis benchmark with real playthrough coverage of every mission (canonical + secret). Reference: `~/src/bioluminescent-sea`, `~/src/mean-streets`. CV is a single-gameboard surface with parallax — should be *easier* than 3D, not harder.
+2. **Charge-shot secondary action per weapon** — tap = quick precise shot (current behavior); hold = leading mode where a CHARGE emission ring (or square if the reticle is non-circular) builds in segments around the reticle(s). Release before saturation auto-fires a heavier variant: shotgun → wider spray, revolver → automatic burst, tesla → burst repeater, flamethrower → napalm that sticks for seconds based on charge. Pairs with reticle-shape / multi-reticle modifiers.
+
+Memory of this halt is in `~/.claude/projects/-Users-jbogaty-src-arcade-cabinet-concrete-vermin/memory/project_governor_and_charge_shot.md`.
+
 **Mandate (verbatim 2026-04-28):** "you should hsve zero deferrals stubs placeholders unwired unimplemented pieces code not covered in unit and visusl integrst8on and e2e testing no area oc the player journey not fully polisjed and balanace, all ui/ux/hud fully gonethrohfh with 21dev inspiratopn smd na eye to makomg this the mosr fun possosble. EVERYTHING"
 
 Decoded: ZERO deferrals. ZERO stubs. ZERO placeholders. ZERO unwired pieces. ZERO unimplemented features. EVERY code path covered by unit + visual-integration + e2e tests. EVERY beat of the player journey polished AND balanced. EVERY UI/UX/HUD surface redone with 21st.dev inspiration aimed at MAX FUN.

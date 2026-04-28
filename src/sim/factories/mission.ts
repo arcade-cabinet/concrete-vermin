@@ -116,6 +116,10 @@ export const missionSpecSchema = z
     cashAward: z.number().int().nonnegative().optional(),
     secret: z.boolean().default(false),
     sGradeUnlockFrom: z.string().min(1).optional(),
+    // Marks the canonical first-run tutorial mission. Designer-set so
+    // catalog tests can carve out tutorial-only allowances (reduced
+    // composition palette, easier balance) without hard-coding the id.
+    tutorial: z.boolean().default(false),
   })
   .strict()
   .superRefine((data, ctx) => {

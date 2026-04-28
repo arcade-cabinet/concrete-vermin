@@ -11,13 +11,16 @@ import talismansData from "./talismans.json" with { type: "json" };
 // Per-mission lore
 import above08 from "./missions/above-08-rooftop-chase.json" with { type: "json" };
 import above09 from "./missions/above-09-pigeon-king.json" with { type: "json" };
+import aboveSecretGrandfather from "./missions/above-secret-grandfather.json" with { type: "json" };
 import streets01 from "./missions/streets-01-bodega.json" with { type: "json" };
 import streets02 from "./missions/streets-02-alley.json" with { type: "json" };
 import streets03 from "./missions/streets-03-rooftop.json" with { type: "json" };
 import streets04 from "./missions/streets-04-dumpster-bear.json" with { type: "json" };
+import streetsSecretCellar from "./missions/streets-secret-cellar.json" with { type: "json" };
 import underworld05 from "./missions/underworld-05-subway.json" with { type: "json" };
 import underworld06 from "./missions/underworld-06-sewer-shallows.json" with { type: "json" };
 import underworld07 from "./missions/underworld-07-river-mutant.json" with { type: "json" };
+import underworldSecretCathedral from "./missions/underworld-secret-cathedral.json" with { type: "json" };
 
 const settingSchema = z
   .object({
@@ -159,6 +162,9 @@ const MISSION_LORE_LIST = [
   underworld07,
   above08,
   above09,
+  streetsSecretCellar,
+  underworldSecretCathedral,
+  aboveSecretGrandfather,
 ].map((data) => Object.freeze(missionLoreSchema.parse(data)));
 
 const MISSION_LORE: ReadonlyMap<string, (typeof MISSION_LORE_LIST)[number]> = new Map(

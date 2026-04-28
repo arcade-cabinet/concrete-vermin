@@ -48,8 +48,12 @@ describe("encounter composition uniqueness", () => {
     }
   });
 
-  it("each mission's encounter list mixes at least 2 distinct variants OR 2 distinct patterns", () => {
+  it("each non-tutorial mission mixes at least 2 distinct variants AND 2 distinct patterns", () => {
+    // Tutorial missions intentionally use a reduced palette so a non-
+    // gamer can pass on first try; the variety gate is a max-fun
+    // check, not a difficulty check.
     for (const m of ALL) {
+      if (m.tutorial) continue;
       const variants = new Set<string>();
       const patterns = new Set<string>();
       for (const enc of m.encounters) {
@@ -58,49 +62,56 @@ describe("encounter composition uniqueness", () => {
           patterns.add(s.pattern);
         }
       }
-      const variety = variants.size + patterns.size;
       expect(
-        variety,
-        `${m.id}: too monotonous (${variants.size} variants × ${patterns.size} patterns)`,
-      ).toBeGreaterThanOrEqual(4);
+        variants.size,
+        `${m.id}: only ${variants.size} distinct variant(s) — needs ≥2`,
+      ).toBeGreaterThanOrEqual(2);
+      expect(
+        patterns.size,
+        `${m.id}: only ${patterns.size} distinct pattern(s) — needs ≥2`,
+      ).toBeGreaterThanOrEqual(2);
     }
   });
 
   it("missions in the same act do not share an entire encounter (variant/pattern/count) verbatim", () => {
     // Stronger check: even one identical encounter (full signature including
     // count) across two missions in the same act is a composition smell.
-    const byAct = new Map<string, { missionId: string; encounterId: string; sig: string }[]>();
+    const seen = new Map<string, { missionId: string; encounterId: string }>();
     for (const m of ALL) {
-      const key = m.act;
-      let list = byAct.get(key);
-      if (!list) {
-        list = [];
-        byAct.set(key, list);
-      }
       for (const enc of m.encounters) {
-        const sig = enc.spawns
+        const sig = `${m.act}::${enc.spawns
           .map((s) => `${s.variant}@${s.pattern}x${s.count}`)
           .sort()
-          .join("|");
-        for (const prior of list) {
-          if (prior.sig === sig) {
-            throw new Error(
-              `Duplicate encounter in act "${key}": ${m.id}/${enc.id} matches ${prior.missionId}/${prior.encounterId} (sig=${sig})`,
-            );
-          }
-        }
-        list.push({ missionId: m.id, encounterId: enc.id, sig });
+          .join("|")}`;
+        const prior = seen.get(sig);
+        expect(
+          prior,
+          prior
+            ? `Duplicate encounter in act "${m.act}": ${m.id}/${enc.id} matches ${prior.missionId}/${prior.encounterId}`
+            : "",
+        ).toBeUndefined();
+        seen.set(sig, { missionId: m.id, encounterId: enc.id });
       }
     }
-    expect(byAct.size).toBeGreaterThan(0);
+  });
+
+  it("at most one tutorial mission exists in the canonical catalog", () => {
+    // Tutorial flag carves out reduced-palette + reduced-difficulty
+    // allowances; a second tutorial would silently bypass the
+    // composition / variety / distinguishing gates above.
+    const tutorials = ALL.filter((m) => m.tutorial);
+    expect(
+      tutorials.length,
+      `multiple tutorial missions: ${tutorials.map((m) => m.id).join(", ")}`,
+    ).toBeLessThanOrEqual(1);
   });
 
   it("every non-tutorial mission carries at least one distinguishing variant or pattern within its act", () => {
-    // Tutorial mission (streets-01-bodega) intentionally uses a reduced
-    // palette so a non-gamer can pass it on first try. Every other
-    // mission must own at least one (variant, pattern) tuple that no
-    // sibling in the same act uses, otherwise players feel deja vu.
-    const TUTORIAL_ID = "streets-01-bodega";
+    // Tutorial missions (m.tutorial === true) intentionally use a
+    // reduced palette so a non-gamer can pass on first try. Every
+    // other mission must own at least one (variant, pattern) tuple
+    // that no sibling in the same act uses, otherwise players feel
+    // deja vu.
     const byAct = new Map<string, Mission[]>();
     for (const m of ALL) {
       let bucket = byAct.get(m.act);
@@ -113,7 +124,7 @@ describe("encounter composition uniqueness", () => {
     for (const [act, missions] of byAct) {
       if (missions.length < 2) continue;
       for (const m of missions) {
-        if (m.id === TUTORIAL_ID) continue;
+        if (m.tutorial) continue;
         const ownTuples = new Set(spawnTuplesOf(m).map((t) => `${t.variant}@${t.pattern}`));
         const siblingTuples = new Set<string>();
         for (const other of missions) {
