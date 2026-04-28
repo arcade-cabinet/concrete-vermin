@@ -1,61 +1,222 @@
 ---
-title: Bestiary — Archetype + Trait Taxonomy
-updated: 2026-04-27
+title: Bestiary — Twelve Archetypes
+updated: 2026-04-28
 status: current
 domain: technical
 ---
 
 # Bestiary
 
-Reference for the data model. Canonical types live in:
-- `src/sim/archetypes/vermin/` (one file per archetype)
-- `src/sim/traits/vermin.ts` (trait taxonomy)
-- `src/sim/content/variants.ts` (named variants)
+The twelve archetypes of *Concrete Vermin*. Source of truth for runtime behavior is `src/sim/archetypes/vermin/<id>.ts`. Source of truth for variants (named trait compositions) is `src/sim/content/variants.ts`. The in-game Bestiary screen will derive entries from these tables.
 
-The in-game Bestiary screen ([src/ui/screens/Bestiary.tsx](../src/ui/screens/Bestiary.tsx)) auto-derives entries from `VARIANTS`.
+This document is the **editorial reference** — what each thing IS, how it acts, what kind of bounty it pays, and the line you'd read about it on the cabinet's bestiary screen.
 
-## Archetypes (~12)
+## Reading guide
 
-| ID | Locomotion | Brain | Notes |
-|---|---|---|---|
-| `rat` | ground | ground-swarm | the foundation; comes in many variants |
-| `roach` | wall | wall-climber | tiny, very fast, ceiling-drops |
-| `pigeon` | flying | erratic-flyer | unpredictable, mid-air kills give bonus |
-| `raccoon` | ground | lunger | pause-then-leap; range threat |
-| `seagull` | flying | dive-bomber | peels off and strikes |
-| `feral-cat` | ground | ambusher | hides behind cover, strikes |
-| `sewer-fish` | amphibious | pop-up | surfaces from grates |
-| `street-dog` | ground | charger | straight-line aggression |
-| `goose` | mixed | mixed-threat | ground + flight switching, extremely hostile |
-| `boss-dumpster-bear` | ground | boss-scripted | act 1 boss |
-| `boss-river-mutant` | amphibious | boss-scripted | act 2 boss |
-| `boss-pigeon-king` | flying | boss-scripted | act 3 final boss |
+- **Common name** — what New Yorkers call it.
+- **Taxonomic flavor** — the in-fiction "scientific" name (pulpy, half-real). Used as Bestiary subtitle.
+- **Range stats** — typical health × speed × damage band, normalized to the rat baseline (rat = 1.0×).
+- **Behavior tells** — what the player should be watching for to read its move.
+- **Bounty band** — relative cash payout (S=large, A=above average, B=baseline, C=cheap, K=king-tier).
+- **Splash** — the splash color the renderer paints on death (per-archetype palette in `src/render/SplashLayer.tsx`).
+- **Lore blurb** — the line that ships in the Bestiary screen.
 
-## Traits
+---
 
-See `src/sim/traits/vermin.ts` for the canonical interface. Three tiers:
+## `rat` — Mangy Rat
 
-**Visual** (cosmetic + small stat impact): `furColor`, `eyeGlow`, `bodySize`, `tailLength`, `antennaSize`.
+> *Rattus norvegicus tactica*
 
-**Behavioral** (changes how the AI plans): `speedMod`, `healthMod`, `aggression`.
+| Stat | Value |
+|---|---|
+| Health × Speed × Damage | 1.0 × 1.0 × 1.0 |
+| Bounty | C |
+| Splash | dirty pink + sodium streaks |
 
-**Affliction** (elite/boss tier — rendering AND behavioral): `affliction`.
-- `none` (default)
-- `rabid`: +50% speed, foam particle effect, on-death small AOE infect chance
-- `radioactive`: sickly-green glow aura, leaves toxic puddle on death
-- `cybernetic`: metallic plating, +100% health, spark particles on hit
+**Behavior tells.** Scuttles in straight lines, faster when grouped. Engorged variants slow but tank a slug.
 
-## Variants
+**Lore blurb.** "Brooklyn-strain field rat. Used to fear people. Stopped fearing people about three weeks ago. Mr. Halpern at the bodega will pay the Pawnbroker off the books to make them go away."
 
-~30-50 named compositions in `src/sim/content/variants.ts`. Each is `{ archetype, traits }`. Examples:
+---
 
-- `sewer-rat` = rat + `{furColor: oil-black, eyeGlow: red, bodySize: fat, healthMod: tough}`
-- `central-park-goose` = goose + `{bodySize: engorged, aggression: berserk, affliction: rabid}`
-- `glow-rat` = rat + `{furColor: albino, eyeGlow: sickly-green, affliction: radioactive}`
+## `roach` — Common Roach
+
+> *Periplaneta gigantica*
+
+| Stat | Value |
+|---|---|
+| Health × Speed × Damage | 0.4 × 1.6 × 0.5 |
+| Bounty | C |
+| Splash | amber-yellow + brown |
+
+**Behavior tells.** Wall-climbs, drops from above, comes in clusters. One slug usually catches three; aim for the densest knot.
+
+**Lore blurb.** "Not the kitchen kind. The kind you can hear from twenty feet. They're not afraid of light any more, which is the part that matters."
+
+---
+
+## `pigeon` — Rooftop Pigeon
+
+> *Columba livia urbis*
+
+| Stat | Value |
+|---|---|
+| Health × Speed × Damage | 0.7 × 1.3 × 0.7 |
+| Bounty | B (mid-air kills × 1.4) |
+| Splash | charcoal grey + iridescent oil-slick fleck |
+
+**Behavior tells.** Fakes left, dives right. Always. Rabid variants don't fake — they just dive.
+
+**Lore blurb.** "The ones who used to fly south have stopped flying south. Mrs. Costanza on the fifth floor screamed about them for a week before anyone listened."
+
+---
+
+## `raccoon` — Trash Panda
+
+> *Procyon lotor sanitarius*
+
+| Stat | Value |
+|---|---|
+| Health × Speed × Damage | 1.6 × 0.9 × 1.2 |
+| Bounty | B |
+| Splash | sodium amber + black mask |
+
+**Behavior tells.** Pause-then-leap from cover. The pause is the tell — you have ~250ms after it stops moving to put a slug into it before the leap.
+
+**Lore blurb.** "Trash Panda. Sanitation jokes about them and then sanitation stops joking. The cybernetic ones are a different conversation."
+
+---
+
+## `seagull` — Wharf Seagull
+
+> *Larus argentatus belligerens*
+
+| Stat | Value |
+|---|---|
+| Health × Speed × Damage | 0.8 × 1.4 × 0.9 |
+| Bounty | B |
+| Splash | white feather burst + pink |
+
+**Behavior tells.** Peels off the flock, then strikes in a long arc. The peel is the tell — fire as it begins to bank.
+
+**Lore blurb.** "The gulls run protection. Nobody knows what they're protecting. They will steal your sandwich and they will not give it back."
+
+---
+
+## `feral-cat` — Alley Cat
+
+> *Felis catus urbana*
+
+| Stat | Value |
+|---|---|
+| Health × Speed × Damage | 1.2 × 1.5 × 1.0 |
+| Bounty | B |
+| Splash | rust orange + black |
+
+**Behavior tells.** Hides behind cover, then strikes from a flank. Skittish variants flicker between cover; tough variants commit.
+
+**Lore blurb.** "Alley cat. Half of them have names. The other half have eaten people who had names."
+
+---
+
+## `sewer-fish` — Sewer Pike
+
+> *Esox cloacalis*
+
+| Stat | Value |
+|---|---|
+| Health × Speed × Damage | 1.4 × 1.1 × 1.3 |
+| Bounty | A |
+| Splash | dark green + bioluminescent fleck |
+
+**Behavior tells.** Surfaces from grates with a vertical lunge. Wait for the surface — shooting underwater wastes the slug.
+
+**Lore blurb.** "The water is warm. It shouldn't be warm. The fish in there have not been fish for a while."
+
+---
+
+## `street-dog` — Pack Dog
+
+> *Canis lupus familiaris bowery*
+
+| Stat | Value |
+|---|---|
+| Health × Speed × Damage | 1.8 × 1.3 × 1.4 |
+| Bounty | A |
+| Splash | rust + sodium |
+
+**Behavior tells.** Charges in a straight line; pack mates flank. The lead dog will lock eyes — that's the tell.
+
+**Lore blurb.** "Used to belong to a longshoreman. The longshoreman is on a list now. The dogs are on a different list."
+
+---
+
+## `goose` — Canada Goose
+
+> *Branta canadensis hostilis*
+
+| Stat | Value |
+|---|---|
+| Health × Speed × Damage | 2.0 × 1.0 × 1.5 |
+| Bounty | A |
+| Splash | white down + brown stripe |
+
+**Behavior tells.** Switches between ground charge and short flight. Smarter than the gulls; takes the flank, not the front.
+
+**Lore blurb.** "The geese have organized. Take the geese first. Trust me on that one."
+
+---
+
+## `boss-dumpster-bear` — Dumpster Bear
+
+> *Ursus actually-no-this-shouldn't-exist*
+
+| Stat | Value |
+|---|---|
+| Health × Speed × Damage | 18.0 × 0.6 × 4.0 |
+| Bounty | S |
+| Splash | brick red + matted fur |
+
+**Behavior tells.** Three-stage attack: shoulder-rear, charge, claw-arc. Open at the shoulder-rear (front exposed); covered during charge; open after the claw-arc lands.
+
+**Lore blurb.** "Sanitation called it a 'big raccoon.' It is not a big raccoon. The shift super has not been to work in three days, and we should not ask why."
+
+---
+
+## `boss-river-mutant` — River Mutant
+
+> *Pisces innominatus*
+
+| Stat | Value |
+|---|---|
+| Health × Speed × Damage | 22.0 × 0.8 × 5.0 |
+| Bounty | S |
+| Splash | bioluminescent green + black silt |
+
+**Behavior tells.** Submerges, then surfaces with a tendril sweep. Open during the surface and during the recovery; covered while submerged. The flame works on the recovery.
+
+**Lore blurb.** "Where the East River cuts under the Williamsburg piers. The Pawnbroker doesn't have a name for it. Wear the medal. Don't look at it after."
+
+---
+
+## `boss-pigeon-king` — Pigeon King
+
+> *Columba rex coronatus*
+
+| Stat | Value |
+|---|---|
+| Health × Speed × Damage | 30.0 × 1.4 × 6.0 |
+| Bounty | K |
+| Splash | charcoal grey + bottle-cap silver + sodium |
+
+**Behavior tells.** Court of pigeons swarms; King circles. Open between swarm waves and during the King's perched-roar phase. Tesla rifle holds it.
+
+**Lore blurb.** "Top of the Woolworth Building. He has been waiting for you longer than you have been alive. Finish what your grandfather started."
+
+---
 
 ## Adding a variant
 
-1. Edit `src/sim/content/variants.ts`. Add an entry.
-2. Add flavor text in `src/sim/content/bestiary/<variant-id>.ts` (50-100 word entry, Adult-Swim-comic tone, see DESIGN.md).
-3. Run `pnpm test:node src/sim/content/variants.test.ts` to verify composition.
-4. Run `pnpm analysis:smoke` if the variant appears in any mission's encounters — check it doesn't break balance.
+1. Edit `src/sim/content/variants.ts`. Add an entry — pick an existing archetype and a partial trait override.
+2. Run `pnpm test:node` — the variants test enforces ≥2 variants per non-boss archetype.
+3. If the variant appears in a mission encounter, run `pnpm analysis:smoke` to confirm it doesn't break balance.
