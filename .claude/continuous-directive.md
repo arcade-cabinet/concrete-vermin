@@ -146,7 +146,7 @@ Each `[ ]` is one commit. Group small ones into one PR; large surfaces get their
 - [ ] scripts/perf-trace.ts: assert median frame time < 16ms across 60s mission run
 - [x] vite.config.ts: bundle size budget — fail build if any chunk > 1.5MB gzipped
 - [x] src/main.tsx: lazy-load PauseMenu / SettingsDialog / FirstLaunchOverlay / Credits / AchievementsScreen
-- [ ] src/render/: object-pool every transient sprite (muzzle flash, splash, damage number)
+- [x] src/render/: object-pool every transient sprite (muzzle flash, splash, damage number)
 - [ ] tests: scripts/__tests__/perf.test.ts — bundle-size + frame-time gates run in CI
 
 ### v1.0-MOBILE-VERIFY — Android emulator end-to-end
