@@ -21,7 +21,7 @@ export function SrLiveRegion() {
         data-testid="sr-polite"
         style={SR_ONLY}
       >
-        {!isAssertive ? `${ann.text} ` : ""}
+        {!isAssertive && ann.text ? renderWithMarker(ann.text, ann.id) : ""}
       </div>
       <div
         role="alert"
@@ -30,10 +30,17 @@ export function SrLiveRegion() {
         data-testid="sr-assertive"
         style={SR_ONLY}
       >
-        {isAssertive ? `${ann.text} ` : ""}
+        {isAssertive && ann.text ? renderWithMarker(ann.text, ann.id) : ""}
       </div>
     </>
   );
+}
+
+// Append a zero-width space repeated `id` times so identical narrations
+// produce a different DOM string and AT software re-announces them. The
+// invisible suffix doesn't affect screen-reader output.
+function renderWithMarker(text: string, id: number): string {
+  return `${text}${"​".repeat(id % 8)}`;
 }
 
 const SR_ONLY: React.CSSProperties = {
