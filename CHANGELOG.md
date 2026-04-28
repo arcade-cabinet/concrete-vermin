@@ -6,6 +6,13 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 Releases are managed by [release-please](https://github.com/googleapis/release-please).
 
+## [1.18.0](https://github.com/arcade-cabinet/concrete-vermin/compare/v1.17.0...v1.18.0) (2026-04-28)
+
+
+### Features
+
+* **analysis:** full sim-pure analysis stack — benchmarks, sweeps, locking, autobalance, CLI ([#46](https://github.com/arcade-cabinet/concrete-vermin/issues/46)) ([295195d](https://github.com/arcade-cabinet/concrete-vermin/commit/295195da4a9a6c009001a698b748740919548ea6))
+
 ## [1.17.0](https://github.com/arcade-cabinet/concrete-vermin/compare/v1.16.0...v1.17.0) (2026-04-28)
 
 
