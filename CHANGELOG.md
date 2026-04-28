@@ -6,6 +6,13 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 Releases are managed by [release-please](https://github.com/googleapis/release-please).
 
+## [1.5.0](https://github.com/arcade-cabinet/concrete-vermin/compare/v1.4.0...v1.5.0) (2026-04-28)
+
+
+### Features
+
+* **render:** optional retro CRT overlay (off by default) ([#15](https://github.com/arcade-cabinet/concrete-vermin/issues/15)) ([27e90a2](https://github.com/arcade-cabinet/concrete-vermin/commit/27e90a2279789b00cad3bc39a9e07a6bcffcb3d4))
+
 ## [1.4.0](https://github.com/arcade-cabinet/concrete-vermin/compare/v1.3.0...v1.4.0) (2026-04-28)
 
 
