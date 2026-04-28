@@ -11,6 +11,7 @@ import { Stage } from "../render/Stage";
 import { VerminLayer } from "../render/VerminLayer";
 import { applyAimAssist } from "../input/aimAssist";
 import { installGamepad } from "../input/gamepad";
+import { installAppLifecycle } from "../platform/lifecycle";
 import { GameRunner } from "../runtime/runner";
 import { useGameStore } from "../runtime/store";
 import { getMission } from "../sim/content/missions";
@@ -97,6 +98,19 @@ export function GameStage() {
     if (phase === "briefing" && runnerRef.current) {
       runnerRef.current = null;
     }
+  }, [phase]);
+
+  // OS-level pause/resume: when the player backgrounds the app the
+  // runner has to stop ticking — otherwise the simulation eats battery
+  // and (worse) the player loses progress to off-screen contact damage.
+  // Subscribes via installAppLifecycle (Capacitor App + visibilitychange).
+  useEffect(() => {
+    if (phase !== "playing") return;
+    const teardown = installAppLifecycle({
+      onPause: () => runnerRef.current?.pause(),
+      onResume: () => runnerRef.current?.resume(),
+    });
+    return teardown;
   }, [phase]);
 
   // biome-ignore lint/correctness/useExhaustiveDependencies: fireWithAssist closes over stable refs (runnerRef + aimAssistRef)
@@ -275,13 +289,15 @@ export function GameStage() {
       onPointerDown={onPointerDown}
     >
       <div
+        className="cv-pixi-frame"
         style={{
           // Inside ArcadeFrame's canvas-well, fill whichever axis is the
           // tighter constraint: when the well is wider than 16:9, height
           // bottoms out at 100% and width follows the aspect ratio; when
           // it's taller, width bottoms out at 100% and height follows.
-          // Browsers honor aspect-ratio with one explicit dimension as
-          // long as the other is auto.
+          // The Pixi <canvas> inside has fixed 480×270 HTML attrs — we
+          // scale it up via CSS in the global rule defined below so it
+          // fills the wrapper instead of sitting at its native size.
           height: "100%",
           width: "auto",
           maxWidth: "100%",
@@ -293,6 +309,14 @@ export function GameStage() {
           transform: `translate(${shake.dx}px, ${shake.dy}px)`,
         }}
       >
+        <style>{`
+          .cv-pixi-frame > canvas {
+            display: block;
+            width: 100% !important;
+            height: 100% !important;
+            image-rendering: pixelated;
+          }
+        `}</style>
         <Application
           width={STAGE_W}
           height={STAGE_H}

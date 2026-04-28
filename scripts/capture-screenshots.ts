@@ -96,14 +96,46 @@ async function capture(): Promise<void> {
       });
       const page = await ctx.newPage();
       stdout.write(`[screenshots] ${shot.name}…\n`);
+      // Suppress the opening-interstitial flash so the screenshot shows
+      // the actual MainMenu / playing surface, not the cutscene overlay.
+      await ctx.addInitScript(() => {
+        try {
+          window.localStorage.setItem("cv:opening-shown", "1");
+        } catch {
+          // Best-effort.
+        }
+      });
       // domcontentloaded, not networkidle — Pixi-react never hits
       // networkidle because the rAF ticker keeps requesting frames
       // long after first paint, and Playwright counts that as work.
       await page.goto(BASE_URL, { waitUntil: "domcontentloaded" });
-      await page.locator('[data-testid="briefing"]').waitFor({ timeout: 10_000 });
-      await sleep(800);
+      await page.locator('[data-testid="main-menu"]').waitFor({ timeout: 10_000 });
+      await sleep(400);
+      // 1. MainMenu shot.
       await page.screenshot({
-        path: `${OUT_DIR}/${shot.name}.png`,
+        path: `${OUT_DIR}/${shot.name}-01-mainmenu.png`,
+        fullPage: false,
+        animations: "disabled",
+        caret: "hide",
+        timeout: 15_000,
+      });
+      // 2. Drive into the playing phase + capture the actual game
+      //    canvas inside the ArcadeFrame chrome — the surface players
+      //    spend 95% of their time looking at, and the one we keep
+      //    finding regressions on (canvas sizing, parallax, reticle).
+      await page.getByTestId("main-menu-start").click();
+      const begin = page.getByRole("button", { name: /^▸ begin$|^begin$/i });
+      await begin.waitFor({ timeout: 10_000 });
+      await begin.click();
+      const ms = page.locator('[data-phase-root="mission-select"]');
+      await ms.waitFor({ timeout: 10_000 });
+      await ms.getByRole("button", { name: /^deploy/i }).click();
+      await page.getByTestId("game-stage").waitFor({ timeout: 15_000 });
+      // Let Pixi paint a couple of frames + a few vermin spawn so the
+      // shot reflects an actual gameplay moment, not an empty zone.
+      await sleep(1500);
+      await page.screenshot({
+        path: `${OUT_DIR}/${shot.name}-02-playing.png`,
         fullPage: false,
         animations: "disabled",
         caret: "hide",

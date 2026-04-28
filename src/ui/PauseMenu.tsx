@@ -50,9 +50,14 @@ export function PauseMenu({ onRestart }: PauseMenuProps) {
             type="button"
             aria-label="Pause"
             style={{
+              // Bottom-right corner, next to but not on top of the
+              // MuteButton (which lives at bottom: 60 + safe-area). The
+              // marquee already owns the top strip, so a top-right
+              // pause button collided with the SCORE readout on
+              // narrow viewports.
               position: "fixed",
-              top: "calc(12px + env(safe-area-inset-top))",
-              right: "calc(56px + env(safe-area-inset-right))",
+              bottom: "calc(112px + env(safe-area-inset-bottom))",
+              right: "calc(12px + env(safe-area-inset-right))",
               background: "transparent",
               border: `1px solid ${COLOR.sodium}`,
               color: COLOR.sodium,
@@ -62,7 +67,7 @@ export function PauseMenu({ onRestart }: PauseMenuProps) {
               fontFamily: TYPE.faceMono,
               fontSize: 12,
               cursor: "pointer",
-              zIndex: 5,
+              zIndex: 13,
             }}
           >
             ⏸ PAUSE

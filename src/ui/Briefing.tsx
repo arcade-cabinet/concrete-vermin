@@ -3,8 +3,21 @@ import { startStreetsAmbience } from "../audio/music";
 import { ensureAudio } from "../audio/setup";
 import { useGameStore } from "../runtime/store";
 import { COLOR, TYPE } from "../theme/tokens";
+import { usePlayerProgress } from "./PlayerProgress";
 
 const THREATS: ReadonlyArray<string> = ["RATS", "CLOSE QUARTERS", "FAMILY SHOTGUN"];
+
+interface HowToBeat {
+  glyph: string;
+  label: string;
+  body: string;
+}
+
+const HOW_TO_BEAT: ReadonlyArray<HowToBeat> = [
+  { glyph: "◎", label: "AIM + FIRE", body: "Tap the stage. Reticle snaps and fires." },
+  { glyph: "↻", label: "RELOAD", body: "Press R / bumper, or just keep firing." },
+  { glyph: "♥", label: "STAY ALIVE", body: "Five lives. Vermin past the line take one." },
+];
 
 /**
  * Player-journey gate: 15-second hook. Newspaper-clipping aesthetic —
@@ -12,6 +25,8 @@ const THREATS: ReadonlyArray<string> = ["RATS", "CLOSE QUARTERS", "FAMILY SHOTGU
  */
 export function Briefing() {
   const setPhase = useGameStore((s) => s.setPhase);
+  const firstLaunchSeen = usePlayerProgress((s) => s.firstLaunchSeen);
+  const markFirstLaunchSeen = usePlayerProgress((s) => s.markFirstLaunchSeen);
   const beginRef = useRef<HTMLButtonElement>(null);
   useEffect(() => {
     beginRef.current?.focus();
@@ -106,7 +121,7 @@ export function Briefing() {
           The backroom of <strong>Mangione's News &amp; Tobacco</strong> has been
           moving since dawn. Eight, by the count of the kid sweeping up. The
           old man hands you the shotgun your father carried.{" "}
-          <em>Drag to aim, tap to fire.</em>
+          <em>Tap anywhere to fire.</em>
         </p>
 
         <section
@@ -150,10 +165,49 @@ export function Briefing() {
         </section>
       </article>
 
+      {firstLaunchSeen ? null : (
+        <section
+          data-testid="how-to-beat"
+          aria-label="How to play"
+          style={{
+            marginTop: 22,
+            width: "100%",
+            maxWidth: 580,
+            background: "rgba(13, 12, 10, 0.78)",
+            border: `1px solid ${COLOR.sodium}`,
+            color: COLOR.cream,
+            padding: "10px 14px",
+            fontFamily: TYPE.faceMono,
+            fontSize: 12,
+            display: "grid",
+            gridTemplateColumns: "1fr 1fr 1fr",
+            gap: 12,
+          }}
+        >
+          {HOW_TO_BEAT.map((row) => (
+            <div key={row.label}>
+              <div
+                style={{
+                  fontFamily: TYPE.faceDisplay,
+                  color: COLOR.sodium,
+                  letterSpacing: 2,
+                  fontSize: 11,
+                  marginBottom: 4,
+                }}
+              >
+                <span aria-hidden="true">{row.glyph}</span> {row.label}
+              </div>
+              <div style={{ lineHeight: 1.4, color: COLOR.creamDim }}>{row.body}</div>
+            </div>
+          ))}
+        </section>
+      )}
+
       <button
         type="button"
         ref={beginRef}
         onClick={async () => {
+          if (!firstLaunchSeen) markFirstLaunchSeen();
           await ensureAudio();
           startStreetsAmbience();
           setPhase("mission-select");

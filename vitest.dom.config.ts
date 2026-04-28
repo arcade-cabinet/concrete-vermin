@@ -7,7 +7,11 @@ export default defineConfig({
     environment: "jsdom",
     globals: false,
     setupFiles: ["src/ui/__tests__/setup.ts"],
-    include: ["src/ui/**/*.dom.test.ts", "src/ui/**/*.dom.test.tsx"],
+    include: [
+      "src/ui/**/*.dom.test.ts",
+      "src/ui/**/*.dom.test.tsx",
+      "src/platform/**/*.dom.test.ts",
+    ],
     exclude: ["e2e/**", "node_modules/**"],
     passWithNoTests: true,
   },
