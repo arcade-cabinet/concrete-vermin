@@ -6,6 +6,13 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 Releases are managed by [release-please](https://github.com/googleapis/release-please).
 
+## [1.11.0](https://github.com/arcade-cabinet/concrete-vermin/compare/v1.10.0...v1.11.0) (2026-04-28)
+
+
+### Features
+
+* **copy:** loading tips + per-archetype death lines + encounter callouts + ui-test discovery fix ([#28](https://github.com/arcade-cabinet/concrete-vermin/issues/28)) ([9b9d8bb](https://github.com/arcade-cabinet/concrete-vermin/commit/9b9d8bb33ad73f03525fbea1325f155cb0641660))
+
 ## [1.10.0](https://github.com/arcade-cabinet/concrete-vermin/compare/v1.9.0...v1.10.0) (2026-04-28)
 
 
