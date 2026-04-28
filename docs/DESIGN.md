@@ -95,8 +95,69 @@ A cold player must understand the goal **within 15 seconds** of the title screen
 
 The hero screenshot is a **first-mission moment**: brick wall, sodium streetlight pool, three rats mid-scuttle, the player's reticle hovering over the lead one, the muzzle flash from the previous shot still fading on the right. HUD reads `SCORE 000420  VERMIN 4 / 8  SHELLS 3/6`. No CRT overlay. No menu chrome. Title `CONCRETE VERMIN` lockup in `Big Shoulders Display` 700, sodium amber, bottom-left at 64 px from edge. Tagline below in `Special Elite`: *"Pawnbroker's hiring. 142 Mott Street. Cash, no questions."*
 
+## HUD style guide
+
+The HUD is the only on-screen surface during a mission. It must read in 0.5 seconds peripheral vision and never block aim.
+
+### Anchors
+
+- **Top edge** (12 px + safe-area-inset-top): three columns. Left = SCORE + multiplier. Center = VERMIN N/M. Right = SHELLS + LIVES.
+- **Top-center, below the columns**: modifier-flash chips (HEADSHOT / 2-FOR-1 / etc) — fade-and-rise animation, max 4 visible, newest at the bottom of the stack.
+- **Bottom-right** (12 px + safe-area-inset-bottom/right): mute toggle.
+- **Bottom-left** (reserved): pause button (CV-UX item — coming).
+
+### Drop shadow
+
+Every HUD glyph: `text-shadow: 0 1px 0 #000` (subway-tile relief). Sodium accents add a soft halo: `0 0 6px rgba(212, 148, 58, 0.4)`. The double-shadow is what reads against any background brightness.
+
+### Blink / flash rhythm
+
+- **Multiplier flash chip**: 1.0 s lifetime, opacity `1 → 0`, scale `1.15 → 1.00`, translate-Y `0 → -18 px`. Linear easing — pulpy, not bouncy.
+- **Ammo empty pulse**: 0.6 s sodium → brick → sodium loop. Stops the moment the player begins reload.
+- **Critical-life pulse** (livesRemaining ≤ 1): 1.2 s brick fade-in/out, never fully bright. Reads as warning without screaming.
+- **Score tick-up**: 200 ms ease-out roll from old → new value. Numbers don't pop; they crank.
+- **Streak badges**: 240 ms slide-in, hold 1.6 s, 240 ms fade-out. Always slide in from the same edge to give the eye a place to expect it.
+
+### What the HUD MUST NOT do
+
+- No animation longer than 1.2 s (anything slower steals the player's attention from the stage).
+- No animation that overlaps the bottom 60% of the stage (that's where vermin live).
+- No cursor / pointer rendering — the reticle is the cursor.
+- No drop shadow on body text (only on numerics + headlines).
+- No icons — words and numbers only. The art lives in the renderer; the HUD is a Pawnbroker work-order printed on top.
+
+## Per-act color shift
+
+Each act keeps the canonical palette but biases temperature + ambient tint. The brick / asphalt / sodium core never changes — what changes is the **streetlight pool color** and the **ambient drone** color of the sky/water gradient. Player should feel "this is a different mission" without losing the brand.
+
+| Act | Streetlight pool | Ambient tint | Why |
+|---|---|---|---|
+| **Streets (1-4)** | Sodium amber `#d4943a` | Warm dawn umber (subtle) | The franchise's home temperature. Pawnbroker territory. |
+| **Underworld (5-7)** | Cooler sodium `#b87a2a` + sickly elite-green `#5c6b2e` underglow | Cold concrete `#3a3833` + mossy fluorescent | Underground. Sodium feels distant, fluorescent feels close. The subway and sewer share this palette. |
+| **Above (8-9)** | Sodium amber `#d4943a` desaturated 30% + cream `#e8dcc4` rim | Muted dawn — pre-sunrise grey-pink, cream highlights | Above the city. The light that's about to come, not the light that's there. The Pigeon-King fight should feel like the sky is watching. |
+
+Implementation: `theme.tokens.ts` exports `actLightFor(actId)` returning the streetlight gradient tokens. Renderer reads `mission.act` from the active mission and applies. CRT-overlay tint also derives from this — Underworld gets cool fringe, Above gets pink rim. Streets is unchanged.
+
+## Art-direction one-pager
+
+> **Adult Swim meets early EC Comics meets Death Wish (1974).**
+
+Three references; ignore everything else.
+
+- **Adult Swim** — the *humor* of violence. The 12-Oz Mouse / Squidbillies sensibility: deadpan, cheap-looking on purpose, wrong on purpose. The *wrong* iridescence on the pigeon feather is Adult Swim. The Pawnbroker calling it a "big raccoon" is Adult Swim. Splash colors that read as cartoon paint, not gore, is Adult Swim.
+- **Early EC Comics** (Tales from the Crypt, Vault of Horror, ~1950) — the *composition* of menace. High-contrast, ink-heavy, panels with one big sodium-lit thing and a lot of black around it. The brick wall is an EC frame. The streetlight pool is an EC spotlight. The Pigeon-King's silhouette against the cloud is an EC splash page.
+- **Death Wish (1974)** — the *texture* of the city. Charles Bronson grain, sodium street lamps, half-unreadable graffiti, paranoid mid-shot framing, an overcoat too heavy for the weather. The audio mix lives here: ambient streetlight buzz, distant subway, wet pavement.
+
+Anything that doesn't trace back to one of those three is the wrong reference.
+
+### What we are NOT
+- Not a Tim Burton film. We are not whimsy-with-fangs.
+- Not Hotline Miami. We are not glitchy or strobed or palette-swapped.
+- Not a Souls game. We are not somber.
+- Not a roguelike. The player gets a story, not a dungeon.
+
 ## Theme tokens
 
-Tokens live in `src/ui/theme/theme.tokens.ts`. Treat that file as **the** brand source — components import tokens, never literal hex. The pre-edit-gate brand check enforces literal hex avoidance for the forbidden palette in source files; the lint custom rule (planned) will eventually enforce token-only usage for new code.
+Tokens live in `src/ui/theme/`, decomposed into `colors.ts`, `typography.ts`, `spacing.ts`, `motion.ts`. The aggregator `tokens.ts` re-exports for convenience. Treat the module as **the** brand source — components import tokens, never literal hex. The pre-edit-gate brand check enforces literal hex avoidance for the forbidden palette in source files; the lint custom rule (planned) will eventually enforce token-only usage for all UI components.
 
 See [`docs/LORE.md`](LORE.md) for the editorial style guide and [`docs/BESTIARY.md`](BESTIARY.md) for the per-archetype splash palette.

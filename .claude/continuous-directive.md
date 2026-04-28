@@ -121,14 +121,14 @@ Each `[ ]` is one commit. Group small ones into one PR; large ones get their own
 - [x] docs/DESIGN.md: full palette swatches with hex + use cases (sodium amber, brick, asphalt, subway tile, parchment, blood, sewer green, sky)
 - [x] docs/DESIGN.md: anti-palette section (the forbidden POC neons, why they're banned)
 - [x] docs/DESIGN.md: UI grid + spacing scale (8px base, type ramp)
-- [ ] docs/DESIGN.md: HUD style guide — corner positioning, drop shadows, blink/flash rhythm
-- [ ] docs/DESIGN.md: per-act color shift documentation (Streets warm sodium → Underworld cold green → Above muted dawn)
-- [ ] docs/DESIGN.md: art-direction one-pager: "Adult-Swim meets early-EC-Comics meets Death Wish (1974)"
+- [x] docs/DESIGN.md: HUD style guide — corner positioning, drop shadows, blink/flash rhythm
+- [x] docs/DESIGN.md: per-act color shift documentation (Streets warm sodium → Underworld cold green → Above muted dawn)
+- [x] docs/DESIGN.md: art-direction one-pager: "Adult-Swim meets early-EC-Comics meets Death Wish (1974)"
 - [x] docs/DESIGN.md: marketing screenshot mockup brief (what each of the 5 store screenshots needs to convey)
 - [x] src/ui/theme/tokens.ts: codify palette + type scale + spacing as TS tokens; replace hex literals in UI components
 
 ### CV-UX — UI/UX/HUD polish + responsive scaling (PR #8e — UX)
-- [ ] Lock down theme tokens: src/ui/theme/{colors,typography,spacing,motion}.ts — single source of truth
+- [x] Lock down theme tokens: src/ui/theme/{colors,typography,spacing,motion}.ts — single source of truth
 - [ ] Replace every hard-coded hex in src/ui/* and src/render/* with theme token references
 - [ ] Replace every hard-coded font-family with theme.typography refs
 - [ ] Type scale: define h1/h2/h3/body/hud-mono/hud-display sizes; apply via theme
