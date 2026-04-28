@@ -1,3 +1,5 @@
+import { startStreetsAmbience } from "../audio/music";
+import { ensureAudio } from "../audio/setup";
 import { useGameStore } from "../runtime/store";
 
 const SODIUM = "#d4943a";
@@ -38,7 +40,11 @@ export function Briefing() {
       </p>
       <button
         type="button"
-        onClick={() => startMission("tutorial-bodega", 8)}
+        onClick={async () => {
+          await ensureAudio();
+          startStreetsAmbience();
+          startMission("tutorial-bodega", 8);
+        }}
         style={{
           background: SODIUM,
           color: "#0d0c0a",

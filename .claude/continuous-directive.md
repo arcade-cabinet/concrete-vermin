@@ -66,12 +66,12 @@ Each `[ ]` is one commit. Group small ones into one PR; large ones get their own
 - [x] Render: kill streak / no-reload / variety badges fade in/out
 
 ### CV-AUDIO — Tone.js sfx (PR #6)
-- [ ] src/audio/setup.ts: Tone.js master + bus structure (sfx/music/ui)
-- [ ] src/audio/sfx.ts: synth-based fire/reload/empty for shotgun (no asset deps yet)
-- [ ] src/audio/sfx.ts: vermin spawn/hit/death cues — short noise bursts
-- [ ] src/audio/music.ts: ambient drone bed (looping low pad) for tutorial
-- [ ] Wire src/runtime/runner.ts: emit AudioEvent[] each tick; audio bridge subscribes
-- [ ] Settings: master volume / mute toggle (Radix slider)
+- [x] src/audio/setup.ts: Tone.js master + bus structure (sfx/music/ui)
+- [x] src/audio/sfx.ts: synth-based fire/reload/empty for shotgun (no asset deps yet)
+- [x] src/audio/sfx.ts: vermin spawn/hit/death cues — short noise bursts
+- [x] src/audio/music.ts: ambient drone bed (looping low pad) for tutorial
+- [x] Wire src/runtime/runner.ts: emit AudioEvent[] each tick; audio bridge subscribes
+- [x] Settings: master volume / mute toggle (Radix slider)
 
 ### CV-INPUT — drag-to-aim + mobile (PR #7)
 - [ ] Drag-to-aim: pointer-down + drag tracks reticle without firing; pointer-up fires

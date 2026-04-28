@@ -63,6 +63,9 @@ export interface MuzzleFlash {
 export interface Settings {
   /** Optional retro CRT overlay (off by default per design — pulpy not glitchy). */
   crtOverlay: boolean;
+  /** Master volume in dB. -60 = mute, 0 = unity. Default -6. */
+  masterVolumeDb: number;
+  muted: boolean;
 }
 
 export interface GameState {
@@ -70,6 +73,8 @@ export interface GameState {
   viewport: { width: number; height: number };
   settings: Settings;
   setCrtOverlay: (on: boolean) => void;
+  setMasterVolumeDb: (db: number) => void;
+  setMuted: (m: boolean) => void;
   reticle: { x: number; y: number };
   score: { total: number; multiplier: number };
   player: { ammoCurrent: number; ammoMax: number; livesRemaining: number };
@@ -111,8 +116,10 @@ export interface GameState {
 export const useGameStore = create<GameState>((set) => ({
   phase: "briefing",
   viewport: { width: 480, height: 270 },
-  settings: { crtOverlay: false },
+  settings: { crtOverlay: false, masterVolumeDb: -6, muted: false },
   setCrtOverlay: (on) => set((s) => ({ settings: { ...s.settings, crtOverlay: on } })),
+  setMasterVolumeDb: (db) => set((s) => ({ settings: { ...s.settings, masterVolumeDb: db } })),
+  setMuted: (muted) => set((s) => ({ settings: { ...s.settings, muted } })),
   reticle: { x: 240, y: 200 },
   score: { total: 0, multiplier: 1 },
   player: { ammoCurrent: 6, ammoMax: 6, livesRemaining: 3 },

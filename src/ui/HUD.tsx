@@ -70,6 +70,33 @@ function ModifierFlashes() {
   );
 }
 
+function MuteButton() {
+  const muted = useGameStore((s) => s.settings.muted);
+  const setMuted = useGameStore((s) => s.setMuted);
+  return (
+    <button
+      type="button"
+      onClick={() => setMuted(!muted)}
+      aria-label={muted ? "Unmute audio" : "Mute audio"}
+      style={{
+        position: "fixed",
+        bottom: 12,
+        right: 12,
+        background: "transparent",
+        border: `1px solid ${SODIUM}`,
+        color: SODIUM,
+        padding: "4px 10px",
+        fontFamily: "'Special Elite', monospace",
+        fontSize: 12,
+        cursor: "pointer",
+        pointerEvents: "auto",
+      }}
+    >
+      {muted ? "♪ MUTED" : "♪ ON"}
+    </button>
+  );
+}
+
 export function HUD() {
   const score = useGameStore((s) => s.score);
   const player = useGameStore((s) => s.player);
@@ -109,6 +136,7 @@ export function HUD() {
         </div>
       </div>
       <ModifierFlashes />
+      <MuteButton />
     </>
   );
 }
