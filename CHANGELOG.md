@@ -6,6 +6,13 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 Releases are managed by [release-please](https://github.com/googleapis/release-please).
 
+## [1.8.0](https://github.com/arcade-cabinet/concrete-vermin/compare/v1.7.0...v1.8.0) (2026-04-28)
+
+
+### Features
+
+* **input:** drag-to-aim + long-press reload + keyboard fallback + safe-area HUD ([#21](https://github.com/arcade-cabinet/concrete-vermin/issues/21)) ([1f3c494](https://github.com/arcade-cabinet/concrete-vermin/commit/1f3c494d68608e2c59bb1cf30738a1d239fa2192))
+
 ## [1.7.0](https://github.com/arcade-cabinet/concrete-vermin/compare/v1.6.0...v1.7.0) (2026-04-28)
 
 
