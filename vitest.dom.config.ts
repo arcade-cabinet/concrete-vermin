@@ -12,6 +12,7 @@ export default defineConfig({
       "src/ui/**/*.dom.test.tsx",
       "src/platform/**/*.dom.test.ts",
       "src/governor/**/*.dom.test.tsx",
+      "src/render/**/*.dom.test.tsx",
     ],
     exclude: ["e2e/**", "node_modules/**"],
     passWithNoTests: true,
