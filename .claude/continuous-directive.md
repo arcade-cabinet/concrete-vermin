@@ -58,9 +58,9 @@ Each `[ ]` is one commit. Group small ones into one PR; large ones get their own
 - [x] Render: replace the placeholder ellipse vermin shapes with sprite-grade procedural draws (rat: stretched body + tail, roach: oval + antennae, pigeon: wings)
 - [x] Render: per-archetype splash colors instead of one global cyan (rat=red-brown, roach=tar, pigeon=ash, etc.)
 - [x] Render: muzzle flash burst on fire (sodium amber, 80ms ttl)
-- [ ] Render: vermin shadow ellipse beneath each entity (sells the depth)
-- [ ] Render: brick-wall hatch pattern instead of solid brick rectangle
-- [ ] Render: streetlight pool gradient (sodium amber, ringing the player area)
+- [x] Render: vermin shadow ellipse beneath each entity (sells the depth)
+- [x] Render: brick-wall hatch pattern instead of solid brick rectangle
+- [x] Render: streetlight pool gradient (sodium amber, ringing the player area)
 - [ ] Render: subtle CRT scanline + vignette overlay (separate effect, the only file that may use the neon-cyan POC color per pre-edit-gate)
 - [ ] Render: HUD multiplier flashes (the modifierFlashes from scoring) — pop a small text overlay per kill
 - [ ] Render: kill streak / no-reload / variety badges fade in/out
