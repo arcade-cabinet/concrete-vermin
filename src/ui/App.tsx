@@ -8,15 +8,16 @@ import {
 } from "../audio/setup";
 import { setHapticsEnabled } from "../platform/haptics";
 import { useGameStore } from "../runtime/store";
+import { ArcadeFrame } from "./ArcadeFrame";
 import { Briefing } from "./Briefing";
 import { Credits } from "./Credits";
 import { FirstLaunchOverlay } from "./FirstLaunchOverlay";
 import { GameStage } from "./GameStage";
 import { GlobalStyles } from "./GlobalStyles";
-import { HUD } from "./HUD";
 import { MainMenu } from "./MainMenu";
 import { MissionResult } from "./MissionResult";
 import { MissionSelect } from "./MissionSelect";
+import { OpeningInterstitial } from "./OpeningInterstitial";
 import { PauseMenu } from "./PauseMenu";
 import { PawnShop } from "./PawnShop";
 import { ToastHost } from "./Toast";
@@ -118,30 +119,35 @@ export function App() {
       <GlobalStyles />
       <SrLiveRegion />
       <ToastHost />
+      <OpeningInterstitial />
       {phase === "main-menu" ? <MainMenu /> : null}
       {phase === "credits" ? <Credits /> : null}
       {phase === "briefing" ? <Briefing /> : null}
       {phase === "mission-select" ? (
-        <MissionSelect onPickMission={() => setPhase("pawn-shop")} />
+        <MissionSelect
+          onPickMission={() => deploy(usePlayerProgress.getState().selectedMissionId)}
+        />
       ) : null}
       {phase === "pawn-shop" ? (
         <PawnShop
-          onContinue={() => deploy(usePlayerProgress.getState().selectedMissionId)}
+          onContinue={() => setPhase("mission-select")}
           onBack={() => setPhase("mission-select")}
         />
       ) : null}
       {phase === "playing" ? (
         <>
-          <GameStage />
-          <HUD />
+          <ArcadeFrame>
+            <GameStage />
+          </ArcadeFrame>
           <PauseMenu onRestart={restart} />
           <FirstLaunchOverlay />
         </>
       ) : null}
       {phase === "won" || phase === "lost" ? (
         <>
-          <GameStage />
-          <HUD />
+          <ArcadeFrame>
+            <GameStage />
+          </ArcadeFrame>
           <MissionResult />
         </>
       ) : null}

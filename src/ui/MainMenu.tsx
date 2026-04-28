@@ -1,6 +1,8 @@
+import * as Dialog from "@radix-ui/react-dialog";
 import { useEffect, useRef, useState } from "react";
 import { useGameStore } from "../runtime/store";
 import { COLOR, TYPE } from "../theme/tokens";
+import { PawnShop } from "./PawnShop";
 import { SettingsDialog } from "./SettingsDialog";
 import { useArrowGridNav } from "./hooks/useArrowGridNav";
 import { usePlayerProgress } from "./PlayerProgress";
@@ -154,6 +156,7 @@ export function MainMenu() {
   const startRef = useRef<HTMLButtonElement>(null);
   const gridRef = useArrowGridNav<HTMLDivElement>();
   const [settingsOpen, setSettingsOpen] = useState(false);
+  const [marketOpen, setMarketOpen] = useState(false);
 
   // Autofocus Press Start on mount so a keyboard / arcade-stick player
   // can press Enter immediately without tab-hunting.
@@ -238,10 +241,12 @@ export function MainMenu() {
         {hasProgress ? (
           <MenuButton label="New Run" onClick={() => setPhase("briefing")} />
         ) : null}
+        <MenuButton label="Market" onClick={() => setMarketOpen(true)} />
         <MenuButton label="Settings" onClick={() => setSettingsOpen(true)} />
         <MenuButton label="Credits" onClick={() => setPhase("credits")} />
       </div>
       <SettingsDialog open={settingsOpen} onOpenChange={setSettingsOpen} />
+      <MarketDialog open={marketOpen} onOpenChange={setMarketOpen} />
       <style>{`
         @keyframes cv-press-start {
           0%, 100% { box-shadow: 0 0 22px ${COLOR.sodium}55, inset 0 0 10px ${COLOR.sodium}33; }
@@ -264,5 +269,59 @@ export function MainMenu() {
         © 1979 / 2026 · ARCADE CABINET
       </footer>
     </main>
+  );
+}
+
+/**
+ * Market modal — wraps PawnShop in a Radix Dialog so the player can
+ * browse mods + buy from the title screen without committing to a
+ * mission. The shop's "Continue / Back" CTAs both close the modal.
+ */
+function MarketDialog({
+  open,
+  onOpenChange,
+}: {
+  open: boolean;
+  onOpenChange: (v: boolean) => void;
+}) {
+  return (
+    <Dialog.Root open={open} onOpenChange={onOpenChange}>
+      <Dialog.Portal>
+        <Dialog.Overlay
+          style={{ position: "fixed", inset: 0, background: "rgba(13, 12, 10, 0.78)", zIndex: 50 }}
+        />
+        <Dialog.Content
+          aria-label="Market"
+          aria-describedby={undefined}
+          style={{
+            position: "fixed",
+            top: 0,
+            left: 0,
+            width: "100vw",
+            height: "100vh",
+            zIndex: 51,
+            background: "transparent",
+            overflowY: "auto",
+          }}
+        >
+          <Dialog.Title
+            style={{
+              position: "absolute",
+              width: 1,
+              height: 1,
+              padding: 0,
+              margin: -1,
+              overflow: "hidden",
+              clip: "rect(0, 0, 0, 0)",
+              whiteSpace: "nowrap",
+              border: 0,
+            }}
+          >
+            Market
+          </Dialog.Title>
+          <PawnShop onContinue={() => onOpenChange(false)} onBack={() => onOpenChange(false)} />
+        </Dialog.Content>
+      </Dialog.Portal>
+    </Dialog.Root>
   );
 }

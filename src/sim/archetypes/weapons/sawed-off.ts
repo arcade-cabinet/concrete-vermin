@@ -22,5 +22,7 @@ export const sawedOff: Readonly<WeaponArchetype> = Object.freeze(
       reload: "sfx/weapon/sawed-off-reload",
       empty: "sfx/weapon/empty-click",
     },
+    reticleRadius: 18,
+    reticleShape: "wide",
   }),
 );

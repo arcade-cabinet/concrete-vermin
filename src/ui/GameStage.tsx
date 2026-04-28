@@ -22,7 +22,6 @@ import { usePlayerProgress } from "./PlayerProgress";
 const STAGE_W = 480;
 const STAGE_H = 270;
 const RETICLE_KEY_SPEED_PX = 220; // sim units per second when held
-const LONG_PRESS_MS = 350; // hold past this on press → reload, not fire
 
 // Pixi resolution cap. On retina mobile (dpr 3+), full-resolution
 // rasterization is needlessly expensive — capping at 2 saves ~40% GPU
@@ -75,11 +74,7 @@ export function GameStage() {
   if (resolutionRef.current === 0) resolutionRef.current = clampedResolution();
   const resolution = resolutionRef.current;
 
-  // Pointer state for drag-to-aim + long-press detection.
-  const pointerDownAt = useRef<number | null>(null);
-  const pointerDownPos = useRef<{ x: number; y: number } | null>(null);
-  const pointerMoved = useRef(false);
-  const longPressTimer = useRef<number | null>(null);
+  // Reticle ref so closures (timers, gamepad poll) read current value.
   const lastReticleRef = useRef(reticle);
   lastReticleRef.current = reticle;
 
@@ -229,82 +224,33 @@ export function GameStage() {
     return { x: sx, y: sy };
   }
 
-  function clearLongPress() {
-    if (longPressTimer.current !== null) {
-      window.clearTimeout(longPressTimer.current);
-      longPressTimer.current = null;
-    }
-  }
-
-  function onPointerMove(e: React.PointerEvent<HTMLDivElement>) {
-    const p = clientToStage(e, e.currentTarget);
-    setReticle(p.x, p.y);
-    if (pointerDownPos.current) {
-      const dx = p.x - pointerDownPos.current.x;
-      const dy = p.y - pointerDownPos.current.y;
-      // Movement threshold: dragging cancels the long-press-reload intent.
-      if (Math.hypot(dx, dy) > 6) {
-        pointerMoved.current = true;
-        clearLongPress();
-      }
-    }
-  }
-
   function fireWithAssist(x: number, y: number) {
     const r = runnerRef.current;
     if (!r) return;
-    if (!aimAssistRef.current) {
-      r.queueShot(x, y);
-      return;
-    }
-    const vermin = useGameStore.getState().vermin;
-    const snapped = applyAimAssist(x, y, vermin);
+    // The tap-to-fire model uses the reticle as the hit-box. We snap the
+    // shot to the nearest vermin within the reticle radius — that's what
+    // "the kill box IS the reticle" means in the spec. Aim assist, when
+    // on, just expands that radius slightly for forgiveness.
+    const state = useGameStore.getState();
+    const radius = state.reticleRadius * (aimAssistRef.current ? 1.25 : 1.0);
+    const snapped = applyAimAssist(x, y, state.vermin, radius);
     r.queueShot(snapped.x, snapped.y);
   }
 
+  // Tap-to-fire model. Click / tap places the reticle at the pointer
+  // position and immediately queues a shot. No drag-to-aim, no long-
+  // press-to-reload — reload is bound to R / gamepad bumper / auto when
+  // the magazine drains. The reticle is the hit-box; weapon archetype
+  // controls reticle radius via the `reticleShape` snapshot.
   function onPointerDown(e: React.PointerEvent<HTMLDivElement>) {
+    // Mouse: only fire on primary (left) button. Right-click should fall
+    // through to the browser context menu, middle-click is reserved.
+    // Touch and pen events report button === 0 by default, so this
+    // doesn't break either.
+    if (e.pointerType === "mouse" && e.button !== 0) return;
     const p = clientToStage(e, e.currentTarget);
     setReticle(p.x, p.y);
-    pointerDownAt.current = performance.now();
-    pointerDownPos.current = p;
-    pointerMoved.current = false;
-    e.currentTarget.setPointerCapture(e.pointerId);
-    // Touch tap-to-fire: coarse pointer fires on pointerDown so the
-    // player gets immediate feedback without having to wait for the
-    // pointerUp edge. Long-press still reloads. Mouse stays
-    // press-and-release so drag-to-aim works.
-    if (e.pointerType === "touch") {
-      fireWithAssist(p.x, p.y);
-    }
-    clearLongPress();
-    longPressTimer.current = window.setTimeout(() => {
-      if (!pointerMoved.current) {
-        runnerRef.current?.queueReload();
-        pointerDownAt.current = null;
-      }
-    }, LONG_PRESS_MS);
-  }
-
-  function onPointerUp(e: React.PointerEvent<HTMLDivElement>) {
-    clearLongPress();
-    const downAt = pointerDownAt.current;
-    pointerDownAt.current = null;
-    pointerDownPos.current = null;
-    e.currentTarget.releasePointerCapture(e.pointerId);
-    if (downAt === null) return; // long-press already fired
-    const heldMs = performance.now() - downAt;
-    if (heldMs >= LONG_PRESS_MS) return; // safety
-    // Mouse: fire on release so drag-to-aim works naturally. Touch
-    // already fired on pointerDown — skip to avoid double-fire.
-    if (e.pointerType === "touch") return;
-    const p = clientToStage(e, e.currentTarget);
     fireWithAssist(p.x, p.y);
-  }
-
-  function onPointerCancel() {
-    clearLongPress();
-    pointerDownAt.current = null;
-    pointerDownPos.current = null;
   }
 
   return (
@@ -314,7 +260,7 @@ export function GameStage() {
       // an interactive image with input affordances. The actual game
       // state is narrated through HUD's aria-live region (per design).
       role="img"
-      aria-label="Game canvas — drag to aim, tap to fire, R to reload"
+      aria-label="Game canvas — tap or click to fire at that point. R reloads."
       style={{
         width: "100%",
         height: "100%",
@@ -326,21 +272,20 @@ export function GameStage() {
         userSelect: "none",
         WebkitTouchCallout: "none",
       }}
-      onPointerMove={onPointerMove}
       onPointerDown={onPointerDown}
-      onPointerUp={onPointerUp}
-      onPointerCancel={onPointerCancel}
     >
       <div
         style={{
-          // Stage fit: respect the smallest of three constraints —
-          // viewport width (so we never overflow on portrait phones),
-          // 96 vh (so the HUD has breathing room above and below the
-          // stage on landscape), and 1600 px (so on ultrawide and 4K
-          // we don't blow the canvas out to a billboard size that
-          // exceeds Pixi's auto-density quality envelope). The
-          // aspect-ratio rule keeps the canvas's 16:9 ratio.
-          width: "min(100vw, 96vh, 1600px)",
+          // Inside ArcadeFrame's canvas-well, fill whichever axis is the
+          // tighter constraint: when the well is wider than 16:9, height
+          // bottoms out at 100% and width follows the aspect ratio; when
+          // it's taller, width bottoms out at 100% and height follows.
+          // Browsers honor aspect-ratio with one explicit dimension as
+          // long as the other is auto.
+          height: "100%",
+          width: "auto",
+          maxWidth: "100%",
+          maxHeight: "100%",
           aspectRatio: `${STAGE_W} / ${STAGE_H}`,
           position: "relative",
           // Screen-shake offset: <= 4 CSS px, decays over 80ms. Reduced-

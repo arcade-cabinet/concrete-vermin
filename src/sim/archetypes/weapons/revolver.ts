@@ -22,5 +22,7 @@ export const revolver: Readonly<WeaponArchetype> = Object.freeze(
       reload: "sfx/weapon/revolver-reload",
       empty: "sfx/weapon/empty-click",
     },
+    reticleRadius: 6,
+    reticleShape: "diamond",
   }),
 );

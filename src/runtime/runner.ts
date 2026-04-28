@@ -117,6 +117,11 @@ export class GameRunner {
     setActAmbience(mission.act);
     playMissionStartSting();
     this.startEncounter(0);
+    // Publish an initial snapshot so the renderer/UI sees the correct
+    // reticleRadius/Shape (and ammo / lives) on frame 0, before the first
+    // tick. Otherwise tap-to-fire briefly uses defaults from the previous
+    // mission or the store init.
+    this.publishSnapshot();
   }
 
   /** Queue an "ACTIVE encounter" with N vermin from the chosen pattern. */
@@ -492,6 +497,8 @@ export class GameRunner {
       },
       reloadProgress,
       reloadDurationMs: this.tunedWeapon.reloadMs,
+      reticleRadius: this.tunedWeapon.reticleRadius,
+      reticleShape: this.tunedWeapon.reticleShape,
     });
   }
 }

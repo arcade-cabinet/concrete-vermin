@@ -1,5 +1,8 @@
 import { z } from "zod";
 import type { WeaponArchetype, WeaponId } from "../weapons";
+import { RETICLE_SHAPES, type ReticleShape } from "../weapons/_types";
+
+export { RETICLE_SHAPES, type ReticleShape };
 
 /**
  * Weapon mod registry. Mods are passive multipliers/additives applied
@@ -16,7 +19,14 @@ import type { WeaponArchetype, WeaponId } from "../weapons";
  * mods to weapon ids; an empty array means "all weapons".
  */
 
-export const MOD_SLOTS = ["choke", "extended-mag", "incendiary", "scope", "talisman"] as const;
+export const MOD_SLOTS = [
+  "choke",
+  "extended-mag",
+  "incendiary",
+  "scope",
+  "talisman",
+  "reticle",
+] as const;
 export type ModSlot = (typeof MOD_SLOTS)[number];
 
 export const weaponModSchema = z
@@ -43,6 +53,10 @@ export const weaponModSchema = z
     rangeMul: z.number().positive().default(1),
     /** Armor pierce additive [0..1]. */
     armorPierceAdd: z.number().min(0).max(1).default(0),
+    /** Reticle radius multiplier (default 1 = weapon's natural radius). */
+    reticleRadiusMul: z.number().positive().default(1),
+    /** Override the reticle shape (otherwise weapon's natural shape). */
+    reticleShape: z.enum(RETICLE_SHAPES).optional(),
   })
   .strict();
 
@@ -224,6 +238,48 @@ const MOD_DATA: ReadonlyArray<z.input<typeof weaponModSchema>> = [
     headshotBonusAdd: 0.2,
     critChanceAdd: 0.05,
   },
+  // — Reticle mods —
+  // Adjust the hit-box radius (multiplicative) and/or override the visual
+  // reticle shape. Today the shape is render-only — gameplay difference
+  // comes from radius alone. The "double" and "diamond" variants give the
+  // shape its own readable look; future revisions may make double fire two
+  // pellets.
+  {
+    id: "wide-sights",
+    slot: "reticle",
+    name: "Wide Sights",
+    cost: 70,
+    compatibleWith: [],
+    reticleRadiusMul: 1.5,
+    reticleShape: "wide",
+  },
+  {
+    id: "ring-sight",
+    slot: "reticle",
+    name: "Ring Sight",
+    cost: 60,
+    compatibleWith: [],
+    reticleRadiusMul: 1.3,
+    reticleShape: "ring",
+  },
+  {
+    id: "diamond-pip",
+    slot: "reticle",
+    name: "Diamond Pip",
+    cost: 50,
+    compatibleWith: [],
+    reticleShape: "diamond",
+    headshotBonusAdd: 0.05,
+  },
+  {
+    id: "twin-laser",
+    slot: "reticle",
+    name: "Twin Laser",
+    cost: 220,
+    compatibleWith: ["revolver", "smg", "tesla"],
+    reticleShape: "double",
+    reticleRadiusMul: 0.9,
+  },
 ];
 
 // Internal mutable map kept private — `get`/`size`/iteration go through
@@ -279,6 +335,10 @@ export interface TunedWeapon {
   /** Damage stacking is multiplicative; the resolver applies these. */
   damageMods: ReadonlyArray<number>;
   critChanceMods: ReadonlyArray<number>;
+  /** Reticle hit-box (sim units). */
+  reticleRadius: number;
+  /** Reticle visual + behavior shape. */
+  reticleShape: ReticleShape;
 }
 
 export class LoadoutError extends Error {}
@@ -309,6 +369,8 @@ export function applyLoadout(
   let headshotBonus = weapon.headshotBonus;
   let critChance = weapon.critChance;
   let armorPierce = weapon.armorPierce;
+  let reticleRadius = weapon.reticleRadius;
+  let reticleShape: ReticleShape = weapon.reticleShape;
   const damageMods: number[] = [];
   const critChanceMods: number[] = [];
 
@@ -320,6 +382,8 @@ export function applyLoadout(
     headshotBonus += m.headshotBonusAdd;
     critChance = Math.min(1, critChance + 0); // critChance itself isn't mutated; mods feed critChanceMods
     armorPierce = Math.min(1, armorPierce + m.armorPierceAdd);
+    reticleRadius *= m.reticleRadiusMul;
+    if (m.reticleShape) reticleShape = m.reticleShape;
     if (m.damageMod !== 1) damageMods.push(m.damageMod);
     if (m.critChanceAdd > 0) critChanceMods.push(m.critChanceAdd);
   }
@@ -336,5 +400,7 @@ export function applyLoadout(
     armorPierce,
     damageMods,
     critChanceMods,
+    reticleRadius,
+    reticleShape,
   };
 }

@@ -22,5 +22,7 @@ export const flamethrower: Readonly<WeaponArchetype> = Object.freeze(
       reload: "sfx/weapon/flame-reload",
       empty: "sfx/weapon/empty-click",
     },
+    reticleRadius: 20,
+    reticleShape: "ring",
   }),
 );

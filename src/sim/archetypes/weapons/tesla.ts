@@ -22,5 +22,7 @@ export const tesla: Readonly<WeaponArchetype> = Object.freeze(
       reload: "sfx/weapon/tesla-reload",
       empty: "sfx/weapon/empty-click",
     },
+    reticleRadius: 7,
+    reticleShape: "diamond",
   }),
 );

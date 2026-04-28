@@ -24,6 +24,17 @@ test.describe("tutorial clear", () => {
       "tutorial-clear runs on the desktop project only",
     );
 
+    // Suppress the opening interstitial deterministically. Register the
+    // init script BEFORE the first navigation so the flag is set before
+    // any UI renders — eliminates the goto/reload double-render and any
+    // first-paint flicker.
+    await page.addInitScript(() => {
+      try {
+        window.localStorage.setItem("cv:opening-shown", "1");
+      } catch {
+        // ignore
+      }
+    });
     await page.goto("/");
 
     // Main menu → Press Start (sends to Briefing for fresh runs)
@@ -36,22 +47,25 @@ test.describe("tutorial clear", () => {
     await expect(begin).toBeVisible({ timeout: 15_000 });
     await begin.click();
 
-    // Mission select → DEPLOY (first mission is unlocked by default)
-    const deploy = page.getByRole("button", { name: /^deploy\b/i });
+    // Mission select → DEPLOY drops the player straight into the mission
+    // (no pawn-shop intercept on a fresh run; the Market is reachable from
+    // the MainMenu and from MissionResult, never pre-mission). Scope the
+    // selector to the MissionSelect phase root so a Market modal opened
+    // anywhere can't steal the click.
+    const missionSelect = page.locator('[data-phase-root="mission-select"]');
+    await expect(missionSelect).toBeVisible({ timeout: 10_000 });
+    const deploy = missionSelect.getByRole("button", { name: /^deploy/i });
     await expect(deploy).toBeVisible({ timeout: 10_000 });
     await deploy.click();
-
-    // Pawn shop → DEPLOY (with no mods)
-    const deployFromShop = page.getByRole("button", { name: /^deploy\b/i });
-    await expect(deployFromShop).toBeVisible({ timeout: 10_000 });
-    await deployFromShop.click();
+    // Wait for the Pixi canvas to mount before continuing.
+    await page.waitForFunction(() => document.querySelector('[data-testid="game-stage"]') !== null, null, { timeout: 15_000 });
 
     // Game canvas
     const stage = page.getByTestId("game-stage");
     await expect(stage).toBeVisible({ timeout: 15_000 });
 
     // The HUD shows kill progress; wait for it to render before firing.
-    const kills = page.getByTestId("hud-kills");
+    const kills = page.getByTestId("arcade-kills");
     await expect(kills).toBeVisible();
 
     // Mission-01 spawns 14 rats across two waves; shotgun has a 1.4 s
