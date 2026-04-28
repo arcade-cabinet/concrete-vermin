@@ -124,10 +124,18 @@ if (!isCrtFile && isStyleableFile) {
 }
 
 // 3. Factory pyramid (warning-level — block raw spawn outside factories)
-if (!path.includes("/src/sim/factories/") && !path.includes("/src/ecs/")) {
+// Scope to TS source under src/. Docs (.md) and the gate file itself
+// may reference the forbidden pattern when *describing* the rule.
+const isUnderSrc = /(^|\/)src\//.test(normalizedPath);
+if (
+  isSourceFile &&
+  isUnderSrc &&
+  !path.includes("/src/sim/factories/") &&
+  !path.includes("/src/ecs/")
+) {
   if (/world\.spawn\s*\(\s*Vermin/.test(content)) {
     reject(
-      `Factory pyramid gate: raw world.spawn(Vermin) in ${path}. ` +
+      `Factory pyramid gate: raw spawn in ${path}. ` +
         `All vermin spawning must go through src/sim/factories/actor.composeVermin(). ` +
         `STANDARDS.md §6.`,
     );

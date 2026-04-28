@@ -132,7 +132,7 @@ Each `[ ]` is one commit. Group small ones into one PR; large ones get their own
 - [x] Replace every hard-coded hex in src/ui/* and src/render/* with theme token references
 - [x] Replace every hard-coded font-family with theme.typography refs
 - [x] Type scale: define h1/h2/h3/body/hud-mono/hud-display sizes; apply via theme
-- [ ] Responsive stage scaling: GameStage already uses aspect-ratio container; add CSS clamp() for type sizes; verify on 320px portrait, 480p, 720p, 1080p, 4K, ultrawide
+- [x] Responsive stage scaling: GameStage already uses aspect-ratio container; add CSS clamp() for type sizes; verify on 320px portrait, 480p, 720p, 1080p, 4K, ultrawide
 - [x] Responsive HUD: stack columns on narrow viewports (<480px); reposition score/ammo/lives so they don't overlap on portrait phone
 - [x] Safe-area insets: padding-top/bottom respect env(safe-area-inset-*) for iPhone notch + Android gesture bar
 - [x] Touch target minimums: every interactive button >= 44×44 CSS px
@@ -184,14 +184,14 @@ Each `[ ]` is one commit. Group small ones into one PR; large ones get their own
 
 ### CV-RELEASE-INFRA — sign + ship (PR #10)
 - [x] Re-add analysis-nightly.yml workflow once analysis:* exists
-- [ ] Document CI_GITHUB_TOKEN scope in docs/DEPLOYMENT.md
-- [ ] Document ANDROID_KEYSTORE_BASE64 / PASSWORD / KEY_ALIAS / KEY_PASSWORD secrets needed for signed releases
+- [x] Document CI_GITHUB_TOKEN scope in docs/DEPLOYMENT.md
+- [x] Document ANDROID_KEYSTORE_BASE64 / PASSWORD / KEY_ALIAS / KEY_PASSWORD secrets needed for signed releases
 - [ ] Verify: open a release-please PR, watch automerge fire, confirm android job uploads signed AAB to the Release
 
 ### CV-DOCS sweep (PR #11)
-- [ ] docs/STATE.md: update to reflect post-v1.0.0 state
-- [ ] docs/ARCHITECTURE.md: now-real component diagram (sim → ECS → render → UI → audio)
-- [ ] docs/TESTING.md: actual run commands, what each suite covers
+- [x] docs/STATE.md: update to reflect post-v1.0.0 state
+- [x] docs/ARCHITECTURE.md: now-real component diagram (sim → ECS → render → UI → audio)
+- [x] docs/TESTING.md: actual run commands, what each suite covers
 - [ ] CHANGELOG.md: cross-reference release-please's autogen with hand-written release notes
 - [ ] README.md: screenshot of Pages-served game; quickstart for contributors
 
