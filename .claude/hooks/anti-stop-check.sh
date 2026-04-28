@@ -1,34 +1,34 @@
 #!/usr/bin/env bash
-# anti-stop-check.sh — runs on every Stop event to verify the agent did not
-# stop prematurely while the continuous-directive is ACTIVE.
+# anti-stop-check.sh — per-repo Stop hook for Concrete Vermin.
 #
-# Exits 2 (block) if:
-#   - directive file exists AND is ACTIVE
-#   - queue still has unchecked items
-#   - no new commit since last stop event (last-stop marker)
-#
-# Exits 0 (allow) if:
-#   - directive absent (normal session)
-#   - queue drained
-#   - at least one new commit since the last stop marker
+# Blocks Stop while the directive's queue still has open checkboxes.
+# Uses the {"decision":"block","reason":...} JSON protocol so the
+# agent receives the open items as actionable feedback instead of a
+# silent block. No SHA-advance escape hatch — the only way out is to
+# drain the queue or flip Status to RELEASED.
 
 set -euo pipefail
 
-REPO="$(git rev-parse --show-toplevel 2>/dev/null || pwd)"
-DIRECTIVE="$REPO/.claude/continuous-directive.md"
-MARKER="$REPO/.claude/state/.last-stop-sha"
-mkdir -p "$REPO/.claude/state"
+REPO="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
+cd "$REPO"
 
-# No directive → nothing to enforce
+DIRECTIVE="$REPO/.claude/continuous-directive.md"
+
+# No directive → nothing to enforce.
 [ -f "$DIRECTIVE" ] || exit 0
 
-# Directive inactive (explicit user release) → allow stop
-grep -qiE "^\\*\\*Status:\\*\\* *ACTIVE" "$DIRECTIVE" || exit 0
+# Status: RELEASED → user explicitly let us stop.
+if grep -qiE '^\*\*Status:\*\* *RELEASED' "$DIRECTIVE"; then
+  exit 0
+fi
 
-# Count unchecked queue items
-OPEN=$(grep -cE '^- \[ \]' "$DIRECTIVE" || true)
-if [ "$OPEN" -eq 0 ]; then
-  # Queue drained. Allow stop. Mark done.
+# Status: ACTIVE check (default if absent — be strict).
+# Use `|| true` so set -e doesn't trip on no-match.
+n=$(grep -c '^- \[ \]' "$DIRECTIVE" 2>/dev/null || true)
+n=${n:-0}
+
+if [ "$n" = "0" ]; then
+  # Queue drained — flip to DRAINED so the next session knows.
   if sed --version 2>/dev/null | grep -q GNU; then
     sed -i 's/^\*\*Status:\*\* *ACTIVE/**Status:** DRAINED/' "$DIRECTIVE"
   else
@@ -37,24 +37,23 @@ if [ "$OPEN" -eq 0 ]; then
   exit 0
 fi
 
-# Require at least one commit since last stop attempt
-CURRENT_SHA="$(git rev-parse HEAD 2>/dev/null || echo "none")"
-LAST_SHA="$(cat "$MARKER" 2>/dev/null || echo "")"
+TMP=$(mktemp -t keep-going.XXXXXX)
+trap 'rm -f "$TMP"' EXIT
 
-if [ "$CURRENT_SHA" = "$LAST_SHA" ]; then
-  cat >&2 <<EOF
-⛔ STOP BLOCKED: continuous-directive is ACTIVE and no new commit was made
-   since the last stop attempt (HEAD still $CURRENT_SHA).
+{
+  echo "Stop blocked: ${n} checkboxes still open in .claude/continuous-directive.md."
+  echo ""
+  echo "Top open items:"
+  grep '^- \[ \]' "$DIRECTIVE" | head -8
+  echo ""
+  echo "Pick the next one and execute. Do not ask what to do."
+  echo "If the user has explicitly said stop, change the directive's"
+  echo "Status from ACTIVE to RELEASED."
+} > "$TMP"
 
-Queue has $OPEN open items in .claude/continuous-directive.md.
-Pick the top one, ship a commit, then you may stop.
-
-If the user has explicitly said "stop", change the directive's
-Status line from ACTIVE to RELEASED and this hook will allow exit.
-EOF
-  exit 2
-fi
-
-# New commit since last stop → allow, record
-echo "$CURRENT_SHA" > "$MARKER"
-exit 0
+python3 - "$TMP" <<'PY'
+import json, sys
+with open(sys.argv[1]) as f:
+    reason = f.read()
+print(json.dumps({"decision": "block", "reason": reason}))
+PY
