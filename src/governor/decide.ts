@@ -5,10 +5,10 @@ import { selectHighestThreat } from "./threat";
 import { leadPoint } from "./yuka-adapters";
 
 export interface GovernorProfile {
-  predictionFactor: number;   // 1 = canonical Reynolds; <1 dampens lookahead
-  reticleMaxSpeed: number;    // sim-units/sec; reticle snaps, knob only
-  shotCooldownMs: number;     // gap between consecutive queueShot calls
-  hitToleranceUnits: number;  // slack on lead-vs-current overshoot gate
+  predictionFactor: number; // 1 = canonical Reynolds; <1 dampens lookahead
+  reticleMaxSpeed: number; // sim-units/sec; reticle snaps, knob only
+  shotCooldownMs: number; // gap between consecutive queueShot calls
+  hitToleranceUnits: number; // slack on lead-vs-current overshoot gate
 }
 
 export const PLAYTHROUGH: GovernorProfile = {

@@ -23,8 +23,8 @@ export interface GovernorLoopProps {
   weapon: WeaponArchetype;
   enabled: boolean;
   profile?: GovernorProfile;
-  playerLineY: number;                           // threat scoring origin
-  shooterPos: { x: number; y: number };          // pursuit lookahead origin
+  playerLineY: number; // threat scoring origin
+  shooterPos: { x: number; y: number }; // pursuit lookahead origin
 }
 
 /** Headless sibling of <Loop>: drives runner.queueShot/queueReload via Yuka pursuit. Returns null. */

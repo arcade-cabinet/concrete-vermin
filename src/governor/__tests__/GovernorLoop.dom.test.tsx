@@ -203,7 +203,7 @@ describe("GovernorLoop", () => {
     tickCb?.(); // same now → blocked by cooldown
     expect(runner.queueShot).toHaveBeenCalledOnce();
 
-    useGameStore.setState({ now: 1 + (PLAYTHROUGH.shotCooldownMs / 1000) + 0.01 });
+    useGameStore.setState({ now: 1 + PLAYTHROUGH.shotCooldownMs / 1000 + 0.01 });
     tickCb?.();
     expect(runner.queueShot).toHaveBeenCalledTimes(2);
   });

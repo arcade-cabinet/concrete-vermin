@@ -80,11 +80,7 @@ describe("leadPoint", () => {
   });
 
   it("does not produce NaN when reticleMaxSpeed=0 against a stationary target", () => {
-    const aim = leadPoint(
-      { x: 0, y: 0 },
-      { x: 100, y: 50, vx: 0, vy: 0 },
-      { reticleMaxSpeed: 0 },
-    );
+    const aim = leadPoint({ x: 0, y: 0 }, { x: 100, y: 50, vx: 0, vy: 0 }, { reticleMaxSpeed: 0 });
     expect(Number.isFinite(aim.x)).toBe(true);
     expect(Number.isFinite(aim.y)).toBe(true);
     expect(aim.x).toBeCloseTo(100);

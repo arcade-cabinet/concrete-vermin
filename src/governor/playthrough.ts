@@ -2,12 +2,7 @@ import { GameRunner } from "../runtime/runner";
 import { INITIAL_SNAPSHOT, useGameStore } from "../runtime/store";
 import { WEAPON_REGISTRY } from "../sim/archetypes/weapons";
 import type { Mission } from "../sim/factories/mission";
-import {
-  type GovernorProfile,
-  PLAYTHROUGH,
-  governorTick,
-  makeGovernorState,
-} from "./decide";
+import { type GovernorProfile, PLAYTHROUGH, governorTick, makeGovernorState } from "./decide";
 
 export interface PlaythroughResult {
   outcome: "won" | "lost" | "timeout";

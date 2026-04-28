@@ -28,11 +28,7 @@ export function selectHighestThreat(
   return bestVermin;
 }
 
-export function scoreThreat(
-  v: VerminSnapshot,
-  weaponDamage: number,
-  opts: ThreatOptions,
-): number {
+export function scoreThreat(v: VerminSnapshot, weaponDamage: number, opts: ThreatOptions): number {
   const lowHealthPenalty = opts.lowHealthPenalty ?? 1.5;
   const distance = Math.abs(v.y - opts.playerLineY);
   const proximity = 1 - Math.min(1, distance / opts.playerLineY);
