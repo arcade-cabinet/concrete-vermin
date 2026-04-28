@@ -33,7 +33,8 @@ export function useArrowGridNav<T extends HTMLElement = HTMLDivElement>() {
       if (items.length === 0) return;
       const active = document.activeElement as HTMLElement | null;
       const idx = active ? items.indexOf(active) : -1;
-      let next = idx;
+      const last = items.length - 1;
+      let next: number;
       switch (e.key) {
         case "ArrowRight":
         case "ArrowDown":
@@ -41,13 +42,13 @@ export function useArrowGridNav<T extends HTMLElement = HTMLDivElement>() {
           break;
         case "ArrowLeft":
         case "ArrowUp":
-          next = idx < 0 ? items.length - 1 : (idx - 1 + items.length) % items.length;
+          next = idx < 0 ? last : (idx - 1 + items.length) % items.length;
           break;
         case "Home":
           next = 0;
           break;
         case "End":
-          next = items.length - 1;
+          next = last;
           break;
         default:
           return;

@@ -11,26 +11,7 @@
  * + Lighthouse audit on the deployed Pages preview.
  */
 import { COLOR } from "../src/theme/colors";
-
-function srgbToLinear(c: number): number {
-  const cs = c / 255;
-  return cs <= 0.03928 ? cs / 12.92 : ((cs + 0.055) / 1.055) ** 2.4;
-}
-
-function relativeLuminance(hex: string): number {
-  const m = hex.replace("#", "");
-  const r = Number.parseInt(m.slice(0, 2), 16);
-  const g = Number.parseInt(m.slice(2, 4), 16);
-  const b = Number.parseInt(m.slice(4, 6), 16);
-  return 0.2126 * srgbToLinear(r) + 0.7152 * srgbToLinear(g) + 0.0722 * srgbToLinear(b);
-}
-
-function contrast(a: string, b: string): number {
-  const la = relativeLuminance(a);
-  const lb = relativeLuminance(b);
-  const [hi, lo] = la > lb ? [la, lb] : [lb, la];
-  return (hi + 0.05) / (lo + 0.05);
-}
+import { AA_THRESHOLD, contrast } from "../src/theme/contrast";
 
 interface Pair {
   fg: string;
@@ -62,7 +43,7 @@ let failed = 0;
 console.log("# WCAG 2.1 AA brand-token contrast audit\n");
 for (const p of PAIRS) {
   const ratio = contrast(p.fg, p.bg);
-  const floor = p.kind === "text" ? 4.5 : 3.0;
+  const floor = p.kind === "text" ? AA_THRESHOLD.text : AA_THRESHOLD.ui;
   const ok = ratio >= floor;
   if (!ok) failed++;
   console.log(ROW(p, ratio, ok));
