@@ -259,7 +259,14 @@ export function GameStage() {
     >
       <div
         style={{
-          width: "min(100vw, 96vh)",
+          // Stage fit: respect the smallest of three constraints —
+          // viewport width (so we never overflow on portrait phones),
+          // 96 vh (so the HUD has breathing room above and below the
+          // stage on landscape), and 1600 px (so on ultrawide and 4K
+          // we don't blow the canvas out to a billboard size that
+          // exceeds Pixi's auto-density quality envelope). The
+          // aspect-ratio rule keeps the canvas's 16:9 ratio.
+          width: "min(100vw, 96vh, 1600px)",
           aspectRatio: `${STAGE_W} / ${STAGE_H}`,
           position: "relative",
           // Screen-shake offset: <= 4 CSS px, decays over 80ms. Reduced-
