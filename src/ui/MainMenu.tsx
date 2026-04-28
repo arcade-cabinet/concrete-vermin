@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useGameStore } from "../runtime/store";
 import { COLOR, TYPE } from "../theme/tokens";
+import { SettingsDialog } from "./SettingsDialog";
 import { useArrowGridNav } from "./hooks/useArrowGridNav";
 import { usePlayerProgress } from "./PlayerProgress";
 
@@ -152,6 +153,7 @@ export function MainMenu() {
   const hasProgress = completed.length > 0;
   const startRef = useRef<HTMLButtonElement>(null);
   const gridRef = useArrowGridNav<HTMLDivElement>();
+  const [settingsOpen, setSettingsOpen] = useState(false);
 
   // Autofocus Press Start on mount so a keyboard / arcade-stick player
   // can press Enter immediately without tab-hunting.
@@ -237,8 +239,10 @@ export function MainMenu() {
         {hasProgress ? (
           <MenuButton label="New Run" onClick={() => setPhase("briefing")} />
         ) : null}
+        <MenuButton label="Settings" onClick={() => setSettingsOpen(true)} />
         <MenuButton label="Credits" onClick={() => setPhase("credits")} />
       </div>
+      <SettingsDialog open={settingsOpen} onOpenChange={setSettingsOpen} />
       <style>{`
         @keyframes cv-press-start {
           0%, 100% { box-shadow: 0 0 22px ${COLOR.sodium}55, inset 0 0 10px ${COLOR.sodium}33; }
