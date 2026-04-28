@@ -2,7 +2,7 @@ import * as Accordion from "@radix-ui/react-accordion";
 import * as Dialog from "@radix-ui/react-dialog";
 import * as Slider from "@radix-ui/react-slider";
 import * as Switch from "@radix-ui/react-switch";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useGameStore } from "../runtime/store";
 import { COLOR, TYPE } from "../theme/tokens";
 
@@ -213,6 +213,7 @@ function Category({ value, title, caption, children }: CategoryProps) {
       <Accordion.Header asChild>
         <h3 style={{ margin: 0 }}>
           <Accordion.Trigger
+            className="cv-settings-trigger"
             style={{
               all: "unset",
               display: "flex",
@@ -271,7 +272,12 @@ export function SettingsDialog({
   const setInvertY = useGameStore((s) => s.setInvertY);
 
   // Open the Audio panel by default — most-tweaked category in playtests.
+  // Reset on every open so a closed-then-reopened dialog honors the default,
+  // not the previous session's collapse state (the dialog stays mounted).
   const [openCats, setOpenCats] = useState<string[]>(["audio"]);
+  useEffect(() => {
+    if (open) setOpenCats(["audio"]);
+  }, [open]);
 
   return (
     <Dialog.Root open={open} onOpenChange={onOpenChange}>
@@ -514,6 +520,12 @@ export function SettingsDialog({
               0% { transform: translateX(0); }
               50% { transform: translateX(20px); }
               100% { transform: translateX(0); }
+            }
+            /* Restore a visible focus indicator the all:unset reset removed,
+               so keyboard users can see which category trigger is focused. */
+            .cv-settings-trigger:focus-visible {
+              outline: 2px solid ${COLOR.sodium};
+              outline-offset: 2px;
             }
             [data-state="open"] > h3 .cv-settings-chevron { transform: rotate(90deg); transition: transform 160ms ease; }
             [data-state="closed"] > h3 .cv-settings-chevron { transform: rotate(0); transition: transform 160ms ease; }
