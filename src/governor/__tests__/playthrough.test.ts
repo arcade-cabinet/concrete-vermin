@@ -19,6 +19,24 @@ const STRICT_PASS_IDS = new Set([
 const strictMissions = ALL_MISSIONS.filter((m) => STRICT_PASS_IDS.has(m.id));
 const knownWeakMissions = ALL_MISSIONS.filter((m) => !STRICT_PASS_IDS.has(m.id));
 
+describe("STRICT_PASS_IDS integrity", () => {
+  it("every id in STRICT_PASS_IDS exists in ALL_MISSIONS", () => {
+    const allIds = new Set(ALL_MISSIONS.map((m) => m.id));
+    for (const id of STRICT_PASS_IDS) {
+      expect(allIds, `STRICT_PASS_IDS contains unknown id "${id}"`).toContain(id);
+    }
+  });
+
+  it("strictMissions + knownWeakMissions covers all missions with no overlap", () => {
+    expect(strictMissions.length + knownWeakMissions.length).toBe(ALL_MISSIONS.length);
+    const strictIds = new Set(strictMissions.map((m) => m.id));
+    const weakIds = new Set(knownWeakMissions.map((m) => m.id));
+    for (const id of strictIds) {
+      expect(weakIds.has(id), `id "${id}" appears in both suites`).toBe(false);
+    }
+  });
+});
+
 describe("governor end-to-end playthrough — strict gate", () => {
   it.each(strictMissions.map((m) => [m.id, m] as const))(
     "%s clears with grade ≥ B",

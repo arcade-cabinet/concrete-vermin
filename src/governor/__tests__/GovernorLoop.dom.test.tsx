@@ -1,5 +1,6 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
 import { cleanup, render } from "@testing-library/react";
+import type { GameRunner } from "../../runtime/runner";
 import { useGameStore } from "../../runtime/store";
 import { WEAPON_REGISTRY } from "../../sim/archetypes/weapons";
 import { GovernorLoop, PLAYTHROUGH } from "../GovernorLoop";
@@ -12,12 +13,9 @@ vi.mock("@pixi/react", () => ({
   },
 }));
 
-interface FakeRunner {
-  queueShot: ReturnType<typeof vi.fn>;
-  queueReload: ReturnType<typeof vi.fn>;
-}
+type RunnerStub = Pick<GameRunner, "queueShot" | "queueReload">;
 
-function makeRunner(): FakeRunner {
+function makeRunner(): RunnerStub {
   return {
     queueShot: vi.fn(),
     queueReload: vi.fn(),
@@ -43,7 +41,7 @@ describe("GovernorLoop", () => {
     const runner = makeRunner();
     render(
       <GovernorLoop
-        runner={runner as never}
+        runner={runner as unknown as GameRunner}
         weapon={WEAPON_REGISTRY.revolver}
         enabled={false}
         playerLineY={270}
@@ -60,7 +58,7 @@ describe("GovernorLoop", () => {
     useGameStore.setState({ player: { ammoCurrent: 0, ammoMax: 6, livesRemaining: 3 } });
     render(
       <GovernorLoop
-        runner={runner as never}
+        runner={runner as unknown as GameRunner}
         weapon={WEAPON_REGISTRY.revolver}
         enabled={true}
         playerLineY={270}
@@ -77,7 +75,7 @@ describe("GovernorLoop", () => {
     useGameStore.setState({ player: { ammoCurrent: 0, ammoMax: 6, livesRemaining: 3 } });
     render(
       <GovernorLoop
-        runner={runner as never}
+        runner={runner as unknown as GameRunner}
         weapon={WEAPON_REGISTRY.revolver}
         enabled={true}
         playerLineY={270}
@@ -111,7 +109,7 @@ describe("GovernorLoop", () => {
     });
     render(
       <GovernorLoop
-        runner={runner as never}
+        runner={runner as unknown as GameRunner}
         weapon={WEAPON_REGISTRY.revolver}
         enabled={true}
         playerLineY={270}
@@ -122,11 +120,10 @@ describe("GovernorLoop", () => {
     expect(runner.queueShot).not.toHaveBeenCalled();
   });
 
-  it("queues a shot at the lead point of the highest-threat vermin", () => {
+  it("queues a shot at the head-offset lead point of the highest-threat vermin", () => {
     const runner = makeRunner();
     useGameStore.setState({
       vermin: [
-        // Far one, lower priority
         {
           id: 1,
           archetypeId: "rat",
@@ -139,7 +136,6 @@ describe("GovernorLoop", () => {
           health: 5,
           maxHealth: 5,
         },
-        // Near one — should be picked
         {
           id: 2,
           archetypeId: "rat",
@@ -156,7 +152,7 @@ describe("GovernorLoop", () => {
     });
     render(
       <GovernorLoop
-        runner={runner as never}
+        runner={runner as unknown as GameRunner}
         weapon={WEAPON_REGISTRY.revolver}
         enabled={true}
         playerLineY={270}
@@ -165,10 +161,11 @@ describe("GovernorLoop", () => {
     );
     tickCb?.();
     expect(runner.queueShot).toHaveBeenCalledOnce();
-    const [x, y] = runner.queueShot.mock.calls[0];
-    // Stationary target → leadPoint returns the target's current position.
-    expect(x).toBeCloseTo(240);
-    expect(y).toBeCloseTo(250);
+    const shotMock = vi.mocked(runner.queueShot);
+    const [x, y] = shotMock.mock.calls[0];
+    // Stationary rat: leadPoint = target pos; aim = pos + rat.headOffset {x:12, y:-6}
+    expect(x).toBeCloseTo(252);
+    expect(y).toBeCloseTo(244);
   });
 
   it("respects the shotCooldownMs gate between consecutive ticks", () => {
@@ -192,7 +189,7 @@ describe("GovernorLoop", () => {
     });
     render(
       <GovernorLoop
-        runner={runner as never}
+        runner={runner as unknown as GameRunner}
         weapon={WEAPON_REGISTRY.revolver}
         enabled={true}
         playerLineY={270}
@@ -200,7 +197,7 @@ describe("GovernorLoop", () => {
       />,
     );
     tickCb?.();
-    tickCb?.(); // same now → blocked by cooldown
+    tickCb?.();
     expect(runner.queueShot).toHaveBeenCalledOnce();
 
     useGameStore.setState({ now: 1 + PLAYTHROUGH.shotCooldownMs / 1000 + 0.01 });
@@ -208,14 +205,13 @@ describe("GovernorLoop", () => {
     expect(runner.queueShot).toHaveBeenCalledTimes(2);
   });
 
-  it("skips firing when lead point overshoots reticle radius + tolerance", () => {
+  it("falls back to body-center + head-offset when lead point overshoots tolerance", () => {
     const runner = makeRunner();
     useGameStore.setState({
       vermin: [
         {
           id: 1,
           archetypeId: "rat",
-          // Far away, fast-moving — leadPoint will overshoot reticleRadius
           x: 50,
           y: 100,
           vx: 999,
@@ -229,7 +225,7 @@ describe("GovernorLoop", () => {
     });
     render(
       <GovernorLoop
-        runner={runner as never}
+        runner={runner as unknown as GameRunner}
         weapon={WEAPON_REGISTRY.revolver}
         enabled={true}
         playerLineY={270}
@@ -237,6 +233,11 @@ describe("GovernorLoop", () => {
       />,
     );
     tickCb?.();
-    expect(runner.queueShot).not.toHaveBeenCalled();
+    // Overshoot > tolerance → fallback: body-center + rat.headOffset {x:12, y:-6}
+    expect(runner.queueShot).toHaveBeenCalledOnce();
+    const shotMock = vi.mocked(runner.queueShot);
+    const [x, y] = shotMock.mock.calls[0];
+    expect(x).toBeCloseTo(62);
+    expect(y).toBeCloseTo(94);
   });
 });
