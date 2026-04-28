@@ -1,5 +1,5 @@
 import { create } from "zustand";
-import { FIRST_MISSION_ID, MISSIONS } from "../sim/content/missions";
+import { FIRST_MISSION_ID, MISSIONS, SECRET_MISSIONS } from "../sim/content/missions";
 import type { WeaponArchetype } from "../sim/factories/mission";
 
 export interface PlayerProgress {
@@ -7,20 +7,17 @@ export interface PlayerProgress {
   unlockedWeapons: ReadonlyArray<WeaponArchetype>;
   activeMods: ReadonlyArray<string>;
   completedMissionIds: ReadonlyArray<string>;
+  /**
+   * Mission ids the player has cleared with an S or S+ grade. Used to
+   * unlock the corresponding `secret` mission via its `sGradeUnlockFrom`
+   * anchor. Persisted alongside cash and completion.
+   */
+  sGradeMissionIds: ReadonlyArray<string>;
   selectedMissionId: string;
-  /**
-   * False until the player has dismissed the first-launch tutorial
-   * overlay; persisted via PlayerProgressPersistence so the tooltip
-   * never re-appears on subsequent loads.
-   */
   firstLaunchSeen: boolean;
-  /**
-   * Achievement ids that the player has unlocked. Persisted alongside
-   * cash + completed missions; the AchievementsScreen reads this to
-   * mark each one locked / unlocked.
-   */
   unlockedAchievements: ReadonlyArray<string>;
   unlockMission: (id: string) => void;
+  markSGradeEarned: (id: string) => void;
   selectMission: (id: string) => void;
   awardCash: (amount: number) => void;
   spendCash: (amount: number) => boolean;
@@ -34,7 +31,17 @@ export interface PlayerProgress {
 const INITIAL_CASH = 0;
 const INITIAL_WEAPONS: ReadonlyArray<WeaponArchetype> = ["shotgun"];
 
-export function isMissionUnlocked(missionId: string, completed: ReadonlyArray<string>): boolean {
+export function isMissionUnlocked(
+  missionId: string,
+  completed: ReadonlyArray<string>,
+  sGradeMissions: ReadonlyArray<string> = [],
+): boolean {
+  // Secret missions: gated by the anchor mission's S/S+ clear, not by
+  // linear act progression.
+  const secret = SECRET_MISSIONS.find((m) => m.id === missionId);
+  if (secret) {
+    return secret.sGradeUnlockFrom !== undefined && sGradeMissions.includes(secret.sGradeUnlockFrom);
+  }
   if (missionId === FIRST_MISSION_ID) return true;
   const idx = MISSIONS.findIndex((m) => m.id === missionId);
   if (idx <= 0) return false;
@@ -47,6 +54,7 @@ export const usePlayerProgress = create<PlayerProgress>((set) => ({
   unlockedWeapons: INITIAL_WEAPONS,
   activeMods: [],
   completedMissionIds: [],
+  sGradeMissionIds: [],
   selectedMissionId: FIRST_MISSION_ID,
   firstLaunchSeen: false,
   unlockedAchievements: [],
@@ -55,6 +63,12 @@ export const usePlayerProgress = create<PlayerProgress>((set) => ({
       s.completedMissionIds.includes(id)
         ? s
         : { completedMissionIds: [...s.completedMissionIds, id] },
+    ),
+  markSGradeEarned: (id) =>
+    set((s) =>
+      s.sGradeMissionIds.includes(id)
+        ? s
+        : { sGradeMissionIds: [...s.sGradeMissionIds, id] },
     ),
   selectMission: (id) => set({ selectedMissionId: id }),
   awardCash: (amount) => set((s) => ({ cash: s.cash + Math.max(0, amount) })),
@@ -90,6 +104,7 @@ export const usePlayerProgress = create<PlayerProgress>((set) => ({
       unlockedWeapons: INITIAL_WEAPONS,
       activeMods: [],
       completedMissionIds: [],
+      sGradeMissionIds: [],
       selectedMissionId: FIRST_MISSION_ID,
       firstLaunchSeen: false,
       unlockedAchievements: [],

@@ -1,5 +1,9 @@
 import { useGameStore } from "../runtime/store";
-import { listMissionsByAct, MISSIONS } from "../sim/content/missions";
+import {
+  getMission,
+  listMissionsByAct,
+  listSecretMissionsByAct,
+} from "../sim/content/missions";
 import { ACT_IDS, type ActId } from "../sim/factories/mission";
 import { useArrowGridNav } from "./hooks/useArrowGridNav";
 import { useIsNarrow } from "./hooks/useViewport";
@@ -137,6 +141,7 @@ function MissionStop({
 
 export function MissionSelect({ onPickMission }: { onPickMission: (id: string) => void }) {
   const completed = usePlayerProgress((s) => s.completedMissionIds);
+  const sGradeMissions = usePlayerProgress((s) => s.sGradeMissionIds);
   const selected = usePlayerProgress((s) => s.selectedMissionId);
   const select = usePlayerProgress((s) => s.selectMission);
   const cash = usePlayerProgress((s) => s.cash);
@@ -245,7 +250,7 @@ export function MissionSelect({ onPickMission }: { onPickMission: (id: string) =
                         .replace(/^[a-z]+-\d+-/, "")
                         .replace(/-/g, " ")
                         .toUpperCase()}
-                      unlocked={isMissionUnlocked(m.id, completed)}
+                      unlocked={isMissionUnlocked(m.id, completed, sGradeMissions)}
                       completed={completed.includes(m.id)}
                       selected={selected === m.id}
                       isBoss={isBoss}
@@ -254,6 +259,14 @@ export function MissionSelect({ onPickMission }: { onPickMission: (id: string) =
                     />
                   );
                 })}
+                <SecretRail
+                  act={act}
+                  lineColor={lineColor}
+                  completed={completed}
+                  sGradeMissions={sGradeMissions}
+                  selected={selected}
+                  onSelect={select}
+                />
               </div>
             </section>
           );
@@ -298,7 +311,7 @@ export function MissionSelect({ onPickMission }: { onPickMission: (id: string) =
         <button
           type="button"
           onClick={() => onPickMission(selected)}
-          disabled={!isMissionUnlocked(selected, completed)}
+          disabled={!isMissionUnlocked(selected, completed, sGradeMissions)}
           style={{
             background: COLOR.sodium,
             color: COLOR.bgConcreteDark,
@@ -311,13 +324,112 @@ export function MissionSelect({ onPickMission }: { onPickMission: (id: string) =
             fontSize: 14,
             fontWeight: 700,
             cursor: "pointer",
-            opacity: isMissionUnlocked(selected, completed) ? 1 : 0.5,
-            boxShadow: isMissionUnlocked(selected, completed) ? `0 0 14px ${COLOR.sodium}66` : "none",
+            opacity: isMissionUnlocked(selected, completed, sGradeMissions) ? 1 : 0.5,
+            boxShadow: isMissionUnlocked(selected, completed, sGradeMissions)
+              ? `0 0 14px ${COLOR.sodium}66`
+              : "none",
           }}
         >
-          DEPLOY · {MISSIONS.find((m) => m.id === selected)?.weapon.toUpperCase()}
+          DEPLOY · {selectedWeaponLabel(selected)}
         </button>
       </footer>
+    </div>
+  );
+}
+
+function selectedWeaponLabel(selectedId: string): string {
+  try {
+    return getMission(selectedId).weapon.toUpperCase();
+  } catch {
+    return "—";
+  }
+}
+
+interface SecretRailProps {
+  act: ActId;
+  lineColor: string;
+  completed: ReadonlyArray<string>;
+  sGradeMissions: ReadonlyArray<string>;
+  selected: string;
+  onSelect: (id: string) => void;
+}
+
+function SecretRail({
+  act,
+  lineColor,
+  completed,
+  sGradeMissions,
+  selected,
+  onSelect,
+}: SecretRailProps) {
+  const secrets = listSecretMissionsByAct(act);
+  if (secrets.length === 0) return null;
+  return (
+    <div
+      data-testid={`secret-rail-${act}`}
+      style={{
+        marginTop: 12,
+        paddingTop: 10,
+        borderTop: `1px dashed ${lineColor}66`,
+      }}
+    >
+      <div
+        style={{
+          color: lineColor,
+          fontFamily: TYPE.faceMono,
+          fontSize: 10,
+          letterSpacing: "0.3em",
+          marginBottom: 6,
+        }}
+      >
+        ✦ SECRET
+      </div>
+      {secrets.map((m) => {
+        const unlocked = isMissionUnlocked(m.id, completed, sGradeMissions);
+        const isSelected = selected === m.id;
+        const label = unlocked
+          ? m.id.replace(/^[a-z]+-secret-/, "").replace(/-/g, " ").toUpperCase()
+          : "??? ??? ???";
+        return (
+          <button
+            key={m.id}
+            type="button"
+            data-arrow-nav-item="mission"
+            disabled={!unlocked}
+            onClick={() => unlocked && onSelect(m.id)}
+            style={{
+              background: isSelected ? `${lineColor}22` : "transparent",
+              border: `1px ${unlocked ? "solid" : "dashed"} ${lineColor}${unlocked ? "" : "55"}`,
+              color: unlocked ? COLOR.cream : COLOR.creamDim,
+              fontFamily: TYPE.faceMono,
+              fontSize: 11,
+              letterSpacing: "0.2em",
+              padding: "8px 10px",
+              minHeight: 32,
+              textAlign: "left",
+              cursor: unlocked ? "pointer" : "not-allowed",
+              opacity: unlocked ? 1 : 0.55,
+              marginBottom: 4,
+              width: "100%",
+            }}
+          >
+            {label}
+            {!unlocked ? (
+              <span
+                style={{
+                  display: "block",
+                  fontSize: 9,
+                  letterSpacing: "0.15em",
+                  color: COLOR.creamDim,
+                  marginTop: 2,
+                }}
+              >
+                S-grade required
+              </span>
+            ) : null}
+          </button>
+        );
+      })}
     </div>
   );
 }
