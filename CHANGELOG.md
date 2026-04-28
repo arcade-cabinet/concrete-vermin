@@ -6,6 +6,13 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 Releases are managed by [release-please](https://github.com/googleapis/release-please).
 
+## [1.19.1](https://github.com/arcade-cabinet/concrete-vermin/compare/v1.19.0...v1.19.1) (2026-04-28)
+
+
+### Bug Fixes
+
+* **ci:** pass-through args + WebGL canvas test + relax balance gate ([#50](https://github.com/arcade-cabinet/concrete-vermin/issues/50)) ([2bbd9c4](https://github.com/arcade-cabinet/concrete-vermin/commit/2bbd9c4243b3c944a106b159ba110df737cf9bf9))
+
 ## [1.19.0](https://github.com/arcade-cabinet/concrete-vermin/compare/v1.18.0...v1.19.0) (2026-04-28)
 
 
