@@ -6,6 +6,13 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 Releases are managed by [release-please](https://github.com/googleapis/release-please).
 
+## [1.17.0](https://github.com/arcade-cabinet/concrete-vermin/compare/v1.16.0...v1.17.0) (2026-04-28)
+
+
+### Features
+
+* **audio,haptics:** full AUDIO.md sonic direction bible + @capacitor/haptics integration ([#44](https://github.com/arcade-cabinet/concrete-vermin/issues/44)) ([b7bfcb5](https://github.com/arcade-cabinet/concrete-vermin/commit/b7bfcb5456e5f6e1990763bc0656428148a8c2b2))
+
 ## [1.16.0](https://github.com/arcade-cabinet/concrete-vermin/compare/v1.15.0...v1.16.0) (2026-04-28)
 
 
