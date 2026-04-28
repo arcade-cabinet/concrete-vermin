@@ -10,7 +10,7 @@ const PARCHMENT = "#e8dcc4";
  * one sentence, then auto-advance. Player-journey gate (CLAUDE.md §8).
  */
 export function Briefing() {
-  const startMission = useGameStore((s) => s.startMission);
+  const setPhase = useGameStore((s) => s.setPhase);
 
   return (
     <div
@@ -43,7 +43,7 @@ export function Briefing() {
         onClick={async () => {
           await ensureAudio();
           startStreetsAmbience();
-          startMission("tutorial-bodega", 8);
+          setPhase("mission-select");
         }}
         style={{
           background: SODIUM,

@@ -11,7 +11,7 @@ import { create } from "zustand";
  * the heavy ECS query on every frame.
  */
 
-export type MissionPhase = "briefing" | "playing" | "won" | "lost";
+export type MissionPhase = "briefing" | "mission-select" | "pawn-shop" | "playing" | "won" | "lost";
 
 export interface VerminSnapshot {
   id: number;

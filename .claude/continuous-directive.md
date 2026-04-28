@@ -81,20 +81,20 @@ Each `[ ]` is one commit. Group small ones into one PR; large ones get their own
 - [x] Mobile safe-area: respect viewport insets in the HUD positioning
 
 ### CV-CONTENT — actual missions + game flow (PR #8a)
-- [ ] src/sim/content/missions/streets/mission-01.ts: bodega backroom (current tutorial, formalized)
-- [ ] src/sim/content/missions/streets/mission-02.ts: alleyway (rats + first roaches)
-- [ ] src/sim/content/missions/streets/mission-03.ts: rooftop (pigeons + dive-bombers)
-- [ ] src/sim/content/missions/streets/mission-04.ts: dumpster bear boss
-- [ ] src/sim/content/missions/underworld/mission-05.ts: subway platform (mixed-wave)
-- [ ] src/sim/content/missions/underworld/mission-06.ts: sewer shallows (sewer-fish lungers)
-- [ ] src/sim/content/missions/underworld/mission-07.ts: river mutant boss
-- [ ] src/sim/content/missions/above/mission-08.ts: rooftop chase (geese + seagulls)
-- [ ] src/sim/content/missions/above/mission-09.ts: pigeon king boss
-- [ ] src/sim/content/missions/index.ts: registry + getMission helper
-- [ ] src/ui/MissionSelect.tsx: act → mission grid
-- [ ] src/ui/PawnShop.tsx: weapon-mod loadout picker between missions
-- [ ] src/ui/PlayerProgress.ts: zustand store for cash + unlocked weapons + active mods
-- [ ] Save/load via @capacitor-community/sqlite (web fallback to localStorage)
+- [x] src/sim/content/missions/streets/mission-01.ts: bodega backroom (current tutorial, formalized)
+- [x] src/sim/content/missions/streets/mission-02.ts: alleyway (rats + first roaches)
+- [x] src/sim/content/missions/streets/mission-03.ts: rooftop (pigeons + dive-bombers)
+- [x] src/sim/content/missions/streets/mission-04.ts: dumpster bear boss
+- [x] src/sim/content/missions/underworld/mission-05.ts: subway platform (mixed-wave)
+- [x] src/sim/content/missions/underworld/mission-06.ts: sewer shallows (sewer-fish lungers)
+- [x] src/sim/content/missions/underworld/mission-07.ts: river mutant boss
+- [x] src/sim/content/missions/above/mission-08.ts: rooftop chase (geese + seagulls)
+- [x] src/sim/content/missions/above/mission-09.ts: pigeon king boss
+- [x] src/sim/content/missions/index.ts: registry + getMission helper
+- [x] src/ui/MissionSelect.tsx: act → mission grid
+- [x] src/ui/PawnShop.tsx: weapon-mod loadout picker between missions
+- [x] src/ui/PlayerProgress.ts: zustand store for cash + unlocked weapons + active mods
+- [x] Save/load via @capacitor-community/sqlite (web fallback to localStorage)
 
 ### CV-LORE — story bible, in-world copy, character voices (PR #8b — creative writing)
 - [ ] docs/LORE.md: full Three Acts narrative — 1979 NYC, the Pawnbroker quest-giver, why vermin are mutating, what's underground, what's "Above"; 2000+ words
