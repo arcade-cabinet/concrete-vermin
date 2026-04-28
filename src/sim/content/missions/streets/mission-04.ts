@@ -35,6 +35,32 @@ export const mission04: Mission = defineMission({
       spawns: [{ variant: "boss-dumpster-bear", count: 1, pattern: "boss-scripted" }],
     },
   ],
+  events: [
+    {
+      id: "lazzaro-warning",
+      trigger: { kind: "at-time", seconds: 4 },
+      effect: { kind: "boss-bark", text: "Pawnbroker: \"Six rounds. One for the head. Make it count.\"" },
+    },
+    {
+      id: "engorged-extra",
+      trigger: { kind: "at-kill-count", threshold: 4 },
+      effect: { kind: "surprise-wave", variant: "raccoon-engorged", count: 1, pattern: "right-flood" },
+    },
+    {
+      id: "bear-roars",
+      trigger: { kind: "at-encounter-start", index: 1 },
+      effect: { kind: "boss-bark", text: "BEAR: a sound that should not come out of a dumpster." },
+    },
+    {
+      id: "alley-flood",
+      trigger: { kind: "at-time", seconds: 30 },
+      effect: {
+        kind: "environmental-hazard",
+        label: "GREASE TRAP RUPTURES",
+        detail: "Footing slick. Reload window slows.",
+      },
+    },
+  ],
   seed: 1979_01_04,
   livesAllowance: 5,
   cashAward: 500,

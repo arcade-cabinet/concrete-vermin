@@ -35,6 +35,41 @@ export const mission03: Mission = defineMission({
       ],
     },
   ],
+  events: [
+    {
+      id: "costanza-scream",
+      trigger: { kind: "at-time", seconds: 3 },
+      effect: { kind: "boss-bark", text: "Mrs. Costanza screaming three floors down." },
+    },
+    {
+      id: "october-gust",
+      trigger: { kind: "at-time", seconds: 14 },
+      effect: {
+        kind: "environmental-hazard",
+        label: "OCTOBER GUST",
+        detail: "Wind shear — pigeon arcs go wide.",
+      },
+    },
+    {
+      id: "rabid-warning",
+      trigger: { kind: "at-encounter-start", index: 1 },
+      effect: { kind: "boss-bark", text: "Pawnbroker: \"Black-feather ones bite. Don't get close.\"" },
+    },
+    {
+      id: "soot-flock-extra",
+      trigger: { kind: "at-kill-count", threshold: 9 },
+      effect: { kind: "surprise-wave", variant: "pigeon-soot", count: 4, pattern: "ceiling-drop" },
+    },
+    {
+      id: "weather-vane-still",
+      trigger: { kind: "at-kill-count", threshold: 14 },
+      effect: {
+        kind: "environmental-hazard",
+        label: "WEATHER VANE STOPS",
+        detail: "Wind dies. The roof goes quiet.",
+      },
+    },
+  ],
   seed: 1979_01_03,
   cashAward: 200,
 });

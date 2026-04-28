@@ -35,6 +35,41 @@ export const mission07: Mission = defineMission({
       spawns: [{ variant: "boss-river-mutant", count: 1, pattern: "boss-scripted" }],
     },
   ],
+  events: [
+    {
+      id: "medal-warning",
+      trigger: { kind: "at-time", seconds: 3 },
+      effect: { kind: "boss-bark", text: "Pawnbroker: \"Keep the Saint-Anthony medal on. I mean it.\"" },
+    },
+    {
+      id: "low-tide-suck",
+      trigger: { kind: "at-time", seconds: 12 },
+      effect: {
+        kind: "environmental-hazard",
+        label: "TIDE SUCKS OUT",
+        detail: "Pier deck slick with kelp. Movement slows.",
+      },
+    },
+    {
+      id: "engorged-fish-extra",
+      trigger: { kind: "at-kill-count", threshold: 6 },
+      effect: { kind: "surprise-wave", variant: "sewer-fish-engorged", count: 2, pattern: "surface-from-grate" },
+    },
+    {
+      id: "boss-rises",
+      trigger: { kind: "at-encounter-start", index: 1 },
+      effect: { kind: "boss-bark", text: "RIVER MUTANT: it knows your grandfather's name." },
+    },
+    {
+      id: "icon-glows",
+      trigger: { kind: "at-kill-count", threshold: 14 },
+      effect: {
+        kind: "environmental-hazard",
+        label: "ICON GLOWS",
+        detail: "Don't look at it. Keep firing.",
+      },
+    },
+  ],
   seed: 1979_02_07,
   livesAllowance: 5,
   cashAward: 750,
