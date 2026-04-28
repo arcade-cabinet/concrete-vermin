@@ -26,7 +26,7 @@ vi.mock("@capacitor/app", () => ({
 }));
 
 import { GameRunner } from "../../runtime/runner";
-import { useGameStore } from "../../runtime/store";
+import { INITIAL_SNAPSHOT, useGameStore } from "../../runtime/store";
 import { mission01 } from "../../sim/content/missions/streets/mission-01";
 import { installAppLifecycle } from "../lifecycle";
 
@@ -46,8 +46,12 @@ function setVisibility(state: "visible" | "hidden"): void {
 }
 
 function fireAppStateChange(isActive: boolean): void {
+  // Hard assertion above; if we reach the call cb is non-null. The
+  // optional chain would silently swallow a regression where the
+  // assertion stops throwing — non-null assertion is the honest form.
   expect(capturedAppStateCb, "Capacitor appStateChange callback not registered").not.toBeNull();
-  capturedAppStateCb?.({ isActive });
+  // biome-ignore lint/style/noNonNullAssertion: see comment above
+  capturedAppStateCb!({ isActive });
 }
 
 beforeEach(() => {
@@ -56,24 +60,10 @@ beforeEach(() => {
     if (event === "appStateChange") capturedAppStateCb = cb;
     return Promise.resolve({ remove: () => {} });
   });
-  // Full snapshot reset — partial reset (just phase + cash) lets
-  // store.now / player.livesRemaining / etc. leak between tests because
-  // the store is a Zustand singleton shared across the whole suite.
-  useGameStore.setState({
-    phase: "briefing",
-    now: 0,
-    score: { total: 0, multiplier: 1 },
-    player: { ammoCurrent: 6, ammoMax: 6, livesRemaining: 3 },
-    vermin: [],
-    projectiles: [],
-    splashes: [],
-    muzzleFlashes: [],
-    modifierFlashes: [],
-    eventBarks: [],
-    damageEvents: [],
-    killCount: 0,
-    cashAwarded: 0,
-  });
+  // Full snapshot reset — partial reset would leak state between
+  // tests because the store is a Zustand singleton. INITIAL_SNAPSHOT
+  // carries every field the runner publishes via setSnapshot.
+  useGameStore.setState({ ...INITIAL_SNAPSHOT, phase: "briefing" });
   Object.defineProperty(document, "visibilityState", {
     value: "visible",
     configurable: true,
@@ -158,8 +148,11 @@ describe("lifecycle ↔ runner integration (Capacitor appStateChange path)", () 
       onResume: () => runner.resume(),
     });
 
-    // installAppLifecycle wires the Capacitor listener via an async
-    // .then() — flush the microtask queue so capturedAppStateCb is set.
+    // capturedAppStateCb is actually captured synchronously in
+    // mockImplementation (line ~55), so it's already set the moment
+    // installAppLifecycle returns. The flush below is hygiene for the
+    // unrelated `nativeRemove` assignment in lifecycle.ts's `.then`,
+    // which we don't observe but want settled before teardown runs.
     await Promise.resolve();
     await Promise.resolve();
 
