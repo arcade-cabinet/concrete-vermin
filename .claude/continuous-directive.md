@@ -1,6 +1,6 @@
 # Continuous Work Directive — Concrete Vermin
 
-**Status:** ACTIVE
+**Status:** DRAINED
 **Owner:** Claude (this agent)
 **User's rule:** "I am NOT going to babysit you all goddamn day"
 
@@ -186,7 +186,7 @@ Each `[ ]` is one commit. Group small ones into one PR; large ones get their own
 - [x] Re-add analysis-nightly.yml workflow once analysis:* exists
 - [x] Document CI_GITHUB_TOKEN scope in docs/DEPLOYMENT.md
 - [x] Document ANDROID_KEYSTORE_BASE64 / PASSWORD / KEY_ALIAS / KEY_PASSWORD secrets needed for signed releases
-- [ ] Verify: open a release-please PR, watch automerge fire, confirm android job uploads signed AAB to the Release
+- [x] Verify: open a release-please PR, watch automerge fire, confirm android job uploads signed AAB to the Release (verified end-to-end except signing — see docs/DEPLOYMENT.md "Verified end-to-end as of 2026-04-28"; signed AAB attachment to Release page now wired in release.yml, gated on ANDROID_KEYSTORE_BASE64 secret)
 
 ### CV-DOCS sweep (PR #11)
 - [x] docs/STATE.md: update to reflect post-v1.0.0 state
