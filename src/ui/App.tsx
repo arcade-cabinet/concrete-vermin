@@ -17,6 +17,11 @@ import { MissionResult } from "./MissionResult";
 import { MissionSelect } from "./MissionSelect";
 import { OpeningInterstitial } from "./OpeningInterstitial";
 import { ToastHost } from "./Toast";
+import { SrLiveRegion } from "./SrLiveRegion";
+import { srMissionComplete, srMissionFailed, srMissionStart } from "../runtime/sr-only";
+import { usePlayerProgress } from "./PlayerProgress";
+import { autoPersistPlayerProgress, loadPlayerProgress } from "./PlayerProgressPersistence";
+import { installAchievementsTracker } from "../runtime/achievementsTracker";
 
 // Lazy-loaded — these screens / overlays are reached after Press Start
 // or only on specific player choices, so deferring their JS shaves the
@@ -28,11 +33,6 @@ const FirstLaunchOverlay = lazy(() =>
   import("./FirstLaunchOverlay").then((m) => ({ default: m.FirstLaunchOverlay })),
 );
 const PawnShop = lazy(() => import("./PawnShop").then((m) => ({ default: m.PawnShop })));
-import { SrLiveRegion } from "./SrLiveRegion";
-import { srMissionComplete, srMissionFailed, srMissionStart } from "../runtime/sr-only";
-import { usePlayerProgress } from "./PlayerProgress";
-import { autoPersistPlayerProgress, loadPlayerProgress } from "./PlayerProgressPersistence";
-import { installAchievementsTracker } from "../runtime/achievementsTracker";
 import { getMission } from "../sim/content/missions";
 
 const MISSION_KILLS_REQUIRED = 1;
