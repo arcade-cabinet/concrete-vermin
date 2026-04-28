@@ -111,21 +111,21 @@ Each `[ ]` is one commit. Group small ones into one PR; large ones get their own
 - [x] src/ui/copy/loading.ts: 30 loading-tip lines in the Pawnbroker's voice (mix of practical hints + lore)
 - [x] src/ui/copy/death.ts: per-archetype "killed by" flavor lines (e.g. "the rats got you", "outdove by a goose")
 - [x] src/ui/copy/encounter-callouts.ts: dynamic in-mission callouts (10+ kill streak, no-reload milestone, headshot streak)
-- [ ] docs/BESTIARY.md: per-archetype entry — common name, taxonomic flavor name, range stats, behavior tells, kill bounty band, splash color, lore blurb (12 entries)
-- [ ] docs/WEAPONS.md: per-weapon (6) — Pawnbroker pitch, mechanical stats, loadout tips, visual signature
-- [ ] docs/MODS.md: per-mod (20) — Pawnbroker pitch, mechanical effect, who it suits, lore footnote
-- [ ] docs/BALANCE.md: target par-score and par-accuracy per mission (table of 9), reasoning per number
+- [x] docs/BESTIARY.md: per-archetype entry — common name, taxonomic flavor name, range stats, behavior tells, kill bounty band, splash color, lore blurb (12 entries)
+- [x] docs/WEAPONS.md: per-weapon (6) — Pawnbroker pitch, mechanical stats, loadout tips, visual signature
+- [x] docs/MODS.md: per-mod (20) — Pawnbroker pitch, mechanical effect, who it suits, lore footnote
+- [x] docs/BALANCE.md: target par-score and par-accuracy per mission (table of 9), reasoning per number
 
 ### CV-DESIGN — visual + brand bible (PR #8c — design elements)
-- [ ] docs/DESIGN.md: the Concrete Vermin brand identity — typeface choices (Big Shoulders Display + Special Elite), why, where each is used
-- [ ] docs/DESIGN.md: full palette swatches with hex + use cases (sodium amber, brick, asphalt, subway tile, parchment, blood, sewer green, sky)
-- [ ] docs/DESIGN.md: anti-palette section (the forbidden POC neons, why they're banned)
-- [ ] docs/DESIGN.md: UI grid + spacing scale (8px base, type ramp)
+- [x] docs/DESIGN.md: the Concrete Vermin brand identity — typeface choices (Big Shoulders Display + Special Elite), why, where each is used
+- [x] docs/DESIGN.md: full palette swatches with hex + use cases (sodium amber, brick, asphalt, subway tile, parchment, blood, sewer green, sky)
+- [x] docs/DESIGN.md: anti-palette section (the forbidden POC neons, why they're banned)
+- [x] docs/DESIGN.md: UI grid + spacing scale (8px base, type ramp)
 - [ ] docs/DESIGN.md: HUD style guide — corner positioning, drop shadows, blink/flash rhythm
 - [ ] docs/DESIGN.md: per-act color shift documentation (Streets warm sodium → Underworld cold green → Above muted dawn)
 - [ ] docs/DESIGN.md: art-direction one-pager: "Adult-Swim meets early-EC-Comics meets Death Wish (1974)"
-- [ ] docs/DESIGN.md: marketing screenshot mockup brief (what each of the 5 store screenshots needs to convey)
-- [ ] src/ui/theme/tokens.ts: codify palette + type scale + spacing as TS tokens; replace hex literals in UI components
+- [x] docs/DESIGN.md: marketing screenshot mockup brief (what each of the 5 store screenshots needs to convey)
+- [x] src/ui/theme/tokens.ts: codify palette + type scale + spacing as TS tokens; replace hex literals in UI components
 
 ### CV-UX — UI/UX/HUD polish + responsive scaling (PR #8e — UX)
 - [ ] Lock down theme tokens: src/ui/theme/{colors,typography,spacing,motion}.ts — single source of truth

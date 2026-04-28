@@ -105,7 +105,13 @@ if (isInSim && isSourceFile && !isPurityTest) {
 }
 
 // 2. Brand-no-neon
-if (!isCrtFile) {
+// Only enforce for source/style files. Docs (.md) and JSON catalogs may
+// legitimately reference the forbidden palette to document the anti-palette
+// or describe what was migrated away from.
+const isStyleableFile = /\.(?:ts|tsx|js|jsx|mjs|cjs|css|scss|sass|less|svg|html)$/.test(
+  normalizedPath,
+);
+if (!isCrtFile && isStyleableFile) {
   for (const re of FORBIDDEN_NEON_HEX) {
     if (re.test(content)) {
       reject(
