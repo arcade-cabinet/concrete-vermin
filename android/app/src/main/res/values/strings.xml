@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">Concrete Vermin</string>
+    <string name="title_activity_main">Concrete Vermin</string>
+    <string name="package_name">com.arcadecabinet.concretevermin</string>
+    <string name="custom_url_scheme">com.arcadecabinet.concretevermin</string>
+</resources>

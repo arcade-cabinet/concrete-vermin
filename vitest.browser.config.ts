@@ -1,5 +1,6 @@
-import { defineConfig } from "vitest/config";
 import path from "node:path";
+import { playwright } from "@vitest/browser-playwright";
+import { defineConfig } from "vitest/config";
 
 // Real Chromium for canvas/WebGL/Pixi tests.
 export default defineConfig({
@@ -9,8 +10,9 @@ export default defineConfig({
     passWithNoTests: true,
     browser: {
       enabled: true,
-      provider: "playwright",
       headless: true,
+      provider: playwright(),
+      viewport: { width: 1280, height: 720 },
       instances: [{ browser: "chromium" }],
     },
   },

@@ -20,6 +20,7 @@
     "resolveJsonModule": true,
     "outDir": "./dist/types/sim",
     "tsBuildInfoFile": "./tsconfig.sim.tsbuildinfo",
+    "ignoreDeprecations": "6.0",
     "baseUrl": ".",
     "paths": {
       "@/sim/*": ["src/sim/*"],

@@ -1,9 +1,24 @@
 {
-  "$schema": "https://biomejs.dev/schemas/2.4.11/schema.json",
+  "$schema": "https://biomejs.dev/schemas/2.4.13/schema.json",
   "vcs": { "enabled": true, "clientKind": "git", "useIgnoreFile": true },
   "files": {
-    "includes": ["**/*.ts", "**/*.tsx", "**/*.mjs", "**/*.js", "**/*.json", "**/*.jsonc"],
-    "experimentalScannerIgnores": ["node_modules", "dist", "build", "android", "ios", "sim/reports", "playwright-report", "test-results", "coverage"]
+    "includes": [
+      "**/*.ts",
+      "**/*.tsx",
+      "**/*.mjs",
+      "**/*.js",
+      "**/*.json",
+      "**/*.jsonc",
+      "!!**/node_modules",
+      "!!**/dist",
+      "!!**/build",
+      "!!**/android",
+      "!!**/ios",
+      "!!**/sim/reports",
+      "!!**/playwright-report",
+      "!!**/test-results",
+      "!!**/coverage"
+    ]
   },
   "formatter": {
     "enabled": true,
@@ -36,7 +51,12 @@
       "includes": ["src/sim/**/*.ts"],
       "linter": {
         "rules": {
-          "correctness": {
+          "correctness": {},
+          "suspicious": {
+            "noGlobalAssign": "error"
+          },
+          "nursery": {},
+          "style": {
             "noRestrictedImports": {
               "level": "error",
               "options": {
@@ -51,12 +71,6 @@
                 }
               }
             }
-          },
-          "suspicious": {
-            "noGlobalAssign": "error"
-          },
-          "nursery": {
-            "noRestrictedImports": "off"
           }
         }
       }
@@ -65,7 +79,8 @@
       "includes": ["src/render/**/*.ts", "src/render/**/*.tsx"],
       "linter": {
         "rules": {
-          "correctness": {
+          "correctness": {},
+          "style": {
             "noRestrictedImports": {
               "level": "error",
               "options": {
