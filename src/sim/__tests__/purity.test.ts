@@ -6,8 +6,12 @@ import { describe, expect, it } from "vitest";
 const SIM_ROOT = join(__dirname, "..");
 const REPO_ROOT = join(SIM_ROOT, "..", "..");
 
-const FORBIDDEN_IMPORT_RE =
-  /from\s+["'](react|react-dom|@pixi\/react|pixi-react|pixi\.js|@pixi\/[^"']+|tone|@capacitor\/[^"']+|@capacitor-community\/[^"']+|framer-motion|@radix-ui\/[^"']+|matter-js)["']/;
+const FORBIDDEN_MODULE_PATTERN =
+  /(react|react-dom|@pixi\/react|pixi-react|pixi\.js|@pixi\/[^"']+|tone|@capacitor\/[^"']+|@capacitor-community\/[^"']+|framer-motion|@radix-ui\/[^"']+|matter-js)/;
+// Match `from "..."`, `import "..."` (side-effect), and dynamic `import("...")`.
+const FORBIDDEN_IMPORT_RE = new RegExp(
+  `(?:from|import)\\s*\\(?\\s*["']${FORBIDDEN_MODULE_PATTERN.source}["']\\s*\\)?`,
+);
 
 const MATH_RANDOM_RE = /\bMath\.random\s*\(/;
 
@@ -29,7 +33,7 @@ function stripComments(src: string): string {
 }
 
 describe("src/sim purity (defense in depth)", () => {
-  const files = walk(SIM_ROOT, /\.ts$/);
+  const files = walk(SIM_ROOT, /\.(ts|tsx)$/);
 
   it("has at least one source file", () => {
     expect(files.length).toBeGreaterThan(0);

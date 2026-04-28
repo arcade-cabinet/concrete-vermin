@@ -24,6 +24,23 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
+      - name: Sim-purity grep gate
+        run: |
+          set -e
+          # Only the purity test itself may reference these patterns
+          # (in regex literals); every other sim file is scanned.
+          PURITY_TEST='src/sim/__tests__/purity.test.ts'
+          if grep -RInE 'Math\.random\s*\(' src/sim/ --include='*.ts' \
+              | grep -v "^${PURITY_TEST}:"; then
+            echo "::error::Math.random in src/sim/ — use createRng(seed). STANDARDS.md §2."
+            exit 1
+          fi
+          if grep -RInE "from\s+['\"](react|react-dom|pixi-react|pixi\.js|@pixi/|tone|@capacitor/|framer-motion|@radix-ui/|matter-js)" src/sim/ --include='*.ts' \
+              | grep -v "^${PURITY_TEST}:"; then
+            echo "::error::Forbidden import in src/sim/. STANDARDS.md §2."
+            exit 1
+          fi
+
       - name: Type check
         run: pnpm run typecheck
 

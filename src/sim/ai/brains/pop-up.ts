@@ -17,7 +17,7 @@ export const popUpBrain: Brain = (self, world, rng) => {
   if (rng.next() < self.aggression) {
     steps.push({
       kind: "lunge-at",
-      target: world.playerPosition,
+      target: { x: world.playerPosition.x, y: world.playerPosition.y },
       speed: 120,
       durationS: 0.4,
     });

@@ -17,7 +17,7 @@ export const lungerBrain: Brain = (self, world, rng) => {
     { kind: "wait", durationS: 0.5 + self.reactionDelayS },
     {
       kind: "lunge-at",
-      target: world.playerPosition,
+      target: { x: world.playerPosition.x, y: world.playerPosition.y },
       speed: speed * 2.2,
       durationS: 0.6,
     },

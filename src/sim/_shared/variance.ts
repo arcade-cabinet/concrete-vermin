@@ -11,13 +11,12 @@ export interface Range {
   readonly max: number;
 }
 
-/** Uniform sample inside an inclusive range; falls back if max <= min. */
+/** Uniform sample on the half-open range [min, max); falls back to min if max <= min. */
 export const sampleRange = (rng: Rng, range: Range): number => {
   if (range.max <= range.min) return range.min;
   return rng.range(range.min, range.max);
 };
 
-/** Gaussian-ish sample centered on `mean`, std `stddev`, clipped to `[min,max]`. */
 export const sampleGaussian = (
   rng: Rng,
   mean: number,
@@ -25,7 +24,7 @@ export const sampleGaussian = (
   min: number,
   max: number,
 ): number => {
-  const raw = mean + rng.gaussian() * stddev * 2;
+  const raw = mean + rng.gaussian() * stddev;
   return raw < min ? min : raw > max ? max : raw;
 };
 

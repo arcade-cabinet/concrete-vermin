@@ -11,7 +11,7 @@ export const ambusherBrain: Brain = (self, world, _rng) => {
     { kind: "wait", durationS: 0.8 + self.reactionDelayS },
     {
       kind: "lunge-at",
-      target: world.playerPosition,
+      target: { x: world.playerPosition.x, y: world.playerPosition.y },
       speed: speed * 2.5,
       durationS: 0.5,
     },

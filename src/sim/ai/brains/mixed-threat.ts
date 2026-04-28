@@ -15,15 +15,29 @@ export const mixedThreatBrain: Brain = (self, world, rng) => {
     const steps: BrainStep[] = [
       { kind: "climb-to", target: { x: flankX, y: cruiseY }, speed },
       { kind: "wait", durationS: 0.25 + self.reactionDelayS },
-      { kind: "dive-at", target: world.playerPosition, speed: speed * 1.7 },
+      {
+        kind: "dive-at",
+        target: { x: world.playerPosition.x, y: world.playerPosition.y },
+        speed: speed * 1.7,
+      },
     ];
     return { brainId: "mixed-threat", steps, plannedAt: world.now };
   }
   const steps: BrainStep[] = [
     { kind: "wait", durationS: 0.4 + self.reactionDelayS },
-    { kind: "lunge-at", target: world.playerPosition, speed: speed * 1.6, durationS: 0.5 },
+    {
+      kind: "lunge-at",
+      target: { x: world.playerPosition.x, y: world.playerPosition.y },
+      speed: speed * 1.6,
+      durationS: 0.5,
+    },
     { kind: "wait", durationS: 0.3 },
-    { kind: "lunge-at", target: world.playerPosition, speed: speed * 1.6, durationS: 0.5 },
+    {
+      kind: "lunge-at",
+      target: { x: world.playerPosition.x, y: world.playerPosition.y },
+      speed: speed * 1.6,
+      durationS: 0.5,
+    },
   ];
   return { brainId: "mixed-threat", steps, plannedAt: world.now };
 };

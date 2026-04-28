@@ -22,7 +22,11 @@ export const erraticFlyerBrain: Brain = (self, world, rng) => {
 
   // ~aggression chance to dive on the player after the wobble.
   if (rng.next() < self.aggression) {
-    steps.push({ kind: "dive-at", target: world.playerPosition, speed: speed * 1.6 });
+    steps.push({
+      kind: "dive-at",
+      target: { x: world.playerPosition.x, y: world.playerPosition.y },
+      speed: speed * 1.6,
+    });
   } else {
     steps.push(wobble());
   }
