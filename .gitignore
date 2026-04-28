@@ -24,3 +24,4 @@ android/app/release/
 android/app/release.keystore
 ios/App/Pods/
 ios/App/build/
+.claude/scheduled_tasks.lock

@@ -22,12 +22,18 @@ const FORBIDDEN_NEON_HEX = [
 ];
 
 const FORBIDDEN_SIM_IMPORTS = [
-  /^|"react"|"react-dom"|"pixi-react"/,
-  /"pixi\.js"|"@pixi\//,
-  /"tone"/,
-  /"@capacitor\/|"@capacitor-community\//,
-  /"framer-motion"|"@radix-ui\//,
-  /"matter-js"/,
+  /["']react["']/,
+  /["']react-dom["']/,
+  /["']@pixi\/react["']/,
+  /["']pixi-react["']/,
+  /["']pixi\.js["']/,
+  /["']@pixi\//,
+  /["']tone["']/,
+  /["']@capacitor\//,
+  /["']@capacitor-community\//,
+  /["']framer-motion["']/,
+  /["']@radix-ui\//,
+  /["']matter-js["']/,
 ];
 
 let input = "";
