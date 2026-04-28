@@ -403,18 +403,78 @@ const drawDefault = (
   g.ellipse(x, y, w / 2, h / 2).fill(VERMIN_DEFAULT);
 };
 
+/**
+ * Idle/walk modulator. Returns a (dx, dy, tailPhase) per vermin per
+ * frame so drawers can apply a breathing offset + tail/wing/antenna
+ * waggle. Keeps the actual draw functions deterministic; animation is
+ * a transform applied at draw time.
+ */
+function idleModulator(archetypeId: string, x: number, now: number): {
+  bobY: number;
+  wiggle: number;
+} {
+  // Use position + clock for phase so neighbouring vermin animate out
+  // of phase. Per-archetype amplitude + frequency.
+  let amp = 1;
+  let freq = 6;
+  switch (archetypeId) {
+    case "rat":
+    case "raccoon":
+    case "feral-cat":
+    case "street-dog":
+      amp = 1;
+      freq = 7;
+      break;
+    case "roach":
+      amp = 0.6;
+      freq = 14; // antennae buzz fast
+      break;
+    case "pigeon":
+    case "seagull":
+    case "goose":
+    case "boss-pigeon-king":
+      amp = 1.6;
+      freq = 9; // wing-beat
+      break;
+    case "sewer-fish":
+      amp = 1.2;
+      freq = 5; // gill flutter
+      break;
+    case "boss-dumpster-bear":
+    case "boss-river-mutant":
+      amp = 2.2;
+      freq = 3.5;
+      break;
+  }
+  const phase = now * freq + x * 0.1;
+  return {
+    bobY: Math.sin(phase) * amp,
+    wiggle: Math.sin(phase * 1.7) * 0.5,
+  };
+}
+
 export function VerminLayer() {
   const vermin = useGameStore((s) => s.vermin);
+  const now = useGameStore((s) => s.now);
+  const reducedMotion = useGameStore((s) => s.settings.reducedMotion);
 
   const draw = useCallback(
     (g: PixiGraphics) => {
       g.clear();
       for (const v of vermin) {
         const drawer = DRAWERS[v.archetypeId] ?? drawDefault;
-        drawer(g, v);
+        if (reducedMotion) {
+          drawer(g, v);
+          continue;
+        }
+        const m = idleModulator(v.archetypeId, v.x, now);
+        // Apply a tiny bob + a horizontal wiggle to the draw position.
+        // The drawers operate on (x, y) so substituting the offset is
+        // safe without rewriting any drawer.
+        drawer(g, { ...v, x: v.x + m.wiggle, y: v.y + m.bobY });
       }
     },
-    [vermin],
+    [vermin, now, reducedMotion],
   );
 
   return <pixiGraphics draw={draw} />;

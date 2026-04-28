@@ -2,6 +2,7 @@ import { Application, useTick } from "@pixi/react";
 import { useEffect, useRef, useState } from "react";
 import "../render/extend";
 import { CRTOverlay } from "../render/CRTOverlay";
+import { HudOverlay } from "../render/HudOverlay";
 import { MuzzleFlashLayer } from "../render/MuzzleFlashLayer";
 import { ProjectileLayer } from "../render/ProjectileLayer";
 import { ReticleLayer } from "../render/ReticleLayer";
@@ -294,6 +295,7 @@ export function GameStage() {
           <ProjectileLayer />
           <MuzzleFlashLayer />
           <SplashLayer />
+          <HudOverlay />
           <ReticleLayer />
           {crtOn ? <CRTOverlay /> : null}
           {runnerRef.current ? (

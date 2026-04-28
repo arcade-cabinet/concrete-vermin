@@ -85,10 +85,10 @@ export function App() {
         const enc = e.spawns.reduce((a, s) => a + (s.pattern === "boss-scripted" ? 1 : s.count), 0);
         return acc + enc;
       }, 0);
-      startMission(id, Math.max(MISSION_KILLS_REQUIRED, total));
+      startMission(id, Math.max(MISSION_KILLS_REQUIRED, total), m.act);
     } catch {
       // Bad id — fallback to tutorial.
-      startMission("streets-01-bodega", MISSION_KILLS_REQUIRED);
+      startMission("streets-01-bodega", MISSION_KILLS_REQUIRED, "streets");
     }
   };
 

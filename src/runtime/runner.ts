@@ -47,8 +47,10 @@ import { applyLoadout, MOD_REGISTRY, type WeaponMod } from "../sim/archetypes/mo
 import { WEAPON_REGISTRY } from "../sim/archetypes/weapons";
 import { composeEncounter } from "../sim/factories/encounter";
 import type { Mission } from "../sim/factories/mission";
+import { pushShake } from "./screenShake";
 import { useGameStore } from "./store";
 import type {
+  DamageEvent,
   ProjectileSnapshot,
   SplashSnapshot,
   VerminSnapshot,
@@ -94,6 +96,8 @@ export class GameRunner {
   private readonly maxHpPerLife = 100;
   private ended = false;
   private bossLeitmotifActive = false;
+  private damageEvents: DamageEvent[] = [];
+  private static readonly DAMAGE_TTL_S = 0.4;
 
   constructor(mission: Readonly<Mission>, modIds: ReadonlyArray<string> = [], seed?: number) {
     this.mission = mission;
@@ -274,11 +278,19 @@ export class GameRunner {
     const newKills = events.filter((e) => e.kind === "kill").length;
     this.kills += newKills;
     for (const e of events) {
+      this.damageEvents.push({
+        at: this.now,
+        x: e.position.x,
+        y: e.position.y,
+        amount: e.damage,
+        crit: e.isCrit,
+        headshot: e.isHeadshot,
+      });
       if (e.kind === "kill") {
         playVerminDeath(e.archetypeId);
         if (e.archetypeId.startsWith("boss-")) {
           void bossDamageHaptic();
-          // Silence-as-sting + stop the leitmotif on boss death.
+          pushShake("bossDeath");
           if (this.bossLeitmotifActive) {
             stopBossLeitmotif();
             this.bossLeitmotifActive = false;
@@ -286,10 +298,12 @@ export class GameRunner {
           }
         } else {
           void killHaptic();
+          pushShake("kill");
         }
       } else {
         playVerminHit(e.archetypeId);
         if (e.archetypeId.startsWith("boss-")) {
+          pushShake("bossHit");
           void bossDamageHaptic();
         } else {
           void hitHaptic();
@@ -314,6 +328,7 @@ export class GameRunner {
       }
     }
     this.modifierFlashes = this.modifierFlashes.filter((f) => this.now - f.at < 1.2);
+    this.damageEvents = this.damageEvents.filter((d) => this.now - d.at < GameRunner.DAMAGE_TTL_S);
 
     // 7. Cull off-screen + lifecycle GC. Off-screen vermin (those that
     // crossed the player line) bite — deduct contact damage proportional
@@ -462,6 +477,7 @@ export class GameRunner {
       splashes,
       muzzleFlashes: this.muzzleFlashes.slice(),
       modifierFlashes: this.modifierFlashes.slice(),
+      damageEvents: this.damageEvents.slice(),
       now: this.now,
       score: { total, multiplier },
       killCount: this.kills,
