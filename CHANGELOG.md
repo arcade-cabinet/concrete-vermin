@@ -6,6 +6,13 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 Releases are managed by [release-please](https://github.com/googleapis/release-please).
 
+## [1.2.0](https://github.com/arcade-cabinet/concrete-vermin/compare/v1.1.0...v1.2.0) (2026-04-28)
+
+
+### Features
+
+* **render:** per-archetype splash palettes with radial flecks ([#9](https://github.com/arcade-cabinet/concrete-vermin/issues/9)) ([c85c28d](https://github.com/arcade-cabinet/concrete-vermin/commit/c85c28dea0b3eec9393526a229aed13b373d9dc6))
+
 ## [1.1.0](https://github.com/arcade-cabinet/concrete-vermin/compare/v1.0.1...v1.1.0) (2026-04-28)
 
 
