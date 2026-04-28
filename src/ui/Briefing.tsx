@@ -20,12 +20,16 @@ export function Briefing() {
         flexDirection: "column",
         alignItems: "center",
         justifyContent: "center",
-        gap: 24,
+        gap: "clamp(16px, 4vw, 32px)",
         background: COLOR.bgAsphalt,
         color: COLOR.cream,
         fontFamily: TYPE.faceDisplay,
         textAlign: "center",
-        padding: 32,
+        // Respect safe areas so the Begin button is always reachable
+        // on notched/gestured devices regardless of orientation.
+        padding:
+          "calc(32px + env(safe-area-inset-top)) calc(24px + env(safe-area-inset-right)) " +
+          "calc(32px + env(safe-area-inset-bottom)) calc(24px + env(safe-area-inset-left))",
       }}
     >
       <h1
@@ -52,6 +56,9 @@ export function Briefing() {
           background: COLOR.sodium,
           color: COLOR.bgAsphalt,
           border: "none",
+          // Touch-target floor: 44 CSS px on every dimension.
+          minWidth: 44,
+          minHeight: 44,
           padding: "12px 28px",
           fontFamily: "inherit",
           fontSize: "1.2rem",

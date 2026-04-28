@@ -1,7 +1,9 @@
 import { type ModifierFlashSnapshot, useGameStore } from "../runtime/store";
 import { COLOR, TYPE } from "../theme/tokens";
+import { useIsNarrow } from "./hooks/useViewport";
 
 const FLASH_TTL_S = 1.0;
+const TOUCH_TARGET_PX = 44;
 
 const FLASH_LABELS: Record<ModifierFlashSnapshot["kind"], string> = {
   headshot: "HEADSHOT",
@@ -28,7 +30,7 @@ function ModifierFlashes() {
     <div
       style={{
         position: "fixed",
-        top: 36,
+        top: "calc(36px + env(safe-area-inset-top))",
         left: "50%",
         transform: "translateX(-50%)",
         display: "flex",
@@ -83,7 +85,10 @@ function MuteButton() {
         background: "transparent",
         border: `1px solid ${COLOR.sodium}`,
         color: COLOR.sodium,
-        padding: "4px 10px",
+        // Touch-target minimum (44 CSS px). Padding centers the label.
+        minWidth: TOUCH_TARGET_PX,
+        minHeight: TOUCH_TARGET_PX,
+        padding: "0 12px",
         fontFamily: TYPE.faceMono,
         fontSize: 12,
         cursor: "pointer",
@@ -100,6 +105,7 @@ export function HUD() {
   const player = useGameStore((s) => s.player);
   const killCount = useGameStore((s) => s.killCount);
   const killsRequired = useGameStore((s) => s.killsRequired);
+  const narrow = useIsNarrow();
 
   return (
     <>
@@ -109,15 +115,21 @@ export function HUD() {
           top: "calc(12px + env(safe-area-inset-top))",
           left: 0,
           right: 0,
+          // Narrow viewports (phones in portrait): stack the three columns
+          // top-to-bottom centered. Wider viewports keep the design's
+          // edge-anchored row layout.
           display: "flex",
-          justifyContent: "space-between",
+          flexDirection: narrow ? "column" : "row",
+          justifyContent: narrow ? "flex-start" : "space-between",
+          alignItems: narrow ? "center" : "stretch",
+          gap: narrow ? 2 : 0,
           padding:
             "0 calc(16px + env(safe-area-inset-right)) 0 calc(16px + env(safe-area-inset-left))",
           pointerEvents: "none",
           fontFamily: TYPE.faceMono,
           color: COLOR.cream,
           textShadow: "0 1px 0 #000",
-          fontSize: 14,
+          fontSize: narrow ? 12 : 14,
         }}
       >
         <div>
