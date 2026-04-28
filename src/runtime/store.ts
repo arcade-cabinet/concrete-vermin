@@ -146,11 +146,7 @@ export interface GameState {
   killCount: number;
   /** Append-only ring of recent damage numbers for the floating HUD. */
   damageEvents: ReadonlyArray<DamageEvent>;
-  /**
-   * Most-recent screen-reader narration. The id increments on every
-   * announceForScreenReader call (even with identical text) so AT
-   * software re-narrates a repeated event rather than collapsing it.
-   */
+  /** id increments on every call so AT re-narrates repeated text. */
   srAnnouncement: { text: string; urgency: "polite" | "assertive"; id: number };
   announceForScreenReader: (text: string, urgency?: "polite" | "assertive") => void;
   // Setters

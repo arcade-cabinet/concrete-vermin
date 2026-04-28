@@ -1,10 +1,6 @@
 /**
- * Screen-reader-only narration strings. Components push these into an
- * `aria-live="polite"` region so non-sighted players get the same
- * "look at that big thing" emotional beats sighted players get from
- * the visual cues.
- *
- * Pure data + functions — no DOM, no framework.
+ * Lives in src/runtime/ so the runner (push) and the UI live region
+ * (read) can both import without crossing the layering gate.
  */
 
 export interface SRNarration {
