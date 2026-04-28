@@ -103,17 +103,83 @@ A dry run of the full path looks like:
 - **release-please PR doesn't auto-merge.** Check that all required CI jobs are green (`balance-benchmark` is `continue-on-error`; only `core` is currently a hard required gate). If `automerge.yml`'s "Approve PR" step shows "Resource not accessible by integration", the `CI_GITHUB_TOKEN` PAT lacks the `pull_requests: write` permission.
 - **android job is skipped silently.** Means `release-please.outputs.release_created` was false — the run was triggered by a non-tag-creating push (e.g. the merge of the release-please PR itself, before the tag is pushed). The next push (the tag) will re-trigger and the android job will run.
 
-## Mobile QA checklist
+## Android QA checklist
 
-Before tagging a release, manual pass on a real Android device:
+### CI coverage (automated, every PR)
 
+`e2e/android-launch.spec.ts` runs against the Vite preview bundle in a Pixel 7
+mobile-portrait Chromium viewport (390 × 844) as part of the `e2e-smoke` CI job.
+
+| What the CI test checks | What it does NOT check |
+|---|---|
+| Web bundle boots without unhandled JS errors | Capacitor native plugin init (haptics, SQLite, splash, screen-orientation) |
+| MainMenu renders within 10 s | Touch latency / real GPU rendering inside Android WebView |
+| Viewport is portrait (height > width) | App lifecycle events on a real device |
+
+**Why web preview, not a real emulator:** Playwright's `androidDevice` fixture requires
+a running Android emulator or ADB-connected device, which standard CI runners don't
+provide. The Capacitor web bundle is identical to what runs in the Android WebView, so
+a mobile-viewport Chromium session catches all JS and layout regressions without the
+CI cost of an emulator image.
+
+### Verifying `cap:sync` locally
+
+```bash
+# Full build + Capacitor sync to android/ in one step
+pnpm cap:sync
+```
+
+Expected output ends with `✔ update android` and `[info] Sync finished in …`. Any
+TypeScript compile error or Vite build failure surfaces here before touching the
+Android project.
+
+### Launching on a device / emulator
+
+```bash
+# Requires Android Studio + a running emulator (or USB-connected device with ADB)
+pnpm cap:run:android
+```
+
+To open the project in Android Studio for manual inspection:
+
+```bash
+pnpm cap:open:android
+```
+
+### Manual pre-release QA (real Android device)
+
+Before tagging a release, run through this checklist on a physical device:
+
+- [ ] `pnpm cap:sync` exits cleanly (no build errors)
+- [ ] App icon present at all densities (mdpi → xxxhdpi)
+- [ ] Splash screen branded (sodium amber, no neon)
+- [ ] Orientation lock works — cannot rotate to landscape
 - [ ] All 12 missions playable end-to-end
-- [ ] Touch latency feels acceptable (drag-to-aim doesn't lag)
-- [ ] Haptics fire correctly (off / light / medium / heavy)
-- [ ] Orientation lock works (cannot rotate to portrait)
+- [ ] Touch latency acceptable (drag-to-aim doesn't lag)
+- [ ] Haptics fire correctly (off / light / medium / heavy settings)
 - [ ] Background → foreground correctly pauses + resumes
-- [ ] Audio resumes correctly after notification interruption
-- [ ] App icon + splash screen present
-- [ ] Sustained 60fps on low-end test device
+- [ ] Audio resumes after notification interruption
+- [ ] Sustained 60 fps on a low-end test device
 - [ ] No crashes after 30-min play session
 - [ ] Persistence survives app restart (high scores, artifacts, bestiary, loadouts)
+
+### Signing and distributing the AAB
+
+The `release.yml` android job builds a signed `.aab` automatically when the
+`ANDROID_KEYSTORE_BASE64` / `ANDROID_KEYSTORE_PASSWORD` / `ANDROID_KEY_ALIAS` /
+`ANDROID_KEY_PASSWORD` secrets are configured in the repository settings (see
+§"Android signing secrets" above). The signed bundle is attached to the GitHub Release.
+
+To build and inspect the AAB locally:
+
+```bash
+cd android
+./gradlew bundleRelease          # produces app/build/outputs/bundle/release/
+# Then use bundletool to extract APKs for sideloading:
+bundletool build-apks \
+  --bundle=app/build/outputs/bundle/release/app-release.aab \
+  --output=concrete-vermin.apks \
+  --ks=release.keystore \
+  --ks-key-alias=concrete-vermin
+bundletool install-apks --apks=concrete-vermin.apks
+```

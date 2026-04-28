@@ -157,7 +157,12 @@ jobs:
       - name: Build
         run: pnpm run build
 
-      - name: e2e (desktop project only)
+      - name: e2e (desktop project)
         env:
           PW_HEADLESS: '1'
         run: pnpm exec playwright test --project=desktop
+
+      - name: e2e (mobile-portrait — android launch smoke)
+        env:
+          PW_HEADLESS: '1'
+        run: pnpm exec playwright test --project=mobile-portrait e2e/android-launch.spec.ts
