@@ -6,6 +6,13 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 Releases are managed by [release-please](https://github.com/googleapis/release-please).
 
+## [1.16.0](https://github.com/arcade-cabinet/concrete-vermin/compare/v1.15.0...v1.16.0) (2026-04-28)
+
+
+### Features
+
+* **ux:** loading splash + first-launch overlay + screen-shake + Pixi resolution cap ([#42](https://github.com/arcade-cabinet/concrete-vermin/issues/42)) ([0b9776d](https://github.com/arcade-cabinet/concrete-vermin/commit/0b9776d5f8b5432435b0e3abb9d875cd97d66bfd))
+
 ## [1.15.0](https://github.com/arcade-cabinet/concrete-vermin/compare/v1.14.0...v1.15.0) (2026-04-28)
 
 
