@@ -6,6 +6,13 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 Releases are managed by [release-please](https://github.com/googleapis/release-please).
 
+## [1.10.0](https://github.com/arcade-cabinet/concrete-vermin/compare/v1.9.0...v1.10.0) (2026-04-28)
+
+
+### Features
+
+* **lore:** JSON-decomposed lore + UI copy modules + sim-purity gate fix ([#26](https://github.com/arcade-cabinet/concrete-vermin/issues/26)) ([d4a5925](https://github.com/arcade-cabinet/concrete-vermin/commit/d4a592588dc2d35af2ccf0af61e3764000988711))
+
 ## [1.9.0](https://github.com/arcade-cabinet/concrete-vermin/compare/v1.8.0...v1.9.0) (2026-04-28)
 
 
