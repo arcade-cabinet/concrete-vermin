@@ -26,7 +26,11 @@ export const mission06: Mission = defineMission({
       isCheckpoint: false,
       spawns: [
         { variant: "sewer-fish-baseline", count: 5, pattern: "surface-from-grate" },
-        { variant: "rat-engorged", count: 3, pattern: "left-flood" },
+        // Sewer-pipe ceiling-drop is the act-2 signature for this
+        // mission — distinguishes it from m05 (mixed-wave + pop-from-
+        // vent) and m07 (boss-scripted) per the encounter composition
+        // uniqueness gate.
+        { variant: "roach-massive", count: 3, pattern: "ceiling-drop" },
       ],
     },
     {
