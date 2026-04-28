@@ -60,3 +60,24 @@ describe("INITIAL_SNAPSHOT", () => {
     expect(useGameStore.getState().phase).toBe("lost");
   });
 });
+
+describe("startMission resets the snapshot but layers in the mission scaffolding", () => {
+  // Documents the contract that MissionResult relies on: a player who
+  // replays a cleared mission gets fresh score / killCount / vermin
+  // arrays at the moment startMission() runs. The first publishSnapshot
+  // from the runner then overwrites the score/killCount with sim
+  // values, so this is just the inter-mission gap state.
+  it("zeroes vermin / projectiles / muzzle flashes / event barks", () => {
+    useGameStore.setState({
+      vermin: [{ id: 1, archetypeId: "rat", x: 0, y: 0, width: 0, height: 0, health: 0, maxHealth: 0 }],
+      projectiles: [{ id: 1, x: 0, y: 0, vx: 0, vy: 0 }],
+      muzzleFlashes: [{ x: 0, y: 0, targetX: 0, targetY: 0, firedAt: 0, ttlS: 0 }],
+      eventBarks: [{ id: "x", kind: "boss", text: "y", at: 0 }],
+    });
+    useGameStore.getState().startMission("streets-01-bodega", 14, "streets");
+    expect(useGameStore.getState().vermin).toEqual([]);
+    expect(useGameStore.getState().projectiles).toEqual([]);
+    expect(useGameStore.getState().muzzleFlashes).toEqual([]);
+    expect(useGameStore.getState().eventBarks).toEqual([]);
+  });
+});
