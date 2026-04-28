@@ -105,6 +105,10 @@ describe("GameRunner kill dedupe", () => {
       r.step(FRAME);
       if (useGameStore.getState().phase === "won") break;
     }
+    const phase = useGameStore.getState().phase;
+    expect(["won", "lost"], `runner did not reach a terminal phase (saw ${phase})`).toContain(
+      phase,
+    );
     const totalSpawnedFromSpec = mission01.encounters.reduce(
       (sum, enc) =>
         sum +

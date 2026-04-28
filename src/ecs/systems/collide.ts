@@ -27,6 +27,12 @@ export interface CollideEvent {
  */
 export function collideSystem(world: World, rng: Rng, now: number): CollideEvent[] {
   const events: CollideEvent[] = [];
+  // Track entities killed earlier in this same tick so subsequent
+  // pellets / projectiles don't fire redundant kill/hit events against
+  // a corpse. Without this, a multi-pellet shotgun blast where every
+  // pellet converges on one rat produces N kill events for one death,
+  // double-charging audio, haptics, and score.
+  const killedThisTick = new Set<number>();
   const vermin: Array<{
     e: ReturnType<World["query"]>[number];
     pos: { x: number; y: number };
@@ -58,6 +64,10 @@ export function collideSystem(world: World, rng: Rng, now: number): CollideEvent
     if (!pp || !pj) continue;
 
     for (const v of vermin) {
+      // Skip vermin already killed earlier this tick — protects audio,
+      // haptics, score, and event consumers from double-firing on
+      // multi-pellet shotgun blasts that converge on a single target.
+      if (killedThisTick.has(v.e.id())) continue;
       const dx = pp.x - v.pos.x;
       const dy = pp.y - v.pos.y;
       if (Math.abs(dx) > v.box.hw || Math.abs(dy) > v.box.hh) continue;
@@ -86,6 +96,7 @@ export function collideSystem(world: World, rng: Rng, now: number): CollideEvent
       proj.set(Lifecycle, { spawnedAt: pl.spawnedAt, deadAt: now });
 
       const killed = hit.killed;
+      if (killed) killedThisTick.add(v.e.id());
       events.push({
         kind: killed ? "kill" : "hit",
         verminEntity: v.e.id(),
