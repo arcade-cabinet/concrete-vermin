@@ -6,6 +6,13 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 Releases are managed by [release-please](https://github.com/googleapis/release-please).
 
+## [1.1.0](https://github.com/arcade-cabinet/concrete-vermin/compare/v1.0.1...v1.1.0) (2026-04-28)
+
+
+### Features
+
+* **render:** per-archetype procedural vermin shapes ([#7](https://github.com/arcade-cabinet/concrete-vermin/issues/7)) ([315e1ba](https://github.com/arcade-cabinet/concrete-vermin/commit/315e1ba1bbbf970aeabf91883868c91ebb9a679d))
+
 ## [1.0.1](https://github.com/arcade-cabinet/concrete-vermin/compare/v1.0.0...v1.0.1) (2026-04-28)
 
 
