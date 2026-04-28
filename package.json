@@ -33,7 +33,8 @@
     "analysis:sweep": "tsx scripts/analysis-cli.ts sweep",
     "analysis:lock:quick": "tsx scripts/analysis-cli.ts lock:quick",
     "analysis:autobalance": "tsx scripts/analysis-cli.ts autobalance",
-    "screenshots": "tsx scripts/capture-screenshots.ts"
+    "screenshots": "tsx scripts/capture-screenshots.ts",
+    "perf:trace": "tsx scripts/perf-trace.ts"
   },
   "dependencies": {
     "@capacitor-community/sqlite": "^8.1.0",

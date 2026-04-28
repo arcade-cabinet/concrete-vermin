@@ -21,6 +21,8 @@ export default defineConfig({
       // Anything that needs jsdom uses the .dom.test.ts suffix and goes
       // through vitest.dom.config.ts.
       "src/ui/**/*.test.ts",
+      // Build-script unit tests (perf gate math, etc.) — pure logic.
+      "scripts/__tests__/**/*.test.ts",
     ],
     exclude: ["e2e/**", "node_modules/**", "**/*.dom.test.*", "**/*.browser.test.*"],
     passWithNoTests: true,
