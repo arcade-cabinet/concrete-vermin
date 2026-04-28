@@ -73,9 +73,9 @@ test.describe("Android launch smoke", () => {
     await page.waitForLoadState("networkidle");
 
     const viewport = page.viewportSize();
-    expect(viewport).not.toBeNull();
-    expect(viewport!.height, "height should exceed width (portrait)").toBeGreaterThan(
-      viewport!.width,
+    if (!viewport) throw new Error("viewport is null");
+    expect(viewport.height, "height should exceed width (portrait)").toBeGreaterThan(
+      viewport.width,
     );
   });
 });
