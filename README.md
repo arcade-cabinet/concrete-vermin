@@ -15,12 +15,15 @@ Pulpy 1979 NYC rail-shooter. Drag to aim, tap to fire. Hunt rats, roaches, pigeo
 
 ## Status
 
-**Playable.** v1.19, deployed to GitHub Pages. All 9 missions across 3 acts (Streets / Underworld / Above), full pause + settings + accessibility polish, JSON-decomposed lore. See [`docs/STATE.md`](docs/STATE.md) for the full snapshot.
+**v1.0 shipped.** All 12 missions, Yuka governor, per-weapon charge-shot, full e2e + coverage gates. See [`docs/STATE.md`](docs/STATE.md) for the complete v1.0 snapshot.
 
-- 🟢 **Pages:** `https://arcade-cabinet.github.io/concrete-vermin/`
-- 🟢 **Tests:** 390 passing (385 node + 5 dom + 1 browser + 1 e2e on CI)
-- 🟢 **CI:** core / balance-benchmark / release-gate / browser-canvas / e2e-smoke jobs all green
-- 🟢 **Nightly:** `analysis-nightly` cron at 06:00 UTC
+[![CI](https://github.com/arcade-cabinet/concrete-vermin/actions/workflows/ci.yml/badge.svg)](https://github.com/arcade-cabinet/concrete-vermin/actions/workflows/ci.yml)
+
+- 🟢 **Play:** [`https://arcade-cabinet.github.io/concrete-vermin/`](https://arcade-cabinet.github.io/concrete-vermin/)
+- 🟢 **Tests:** 637+ node / 54+ dom / 5 e2e specs — all required gates, no `continue-on-error`
+- 🟢 **Balance:** hard gate — `pnpm analysis:benchmark --profile ci` on every PR
+- 🟢 **Coverage:** ≥85% lines across sim/ecs/runtime/audio
+- 🟢 **Mobile:** Android via Capacitor — portrait lock, branded splash, orientation-aware HUD
 
 ## Quick start
 
@@ -58,7 +61,7 @@ pnpm cap:run:android        # launch on a connected Android device or emulator
 
 ## Stack
 
-PixiJS · @pixi/react · Koota (ECS) · Yuka-derived GOAP · Tone.js · Capacitor · Radix UI · TypeScript · Vite · Vitest · Playwright · Biome · pnpm.
+PixiJS · @pixi/react · Koota (ECS) · Yuka (governor + GOAP) · Tone.js · Capacitor · Radix UI · TypeScript · Vite · Vitest · Playwright · Biome · pnpm.
 
 ## Architecture in one sentence
 
