@@ -5,18 +5,57 @@ import { Briefing } from "./Briefing";
 import { GameStage } from "./GameStage";
 import { HUD } from "./HUD";
 import { MissionResult } from "./MissionResult";
+import { MissionSelect } from "./MissionSelect";
+import { PawnShop } from "./PawnShop";
+import { usePlayerProgress } from "./PlayerProgress";
+import { autoPersistPlayerProgress, loadPlayerProgress } from "./PlayerProgressPersistence";
+import { getMission } from "../sim/content/missions";
+
+const MISSION_KILLS_REQUIRED = 8;
 
 export function App() {
   const phase = useGameStore((s) => s.phase);
+  const setPhase = useGameStore((s) => s.setPhase);
+  const startMission = useGameStore((s) => s.startMission);
   const masterVolumeDb = useGameStore((s) => s.settings.masterVolumeDb);
   const muted = useGameStore((s) => s.settings.muted);
 
   useEffect(() => setMasterVolumeDb(masterVolumeDb), [masterVolumeDb]);
   useEffect(() => setMute(muted), [muted]);
 
+  useEffect(() => {
+    loadPlayerProgress();
+    return autoPersistPlayerProgress();
+  }, []);
+
+  const deploy = (id: string) => {
+    try {
+      const m = getMission(id);
+      // Total kills required = sum of spawn counts in non-boss encounters,
+      // plus 1 for any boss-scripted encounter (the boss itself).
+      const total = m.encounters.reduce((acc, e) => {
+        const enc = e.spawns.reduce((a, s) => a + (s.pattern === "boss-scripted" ? 1 : s.count), 0);
+        return acc + enc;
+      }, 0);
+      startMission(id, Math.max(MISSION_KILLS_REQUIRED, total));
+    } catch {
+      // Bad id — fallback to tutorial.
+      startMission("streets-01-bodega", MISSION_KILLS_REQUIRED);
+    }
+  };
+
   return (
     <div style={{ width: "100%", height: "100%" }}>
       {phase === "briefing" ? <Briefing /> : null}
+      {phase === "mission-select" ? (
+        <MissionSelect onPickMission={() => setPhase("pawn-shop")} />
+      ) : null}
+      {phase === "pawn-shop" ? (
+        <PawnShop
+          onContinue={() => deploy(usePlayerProgress.getState().selectedMissionId)}
+          onBack={() => setPhase("mission-select")}
+        />
+      ) : null}
       {phase === "playing" ? (
         <>
           <GameStage />
