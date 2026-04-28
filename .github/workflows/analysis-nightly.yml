@@ -1,0 +1,65 @@
+name: Analysis nightly
+
+on:
+  schedule:
+    # 06:00 UTC daily — early enough to read on the morning commute,
+    # late enough that yesterday's last commits made it in.
+    - cron: '0 6 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  issues: write
+
+jobs:
+  standard-profile:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - uses: pnpm/action-setup@078e9d416474b29c0c387560859308974f7e9c53 # v6.0.1
+        with:
+          version: 10.33.0
+
+      - uses: actions/setup-node@53b83947a5a98c8d113130e565377fae1a50d02f # v6.3.0
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Run standard profile (100 runs/mission, all governors)
+        id: bench
+        run: |
+          # Capture the long-form output so it can be uploaded as an
+          # artifact and (optionally) inlined into a tracking issue.
+          mkdir -p analysis-output
+          pnpm analysis:benchmark -- --profile standard \
+            > analysis-output/standard.txt 2>&1 || true
+          # Print so the workflow log shows the table inline too.
+          cat analysis-output/standard.txt
+
+      - name: Run lock recommendations
+        run: |
+          pnpm analysis:lock:quick \
+            > analysis-output/lock.txt 2>&1 || true
+          cat analysis-output/lock.txt
+
+      - name: Run autobalance proposal
+        # Working tree is clean on a fresh checkout, so this exercises
+        # the full autobalance code path. It exits non-zero when any
+        # mission is out of spec — that's expected nightly signal, not
+        # a failure to surface.
+        run: |
+          pnpm analysis:autobalance \
+            > analysis-output/autobalance.txt 2>&1 || true
+          cat analysis-output/autobalance.txt
+
+      - name: Upload analysis artifacts
+        uses: actions/upload-artifact@b4b15b8c7c6ac21ea08fcf65892d2ee8f75cf882 # v4.4.3
+        with:
+          name: analysis-nightly-${{ github.run_id }}
+          path: analysis-output/
+          retention-days: 14

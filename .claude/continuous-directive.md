@@ -175,15 +175,15 @@ Each `[ ]` is one commit. Group small ones into one PR; large ones get their own
 - [x] src/sim/analysis/locking.ts: deriveLockRecommendations(history) → STABLE | UNSTABLE | UNMEASURED
 - [x] src/sim/analysis/autobalance.ts: nudge raw data within clamped bounds; refuse if working tree dirty
 - [x] src/sim/analysis/cli.ts: subcommands benchmark / sweep / lock / autobalance / smoke / focus
-- [ ] src/sim/analysis/__tests__/release-gate.test.ts: verify the lock for v1 missions
+- [x] src/sim/analysis/__tests__/release-gate.test.ts: verify the lock for v1 missions
 - [x] package.json: analysis:smoke / analysis:benchmark / analysis:focus / analysis:sweep / analysis:lock:quick / analysis:autobalance scripts wired (test:release deferred — needs CI workflow update under CV-RELEASE-INFRA)
-- [ ] CI: re-add Release gate + Balance benchmark (CI profile) jobs
-- [ ] CI: re-add browser canvas + e2e-smoke + autobalance jobs (need actual e2e/*.spec.ts and at least one browser test)
-- [ ] e2e/tutorial-clear.spec.ts: load Pages preview; click 8 times; assert "Cleared" overlay appears
-- [ ] vitest.browser test: render GameStage; verify canvas exists + non-zero pixel hash after one tick
+- [x] CI: re-add Release gate + Balance benchmark (CI profile) jobs
+- [x] CI: re-add browser canvas + e2e-smoke + autobalance jobs (need actual e2e/*.spec.ts and at least one browser test)
+- [x] e2e/tutorial-clear.spec.ts: load Pages preview; click 8 times; assert "Cleared" overlay appears
+- [x] vitest.browser test: render GameStage; verify canvas exists + non-zero pixel hash after one tick
 
 ### CV-RELEASE-INFRA — sign + ship (PR #10)
-- [ ] Re-add analysis-nightly.yml workflow once analysis:* exists
+- [x] Re-add analysis-nightly.yml workflow once analysis:* exists
 - [ ] Document CI_GITHUB_TOKEN scope in docs/DEPLOYMENT.md
 - [ ] Document ANDROID_KEYSTORE_BASE64 / PASSWORD / KEY_ALIAS / KEY_PASSWORD secrets needed for signed releases
 - [ ] Verify: open a release-please PR, watch automerge fire, confirm android job uploads signed AAB to the Release
