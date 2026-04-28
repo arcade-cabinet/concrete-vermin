@@ -6,6 +6,13 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 Releases are managed by [release-please](https://github.com/googleapis/release-please).
 
+## [1.4.0](https://github.com/arcade-cabinet/concrete-vermin/compare/v1.3.0...v1.4.0) (2026-04-28)
+
+
+### Features
+
+* **render:** brick hatch + sodium streetlight pool gradient ([#13](https://github.com/arcade-cabinet/concrete-vermin/issues/13)) ([1480d57](https://github.com/arcade-cabinet/concrete-vermin/commit/1480d57250380fba7e1d03242b5f012ce624fb69))
+
 ## [1.3.0](https://github.com/arcade-cabinet/concrete-vermin/compare/v1.2.0...v1.3.0) (2026-04-28)
 
 
