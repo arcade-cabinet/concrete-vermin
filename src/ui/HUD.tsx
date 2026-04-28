@@ -80,8 +80,8 @@ function MuteButton() {
       aria-label={muted ? "Unmute audio" : "Mute audio"}
       style={{
         position: "fixed",
-        bottom: 12,
-        right: 12,
+        bottom: "calc(12px + env(safe-area-inset-bottom))",
+        right: "calc(12px + env(safe-area-inset-right))",
         background: "transparent",
         border: `1px solid ${SODIUM}`,
         color: SODIUM,
@@ -108,12 +108,13 @@ export function HUD() {
       <div
         style={{
           position: "fixed",
-          top: 12,
+          top: "calc(12px + env(safe-area-inset-top))",
           left: 0,
           right: 0,
           display: "flex",
           justifyContent: "space-between",
-          padding: "0 16px",
+          padding:
+            "0 calc(16px + env(safe-area-inset-right)) 0 calc(16px + env(safe-area-inset-left))",
           pointerEvents: "none",
           fontFamily: "'Special Elite', monospace",
           color: PARCHMENT,

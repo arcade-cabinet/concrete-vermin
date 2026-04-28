@@ -4,6 +4,7 @@ import {
   type ModifierFlash,
   recordKill,
   recordMiss,
+  recordReload,
   type ScoreState,
 } from "../../sim/engine/scoring";
 import { setScore } from "../actions";
@@ -54,10 +55,12 @@ export function scoreSystem(
   events: ReadonlyArray<CollideEvent>,
   missCount: number,
   now: number,
+  didReload = false,
 ): ReadonlyArray<ModifierFlash> {
   let s = readScoreState(world, scoreEntityId);
   if (!s) return [];
 
+  if (didReload) s = recordReload(s);
   for (let i = 0; i < missCount; i++) s = recordMiss(s, now);
 
   for (const ev of events) {
