@@ -49,21 +49,22 @@ test.describe("tutorial clear", () => {
     const kills = page.getByTestId("hud-kills");
     await expect(kills).toBeVisible();
 
-    // Fire repeatedly. Spread + the rat-ground-y intercept should
-    // accumulate enough hits to clear the 8 spawns. We click in a
-    // grid across the rat lane.
+    // Mission-01 spawns 14 rats across two waves; shotgun has a 1.4 s
+    // reload after every 6 shots. 250-click cap is headroom for slow
+    // CI runners + multiple reload cycles before the loop exits early.
     const box = await stage.boundingBox();
     if (!box) throw new Error("stage has no bounding box");
-    for (let i = 0; i < 40; i++) {
-      const x = box.x + box.width * (0.2 + (i % 6) * 0.12);
+    const cleared = page.getByText(/cleared/i);
+    const MAX_CLICKS = 250;
+    for (let i = 0; i < MAX_CLICKS; i++) {
+      if (await cleared.isVisible()) break;
+      const x = box.x + box.width * (0.15 + (i % 8) * 0.1);
       const y = box.y + box.height * 0.78;
       await page.mouse.click(x, y);
-      // Tiny pause so the runner ticks between clicks.
-      await page.waitForTimeout(120);
+      await page.waitForTimeout(90);
     }
 
     // The mission ends with the "Cleared" verdict from MissionResult.
-    const cleared = page.getByText(/cleared/i);
-    await expect(cleared).toBeVisible({ timeout: 30_000 });
+    await expect(cleared).toBeVisible({ timeout: 15_000 });
   });
 });

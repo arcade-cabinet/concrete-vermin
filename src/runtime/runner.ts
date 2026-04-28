@@ -238,7 +238,9 @@ export class GameRunner {
     motionSystem(this.gw.world, dt);
     projectileSystem(this.gw.world, dt, this.now);
 
-    // 5. Hit-test.
+    // 5. Hit-test. collideSystem dedupes per-tick kills internally so
+    // multi-pellet shotgun blasts produce one event per actual kill —
+    // safe to count directly.
     const events = collideSystem(
       this.gw.world,
       this.gw.rng.fork(`collide:${this.now.toFixed(3)}`),

@@ -90,6 +90,22 @@ describe("collideSystem", () => {
     const events = collideSystem(world, createRng(1), 0.1);
     expect(events).toEqual([]);
   });
+
+  it("dedupes per-tick kills — multi-pellet shotgun on one rat fires one kill event", () => {
+    const { world, playerEntity } = createGameWorld(1);
+    const rec = composeVermin("rat", {}, createRng(1));
+    spawnVermin(world, rec, { position: { x: 100, y: 100 }, now: 0 });
+    const tuned = applyLoadout(WEAPON_REGISTRY.shotgun, []);
+    fireWeapon(world, tuned, {
+      origin: { x: 100, y: 100 },
+      target: { x: 200, y: 100 },
+      now: 0,
+      ownerEntity: playerEntity,
+    });
+    const events = collideSystem(world, createRng(7), 0.1);
+    const kills = events.filter((e) => e.kind === "kill");
+    expect(kills.length, "multi-pellet blast must produce exactly one kill").toBe(1);
+  });
 });
 
 describe("lifecycleSystem", () => {

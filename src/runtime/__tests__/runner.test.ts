@@ -96,6 +96,26 @@ describe("GameRunner livesAllowance", () => {
   });
 });
 
+describe("GameRunner kill dedupe", () => {
+  it("kill count never exceeds the spawned vermin count", () => {
+    const r = new GameRunner(mission01, [], 1234);
+    for (let i = 0; i < 800; i++) {
+      if (i % 6 === 0) r.queueShot(120 + (i % 5) * 40, 240);
+      r.step(FRAME);
+      if (useGameStore.getState().phase === "won") break;
+    }
+    const phase = useGameStore.getState().phase;
+    expect(["won", "lost"], `runner did not reach a terminal phase (saw ${phase})`).toContain(
+      phase,
+    );
+    const totalSpawnedFromSpec = mission01.encounters.reduce(
+      (sum, enc) => sum + enc.spawns.reduce((acc, s) => acc + s.count, 0),
+      0,
+    );
+    expect(useGameStore.getState().killCount).toBeLessThanOrEqual(totalSpawnedFromSpec);
+  });
+});
+
 describe("GameRunner pause / resume", () => {
   it("pause stops sim time advancing; resume picks back up", () => {
     const r = new GameRunner(mission01, [], 1234);
