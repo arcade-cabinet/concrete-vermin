@@ -1,16 +1,17 @@
 # Continuous Work Directive — Concrete Vermin
 
-**Status:** ACTIVE — but with an explicit post-PR halt (see below)
+**Status:** RELEASED — halt condition met 2026-04-28 when PR #81 (which folded #77/#79/#80) merged after #78. Loop is stopped pending user direction on the Yuka governor + charge-shot exploration listed below.
 **Owner:** Claude (this agent)
 
-## EXPLICIT HALT (user-issued, 2026-04-28)
+## EXPLICIT HALT (user-issued, 2026-04-28) — TRIGGERED
 
-After the four currently-open PRs land on main and any review feedback on them is fully drained:
-- **#77** — secret missions S-grade unlock
-- **#78** — encounter composition uniqueness gate
-- **#79** — lifecycle background→foreground verified
+The four named PRs all landed on main:
+- **#77** — secret missions S-grade unlock — folded into #81 (merged)
+- **#78** — encounter composition uniqueness gate — merged
+- **#79** — lifecycle background→foreground verified — folded into #81 (merged)
+- **#80** — this halt directive itself — folded into #81 (merged)
 
-**STOP THE AUTONOMOUS LOOP.** Do not pick the next checkbox. Do not auto-open the next PR. Switch this directive's Status from `ACTIVE` to `RELEASED` and surface a planning report to the user covering:
+**LOOP STOPPED.** Not picking the next checkbox. Not opening the next PR. The two design directions the user wants to explore:
 
 1. **Yuka-driven end-to-end governor** — proper player-modeling AI that drives the actual input pipeline (queueShot via the same path GameStage does), not the runner's internal API. Models steering / leading / threat-prio against vermin. Replaces the abstract analysis benchmark with real playthrough coverage of every mission (canonical + secret). Reference: `~/src/bioluminescent-sea`, `~/src/mean-streets`. CV is a single-gameboard surface with parallax — should be *easier* than 3D, not harder.
 2. **Charge-shot secondary action per weapon** — tap = quick precise shot (current behavior); hold = leading mode where a CHARGE emission ring (or square if the reticle is non-circular) builds in segments around the reticle(s). Release before saturation auto-fires a heavier variant: shotgun → wider spray, revolver → automatic burst, tesla → burst repeater, flamethrower → napalm that sticks for seconds based on charge. Pairs with reticle-shape / multi-reticle modifiers.
@@ -146,10 +147,10 @@ Each `[ ]` is one commit. Group small ones into one PR; large surfaces get their
 
 ### v1.0-CONTENT-DEPTH — make missions LIVE
 
-- [ ] src/sim/content/missions/*: each mission gets 3-5 dynamic event triggers (mid-mission boss-bark, environmental hazard, surprise wave) — already partially scripted; complete every mission to spec
-- [ ] src/sim/content/encounters/: per-act unique encounter compositions (no two missions feel identical)
-- [ ] src/sim/content/missions/secret/: NEW — 3 hidden missions unlocked by S-grade conditions (bonus content for replay)
-- [ ] src/sim/content/lore/*.json: per-mission post-mission Pawnbroker debrief blurb (different per win/loss/S-grade)
+- [x] src/sim/content/missions/*: each mission gets 3-5 dynamic event triggers (mid-mission boss-bark, environmental hazard, surprise wave) — PR #75 schema + dispatcher + 38 events authored
+- [x] src/sim/content/encounters/: per-act unique encounter compositions (no two missions feel identical) — PR #78 + integration #81 enforce via 5 catalog gates including tutorial-singleton
+- [x] src/sim/content/missions/secret/: 3 hidden missions unlocked by S-grade conditions — PR #81 ships THE CELLAR / CHALK CATHEDRAL / THE OTHER ROOFTOP with full SecretRail UI + persistence
+- [x] src/sim/content/lore/*.json: per-mission post-mission Pawnbroker debrief blurb (different per win/loss/S-grade) — PR #73 ships 27 canonical + PR #81 adds 9 secret = 36 unique lines
 - [x] src/ui/copy/encounter-callouts.ts: 30+ dynamic callouts (was 10) — chained kills, headshot streaks, no-damage runs, boss-phase transitions
 - [x] src/sim/content/achievements.ts: NEW — 20+ achievements with unlock conditions, persisted via player progress store
 - [x] src/ui/AchievementsScreen.tsx: NEW — gallery view of locked/unlocked
@@ -170,7 +171,7 @@ Each `[ ]` is one commit. Group small ones into one PR; large surfaces get their
 - [x] android/app/src/main/res/: app icon set (mdpi/hdpi/xhdpi/xxhdpi/xxxhdpi)
 - [x] android/app/src/main/res/values/styles.xml: splash screen branded (subway-tile background + logo)
 - [x] android/app/src/main/AndroidManifest.xml: orientation lock — landscape phone, free tablet
-- [ ] src/platform/lifecycle.ts: background → foreground correctly pauses runner; verified
+- [x] src/platform/lifecycle.ts: background → foreground correctly pauses runner; verified — PR #81 ships end-to-end integration tests covering both visibilitychange AND Capacitor appStateChange paths, plus a 10s background-gap test that proves lives stay intact
 - [ ] tests: e2e/android-launch.spec.ts — Capacitor launch smoke (emulator-driven where CI supports)
 - [ ] docs/DEPLOYMENT.md: Android QA checklist updated to reflect actual emulator runs
 
