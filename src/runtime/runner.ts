@@ -542,12 +542,15 @@ export class GameRunner {
       const p = e.get(Position);
       const hb = e.get(Hitbox);
       const v = e.get(Vermin);
+      const vel = e.get(Velocity);
       if (!p || !hb || !v) continue;
       vermin.push({
         id: e.id(),
         archetypeId: v.archetypeId,
         x: p.x,
         y: p.y,
+        vx: vel?.x ?? 0,
+        vy: vel?.y ?? 0,
         width: hb.width,
         height: hb.height,
         health: h.current,

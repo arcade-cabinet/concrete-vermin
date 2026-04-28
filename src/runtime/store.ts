@@ -27,6 +27,9 @@ export interface VerminSnapshot {
   archetypeId: string;
   x: number;
   y: number;
+  /** Per-tick velocity from the Velocity trait — used by the governor for lead aim. */
+  vx: number;
+  vy: number;
   width: number;
   height: number;
   health: number;
