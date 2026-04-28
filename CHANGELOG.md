@@ -6,6 +6,13 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 Releases are managed by [release-please](https://github.com/googleapis/release-please).
 
+## [1.0.1](https://github.com/arcade-cabinet/concrete-vermin/compare/v1.0.0...v1.0.1) (2026-04-28)
+
+
+### CI
+
+* match release-please PRs by branch prefix ([#4](https://github.com/arcade-cabinet/concrete-vermin/issues/4)) ([a80b3a5](https://github.com/arcade-cabinet/concrete-vermin/commit/a80b3a5b792b0ba6ad8e9d0652b5825a5d733254))
+
 ## 1.0.0 (2026-04-28)
 
 
