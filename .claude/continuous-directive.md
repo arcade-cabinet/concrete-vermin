@@ -80,16 +80,16 @@ Each `[ ]` is one commit. Group small ones into one PR; large surfaces get their
 
 ### v1.0-RENDER-POLISH — every visual beat hits
 
-- [ ] src/render/Stage.tsx: per-act streetlight color via actLightFor(mission.act) — Streets sodium amber, Underworld sickly green, Above pale dawn
-- [ ] src/render/Stage.tsx: per-act background tint matching DESIGN.md color shift
-- [ ] src/render/SplashLayer.tsx: second-frame fade so splash isn't a single-frame pop
-- [ ] src/render/VerminLayer.tsx: per-archetype idle animation — rat tail wiggle, roach antenna twitch, pigeon wing-beat, sewer-fish gill flutter, goose head-bob
-- [ ] src/render/VerminLayer.tsx: walk-cycle bob (1px vertical sin wave) on locomoting vermin
-- [ ] src/render/Stage.tsx: halftone grain overlay (subtle, 4% opacity) for EC-Comics texture
-- [ ] src/render/effects/screenShake.ts: per-event shake amplitude (kill 4px, boss-hit 8px, boss-death 16px), respects reduced-motion
-- [ ] src/render/HudOverlay.tsx: floating damage numbers on hit (+score amount, sodium-amber, 400ms ttl, rises 24px)
+- [x] src/render/Stage.tsx: per-act streetlight color via actLightFor(mission.act) — Streets sodium amber, Underworld sickly green, Above pale dawn
+- [x] src/render/Stage.tsx: per-act background tint matching DESIGN.md color shift
+- [x] src/render/SplashLayer.tsx: second-frame fade so splash isn't a single-frame pop
+- [x] src/render/VerminLayer.tsx: per-archetype idle animation — rat tail wiggle, roach antenna twitch, pigeon wing-beat, sewer-fish gill flutter, goose head-bob
+- [x] src/render/VerminLayer.tsx: walk-cycle bob (1px vertical sin wave) on locomoting vermin
+- [x] src/render/Stage.tsx: halftone grain overlay (subtle, 4% opacity) for EC-Comics texture
+- [x] src/runtime/screenShake.ts: per-event shake amplitude (kill 4px, boss-hit 8px, boss-death 16px), respects reduced-motion
+- [x] src/render/HudOverlay.tsx: floating damage numbers on hit (+score amount, sodium-amber, 400ms ttl, rises 24px)
 - [ ] src/render/effects/parallax.ts: 3-layer parallax (far brick, mid streetlight, near vermin) tied to subtle camera drift
-- [ ] tests: src/render/__tests__/effects.test.ts — screenShake amplitude clamped, reduced-motion zeroes it
+- [x] tests: src/runtime/__tests__/screenShake.test.ts + src/render/__tests__/actLighting.test.ts — amplitude scaling, decay, dedupe, reduced-motion zeroes it; per-act palette lookup
 - [ ] visual: pnpm screenshots — diff committed alongside
 
 ### v1.0-INPUT-POLISH — feels good on every device

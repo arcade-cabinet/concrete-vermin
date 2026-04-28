@@ -116,6 +116,26 @@ describe("GameRunner kill dedupe", () => {
   });
 });
 
+describe("GameRunner publishes damage events + screen shakes", () => {
+  it("publishes a damage event into the store on each collide event", async () => {
+    const { activeShakeCount, resetShakeForTest } = await import("../screenShake");
+    resetShakeForTest();
+    const r = new GameRunner(mission01, [], 1234);
+    let sawDamage = false;
+    let sawShake = false;
+    for (let i = 0; i < 600; i++) {
+      if (i % 6 === 0) r.queueShot(120 + (i % 5) * 40, 240);
+      r.step(FRAME);
+      if (useGameStore.getState().damageEvents.length > 0) sawDamage = true;
+      if (activeShakeCount() > 0) sawShake = true;
+      const ph = useGameStore.getState().phase;
+      if (ph === "won" || ph === "lost") break;
+    }
+    expect(sawDamage, "runner must publish damageEvents").toBe(true);
+    expect(sawShake, "runner must push screen shakes on kills").toBe(true);
+  });
+});
+
 describe("GameRunner pause / resume", () => {
   it("pause stops sim time advancing; resume picks back up", () => {
     const r = new GameRunner(mission01, [], 1234);

@@ -40,7 +40,12 @@ export function SplashLayer() {
         const palette = PALETTES[s.archetypeId] ?? DEFAULT_PALETTE;
         const t = Math.min(1, s.ageS / Math.max(0.001, s.ttlS));
         const r = 4 + 16 * t;
-        const alpha = 1 - t;
+        // Two-phase fade: blooms in over first 12 % of life (so frame 1
+        // isn't a single-frame pop at full opacity), then linearly
+        // fades the remainder. Sharp peak at the bloom point reads as
+        // an impact, not a glitch.
+        const PEAK = 0.12;
+        const alpha = t < PEAK ? t / PEAK : 1 - (t - PEAK) / (1 - PEAK);
         // Outer ring
         g.circle(s.x, s.y, r).stroke({ color: palette.ring, width: 2, alpha });
         // Bright core

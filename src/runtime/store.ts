@@ -47,6 +47,19 @@ export interface ModifierFlashSnapshot {
   at: number;
 }
 
+export interface DamageEvent {
+  /** Sim seconds when the hit landed — used for ttl + rise interpolation. */
+  at: number;
+  /** Sim coords for the floating number's anchor. */
+  x: number;
+  y: number;
+  /** Damage dealt (formatted as "+N" by the renderer). */
+  amount: number;
+  /** Crit and headshot get bigger + brighter glyphs. */
+  crit: boolean;
+  headshot: boolean;
+}
+
 export interface MuzzleFlash {
   /** Player muzzle position (sim coords). */
   x: number;
@@ -116,9 +129,13 @@ export interface GameState {
   /** Cash awarded across the current session (sums per-mission awards). */
   cashAwarded: number;
   missionId: string;
+  /** Active mission's act — drives per-act render tint + lighting. */
+  missionAct: "streets" | "underworld" | "above";
   missionStartedAt: number;
   killsRequired: number;
   killCount: number;
+  /** Append-only ring of recent damage numbers for the floating HUD. */
+  damageEvents: ReadonlyArray<DamageEvent>;
   // Setters
   setPhase: (p: MissionPhase) => void;
   setViewport: (w: number, h: number) => void;
@@ -138,10 +155,11 @@ export interface GameState {
         | "now"
         | "reloadProgress"
         | "reloadDurationMs"
+        | "damageEvents"
       >
     >,
   ) => void;
-  startMission: (id: string, killsRequired: number) => void;
+  startMission: (id: string, killsRequired: number, act?: "streets" | "underworld" | "above") => void;
   endMission: (won: boolean) => void;
   awardCash: (amount: number) => void;
   resetCash: () => void;
@@ -183,16 +201,19 @@ export const useGameStore = create<GameState>((set) => ({
   reloadDurationMs: 1400,
   cashAwarded: 0,
   missionId: "",
+  missionAct: "streets",
   missionStartedAt: 0,
   killsRequired: 0,
   killCount: 0,
+  damageEvents: [],
   setPhase: (phase) => set({ phase }),
   setViewport: (width, height) => set({ viewport: { width, height } }),
   setReticle: (x, y) => set({ reticle: { x, y } }),
   setSnapshot: (snap) => set(snap),
-  startMission: (id, killsRequired) =>
+  startMission: (id, killsRequired, act = "streets") =>
     set({
       missionId: id,
+      missionAct: act,
       killsRequired,
       killCount: 0,
       missionStartedAt: performance.now() / 1000,
@@ -203,6 +224,7 @@ export const useGameStore = create<GameState>((set) => ({
       splashes: [],
       muzzleFlashes: [],
       modifierFlashes: [],
+      damageEvents: [],
       now: 0,
     }),
   endMission: (won) => set({ phase: won ? "won" : "lost" }),
