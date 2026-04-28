@@ -1,7 +1,7 @@
 {
   "name": "concrete-vermin",
   "private": true,
-  "version": "1.8.0",
+  "version": "1.9.0",
   "description": "Concrete Vermin: Tactical Reforged — pulpy 1979 NYC rail-shooter for the arcade cabinet.",
   "type": "module",
   "packageManager": "pnpm@10.33.0",
