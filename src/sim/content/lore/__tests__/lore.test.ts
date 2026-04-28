@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { MISSIONS } from "../../missions";
+import { MISSIONS, SECRET_MISSIONS } from "../../missions";
 import {
   ALL_MISSION_LORE,
   barks,
@@ -52,18 +52,19 @@ describe("lore registry", () => {
     expect(frame.cabinetPlaque.join(" ")).toMatch(/Pellegrino/);
   });
 
-  it("every mission in MISSIONS has matching lore", () => {
-    for (const m of MISSIONS) {
+  it("every mission (linear + secret) has matching lore", () => {
+    const all = [...MISSIONS, ...SECRET_MISSIONS];
+    for (const m of all) {
       const lore = getMissionLore(m.id);
       expect(lore.id).toBe(m.id);
       expect(lore.briefing.length).toBeGreaterThan(40);
     }
-    expect(ALL_MISSION_LORE).toHaveLength(MISSIONS.length);
+    expect(ALL_MISSION_LORE).toHaveLength(all.length);
   });
 
   it("every mission has a bespoke Pawnbroker debrief for win / loss / sGrade", () => {
     const seen = new Set<string>();
-    for (const m of MISSIONS) {
+    for (const m of [...MISSIONS, ...SECRET_MISSIONS]) {
       const lore = getMissionLore(m.id);
       expect(lore.debrief.win.length).toBeGreaterThan(20);
       expect(lore.debrief.loss.length).toBeGreaterThan(20);

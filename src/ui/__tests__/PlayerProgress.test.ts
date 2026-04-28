@@ -42,4 +42,34 @@ describe("PlayerProgress", () => {
     usePlayerProgress.getState().unlockMission("streets-01-bodega");
     expect(usePlayerProgress.getState().completedMissionIds).toEqual(["streets-01-bodega"]);
   });
+
+  it("secret missions stay locked without an S-grade on their anchor", () => {
+    expect(isMissionUnlocked("streets-secret-cellar", ["streets-04-dumpster-bear"], [])).toBe(false);
+    expect(
+      isMissionUnlocked(
+        "streets-secret-cellar",
+        ["streets-04-dumpster-bear"],
+        ["streets-04-dumpster-bear"],
+      ),
+    ).toBe(true);
+  });
+
+  it("markSGradeEarned is additive and dedupes", () => {
+    usePlayerProgress.getState().markSGradeEarned("streets-01-bodega");
+    usePlayerProgress.getState().markSGradeEarned("streets-01-bodega");
+    expect(usePlayerProgress.getState().sGradeMissionIds).toEqual(["streets-01-bodega"]);
+  });
+
+  it("each secret mission unlocks ONLY when its named anchor has an S-grade", () => {
+    expect(isMissionUnlocked("underworld-secret-cathedral", [], [])).toBe(false);
+    expect(
+      isMissionUnlocked("underworld-secret-cathedral", [], ["streets-01-bodega"]),
+    ).toBe(false);
+    expect(
+      isMissionUnlocked("underworld-secret-cathedral", [], ["underworld-07-river-mutant"]),
+    ).toBe(true);
+    expect(
+      isMissionUnlocked("above-secret-grandfather", [], ["above-09-pigeon-king"]),
+    ).toBe(true);
+  });
 });
