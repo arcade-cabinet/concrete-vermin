@@ -26,6 +26,13 @@ export function MissionResult() {
     }
   }, [won, killCount, missionId]);
 
+  // Autofocus the primary CTA so a keyboard player can hit Enter to
+  // continue and a screen-reader announces the action.
+  const ctaRef = useRef<HTMLButtonElement>(null);
+  useEffect(() => {
+    ctaRef.current?.focus();
+  }, []);
+
   return (
     <div
       data-testid="mission-result"
@@ -80,6 +87,7 @@ export function MissionResult() {
       >
         <button
           type="button"
+          ref={ctaRef}
           onClick={() => setPhase("mission-select")}
           style={{
             background: COLOR.sodium,

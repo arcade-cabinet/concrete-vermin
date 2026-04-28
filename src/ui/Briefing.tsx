@@ -1,3 +1,4 @@
+import { useEffect, useRef } from "react";
 import { startStreetsAmbience } from "../audio/music";
 import { ensureAudio } from "../audio/setup";
 import { useGameStore } from "../runtime/store";
@@ -9,6 +10,13 @@ import { COLOR, TYPE } from "../theme/tokens";
  */
 export function Briefing() {
   const setPhase = useGameStore((s) => s.setPhase);
+
+  // Autofocus Begin so a keyboard player can press Enter immediately
+  // and a screen-reader announces the primary action.
+  const beginRef = useRef<HTMLButtonElement>(null);
+  useEffect(() => {
+    beginRef.current?.focus();
+  }, []);
 
   return (
     <div
@@ -47,6 +55,7 @@ export function Briefing() {
       </p>
       <button
         type="button"
+        ref={beginRef}
         onClick={async () => {
           await ensureAudio();
           startStreetsAmbience();

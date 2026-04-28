@@ -203,6 +203,11 @@ export function GameStage() {
   return (
     <div
       data-testid="game-stage"
+      // role + aria-label so a screen reader announces the canvas as
+      // an interactive image with input affordances. The actual game
+      // state is narrated through HUD's aria-live region (per design).
+      role="img"
+      aria-label="Game canvas — drag to aim, tap to fire, R to reload"
       style={{
         width: "100%",
         height: "100%",
