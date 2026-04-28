@@ -96,7 +96,6 @@ describe("collideSystem", () => {
     const rec = composeVermin("rat", {}, createRng(1));
     spawnVermin(world, rec, { position: { x: 100, y: 100 }, now: 0 });
     const tuned = applyLoadout(WEAPON_REGISTRY.shotgun, []);
-    // 8 pellets, all aimed point-blank at the same vermin.
     fireWeapon(world, tuned, {
       origin: { x: 100, y: 100 },
       target: { x: 200, y: 100 },

@@ -49,12 +49,9 @@ test.describe("tutorial clear", () => {
     const kills = page.getByTestId("hud-kills");
     await expect(kills).toBeVisible();
 
-    // Fire repeatedly while polling for the cleared overlay so the
-    // test exits as soon as the mission ends rather than always
-    // burning the full click budget. Mission-01 spawns 14 rats across
-    // two waves; the shotgun has a 1.4 s reload window after every 6
-    // shots. The cap (250 clicks) is enough headroom for slow CI
-    // runners + multiple reload cycles.
+    // Mission-01 spawns 14 rats across two waves; shotgun has a 1.4 s
+    // reload after every 6 shots. 250-click cap is headroom for slow
+    // CI runners + multiple reload cycles before the loop exits early.
     const box = await stage.boundingBox();
     if (!box) throw new Error("stage has no bounding box");
     const cleared = page.getByText(/cleared/i);

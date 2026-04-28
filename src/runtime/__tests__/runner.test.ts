@@ -99,7 +99,6 @@ describe("GameRunner livesAllowance", () => {
 describe("GameRunner kill dedupe", () => {
   it("kill count never exceeds the spawned vermin count", () => {
     const r = new GameRunner(mission01, [], 1234);
-    // Burn through the mission with rapid fire.
     for (let i = 0; i < 800; i++) {
       if (i % 6 === 0) r.queueShot(120 + (i % 5) * 40, 240);
       r.step(FRAME);
