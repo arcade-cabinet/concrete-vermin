@@ -93,6 +93,12 @@ async function capture(): Promise<void> {
       const ctx = await browser.newContext({
         viewport: { width: shot.width, height: shot.height },
         deviceScaleFactor: 2,
+        // prefers-reduced-motion: skips the title-scramble decode + parallax
+        // wobble + any other JS-driven animation that would otherwise race
+        // the screenshot. Without this, the title would catch mid-decode
+        // ("CONCRE3I OCNJQT") and the parallax layers would catch
+        // mid-shift.
+        reducedMotion: "reduce",
       });
       const page = await ctx.newPage();
       stdout.write(`[screenshots] ${shot.name}…\n`);
@@ -110,7 +116,9 @@ async function capture(): Promise<void> {
       // long after first paint, and Playwright counts that as work.
       await page.goto(BASE_URL, { waitUntil: "domcontentloaded" });
       await page.locator('[data-testid="main-menu"]').waitFor({ timeout: 10_000 });
-      await sleep(400);
+      // Even with reducedMotion, give React a tick to commit the static
+      // title state instead of the scramble initial state.
+      await sleep(200);
       // 1. MainMenu shot.
       await page.screenshot({
         path: `${OUT_DIR}/${shot.name}-01-mainmenu.png`,
