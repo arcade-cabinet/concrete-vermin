@@ -41,6 +41,19 @@ export interface SplashSnapshot {
   archetypeId: string;
 }
 
+export interface MuzzleFlash {
+  /** Player muzzle position (sim coords). */
+  x: number;
+  y: number;
+  /** Reticle direction at time of shot — the flash points this way. */
+  targetX: number;
+  targetY: number;
+  /** Sim time the flash spawned. Renderer uses (now - firedAt) to fade. */
+  firedAt: number;
+  /** How long the flash stays visible (s). */
+  ttlS: number;
+}
+
 export interface GameState {
   phase: MissionPhase;
   viewport: { width: number; height: number };
@@ -50,6 +63,9 @@ export interface GameState {
   vermin: ReadonlyArray<VerminSnapshot>;
   projectiles: ReadonlyArray<ProjectileSnapshot>;
   splashes: ReadonlyArray<SplashSnapshot>;
+  muzzleFlashes: ReadonlyArray<MuzzleFlash>;
+  /** Sim seconds since mission start — published every frame for time-based fades. */
+  now: number;
   missionId: string;
   missionStartedAt: number;
   killsRequired: number;
@@ -60,7 +76,17 @@ export interface GameState {
   setReticle: (x: number, y: number) => void;
   setSnapshot: (
     snap: Partial<
-      Pick<GameState, "vermin" | "projectiles" | "splashes" | "score" | "player" | "killCount">
+      Pick<
+        GameState,
+        | "vermin"
+        | "projectiles"
+        | "splashes"
+        | "muzzleFlashes"
+        | "score"
+        | "player"
+        | "killCount"
+        | "now"
+      >
     >,
   ) => void;
   startMission: (id: string, killsRequired: number) => void;
@@ -76,6 +102,8 @@ export const useGameStore = create<GameState>((set) => ({
   vermin: [],
   projectiles: [],
   splashes: [],
+  muzzleFlashes: [],
+  now: 0,
   missionId: "",
   missionStartedAt: 0,
   killsRequired: 0,
@@ -95,6 +123,8 @@ export const useGameStore = create<GameState>((set) => ({
       vermin: [],
       projectiles: [],
       splashes: [],
+      muzzleFlashes: [],
+      now: 0,
     }),
   endMission: (won) => set({ phase: won ? "won" : "lost" }),
 }));
