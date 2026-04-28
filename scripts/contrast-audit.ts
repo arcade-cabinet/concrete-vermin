@@ -40,17 +40,19 @@ const ROW = (p: Pair, ratio: number, ok: boolean) =>
   `${ok ? "✓" : "✗"}  ${p.fgName.padEnd(16)} on ${p.bgName.padEnd(20)} ${ratio.toFixed(2)}:1  [${p.kind}]  ${p.context}`;
 
 let failed = 0;
-console.log("# WCAG 2.1 AA brand-token contrast audit\n");
+const out = (s: string) => process.stdout.write(`${s}\n`);
+const err = (s: string) => process.stderr.write(`${s}\n`);
+out("# WCAG 2.1 AA brand-token contrast audit\n");
 for (const p of PAIRS) {
   const ratio = contrast(p.fg, p.bg);
   const floor = p.kind === "text" ? AA_THRESHOLD.text : AA_THRESHOLD.ui;
   const ok = ratio >= floor;
   if (!ok) failed++;
-  console.log(ROW(p, ratio, ok));
+  out(ROW(p, ratio, ok));
 }
-console.log("");
+out("");
 if (failed > 0) {
-  console.error(`FAIL: ${failed} pair(s) below WCAG AA threshold.`);
+  err(`FAIL: ${failed} pair(s) below WCAG AA threshold.`);
   process.exit(1);
 }
-console.log(`OK: all ${PAIRS.length} pairs meet WCAG AA.`);
+out(`OK: all ${PAIRS.length} pairs meet WCAG AA.`);

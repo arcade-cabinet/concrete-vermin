@@ -12,6 +12,8 @@ import axe from "axe-core";
 import { afterEach, describe, expect, it } from "vitest";
 import { useGameStore } from "../../runtime/store";
 import { Briefing } from "../Briefing";
+import { Credits } from "../Credits";
+import { MainMenu } from "../MainMenu";
 import { MissionResult } from "../MissionResult";
 import { MissionSelect } from "../MissionSelect";
 import { PawnShop } from "../PawnShop";
@@ -31,10 +33,24 @@ async function runAxe(container: HTMLElement) {
 }
 
 afterEach(() => {
-  useGameStore.setState({ phase: "briefing", missionId: "", missionAct: "streets" });
+  useGameStore.setState({ phase: "main-menu", missionId: "", missionAct: "streets" });
 });
 
 describe("a11y axe smoke", () => {
+  it("MainMenu has no axe violations", async () => {
+    const { container, unmount } = render(<MainMenu />);
+    const v = await runAxe(container);
+    expect(v, JSON.stringify(v, null, 2)).toEqual([]);
+    unmount();
+  });
+
+  it("Credits has no axe violations", async () => {
+    const { container, unmount } = render(<Credits />);
+    const v = await runAxe(container);
+    expect(v, JSON.stringify(v, null, 2)).toEqual([]);
+    unmount();
+  });
+
   it("MissionSelect has no axe violations", async () => {
     const { container, unmount } = render(<MissionSelect onPickMission={() => {}} />);
     const v = await runAxe(container);

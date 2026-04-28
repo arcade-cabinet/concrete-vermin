@@ -26,18 +26,23 @@ test.describe("tutorial clear", () => {
 
     await page.goto("/");
 
+    // Main menu → Press Start (sends to Briefing for fresh runs)
+    const start = page.getByTestId("main-menu-start");
+    await expect(start).toBeVisible({ timeout: 15_000 });
+    await start.click();
+
     // Briefing screen → Begin
-    const begin = page.getByRole("button", { name: /^begin$/i });
+    const begin = page.getByRole("button", { name: /^▸ begin$|^begin$/i });
     await expect(begin).toBeVisible({ timeout: 15_000 });
     await begin.click();
 
     // Mission select → DEPLOY (first mission is unlocked by default)
-    const deploy = page.getByRole("button", { name: /^deploy/i });
+    const deploy = page.getByRole("button", { name: /^deploy\b/i });
     await expect(deploy).toBeVisible({ timeout: 10_000 });
     await deploy.click();
 
     // Pawn shop → DEPLOY (with no mods)
-    const deployFromShop = page.getByRole("button", { name: /^deploy/i });
+    const deployFromShop = page.getByRole("button", { name: /^deploy\b/i });
     await expect(deployFromShop).toBeVisible({ timeout: 10_000 });
     await deployFromShop.click();
 
