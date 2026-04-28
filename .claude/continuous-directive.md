@@ -152,9 +152,9 @@ Each `[ ]` is one commit. Group small ones into one PR; large surfaces get their
 ### v1.0-MOBILE-VERIFY — Android emulator end-to-end
 
 - [ ] pnpm cap:sync && launch Android emulator from CI/local — confirm boots into MainMenu
-- [ ] android/app/src/main/res/: app icon set (mdpi/hdpi/xhdpi/xxhdpi/xxxhdpi)
-- [ ] android/app/src/main/res/values/styles.xml: splash screen branded (subway-tile background + logo)
-- [ ] android/app/src/main/AndroidManifest.xml: orientation lock — landscape phone, free tablet
+- [x] android/app/src/main/res/: app icon set (mdpi/hdpi/xhdpi/xxhdpi/xxxhdpi)
+- [x] android/app/src/main/res/values/styles.xml: splash screen branded (subway-tile background + logo)
+- [x] android/app/src/main/AndroidManifest.xml: orientation lock — landscape phone, free tablet
 - [ ] src/platform/lifecycle.ts: background → foreground correctly pauses runner; verified
 - [ ] tests: e2e/android-launch.spec.ts — Capacitor launch smoke (emulator-driven where CI supports)
 - [ ] docs/DEPLOYMENT.md: Android QA checklist updated to reflect actual emulator runs
