@@ -20,7 +20,9 @@ import streetsSecretCellar from "./missions/streets-secret-cellar.json" with { t
 import underworld05 from "./missions/underworld-05-subway.json" with { type: "json" };
 import underworld06 from "./missions/underworld-06-sewer-shallows.json" with { type: "json" };
 import underworld07 from "./missions/underworld-07-river-mutant.json" with { type: "json" };
-import underworldSecretCathedral from "./missions/underworld-secret-cathedral.json" with { type: "json" };
+import underworldSecretCathedral from "./missions/underworld-secret-cathedral.json" with {
+  type: "json",
+};
 
 const settingSchema = z
   .object({

@@ -36,7 +36,10 @@ describe("createObjectPool", () => {
     // 4th acquire — pool is full, oldest (id=0) gets evicted.
     pool.acquire().id = 99;
     expect(pool.liveCount).toBe(3);
-    const ids = pool.liveSnapshot().map((e) => e.id).sort((a, b) => a - b);
+    const ids = pool
+      .liveSnapshot()
+      .map((e) => e.id)
+      .sort((a, b) => a - b);
     expect(ids).toContain(99);
     expect(ids).not.toContain(0);
   });

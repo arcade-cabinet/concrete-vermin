@@ -55,12 +55,30 @@ export function PawnShop({ onContinue, onBack }: { onContinue: () => void; onBac
         fontFamily: TYPE.faceDisplay,
       }}
     >
-      <header style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", flexWrap: "wrap", gap: 8 }}>
+      <header
+        style={{
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "baseline",
+          flexWrap: "wrap",
+          gap: 8,
+        }}
+      >
         <div>
-          <h2 style={{ color: COLOR.sodium, margin: 0, letterSpacing: "0.2em", fontSize: "1.5rem" }}>
+          <h2
+            style={{ color: COLOR.sodium, margin: 0, letterSpacing: "0.2em", fontSize: "1.5rem" }}
+          >
             MANGIONE'S NEWS &amp; TOBACCO
           </h2>
-          <p style={{ color: COLOR.creamDim, fontFamily: TYPE.faceMono, fontSize: 11, margin: "4px 0 0", letterSpacing: "0.15em" }}>
+          <p
+            style={{
+              color: COLOR.creamDim,
+              fontFamily: TYPE.faceMono,
+              fontSize: 11,
+              margin: "4px 0 0",
+              letterSpacing: "0.15em",
+            }}
+          >
             EST. 1923 · DISCRETION ASSURED
           </p>
         </div>
@@ -69,7 +87,9 @@ export function PawnShop({ onContinue, onBack }: { onContinue: () => void; onBac
           <span style={{ color: COLOR.cream }}>${cash.toLocaleString()}</span>
           {"   "}
           <span style={{ color: COLOR.sodium }}>SLOTS</span>{" "}
-          <span style={{ color: COLOR.cream }}>{activeMods.length}/{MAX_LOADOUT_SLOTS}</span>
+          <span style={{ color: COLOR.cream }}>
+            {activeMods.length}/{MAX_LOADOUT_SLOTS}
+          </span>
         </div>
       </header>
 
@@ -137,9 +157,15 @@ export function PawnShop({ onContinue, onBack }: { onContinue: () => void; onBac
               <div style={{ color: COLOR.sodium, letterSpacing: "0.18em", marginBottom: 4 }}>
                 JOB SLIP
               </div>
-              <div>For: <span style={{ color: COLOR.cream }}>{mission.id}</span></div>
-              <div>Weapon: <span style={{ color: COLOR.cream }}>{mission.weapon}</span></div>
-              <div>Lives: <span style={{ color: COLOR.cream }}>{mission.livesAllowance}</span></div>
+              <div>
+                For: <span style={{ color: COLOR.cream }}>{mission.id}</span>
+              </div>
+              <div>
+                Weapon: <span style={{ color: COLOR.cream }}>{mission.weapon}</span>
+              </div>
+              <div>
+                Lives: <span style={{ color: COLOR.cream }}>{mission.livesAllowance}</span>
+              </div>
             </div>
           ) : null}
         </aside>
@@ -204,10 +230,21 @@ export function PawnShop({ onContinue, onBack }: { onContinue: () => void; onBac
                     {mod.slot.toUpperCase().slice(0, 4)}
                   </span>
                   <span style={{ display: "flex", flexDirection: "column", gap: 2, minWidth: 0 }}>
-                    <strong style={{ color: equipped ? COLOR.bgConcreteDark : COLOR.cream, fontWeight: 700 }}>
+                    <strong
+                      style={{
+                        color: equipped ? COLOR.bgConcreteDark : COLOR.cream,
+                        fontWeight: 700,
+                      }}
+                    >
                       {mod.name}
                     </strong>
-                    <span style={{ fontSize: 11, color: equipped ? COLOR.bgConcreteDark : COLOR.creamDim, letterSpacing: "0.05em" }}>
+                    <span
+                      style={{
+                        fontSize: 11,
+                        color: equipped ? COLOR.bgConcreteDark : COLOR.creamDim,
+                        letterSpacing: "0.05em",
+                      }}
+                    >
                       {modBlurb(mod)}
                     </span>
                   </span>
@@ -285,9 +322,15 @@ export function PawnShop({ onContinue, onBack }: { onContinue: () => void; onBac
   );
 }
 
-function modBlurb(mod: { slot: string; damageMod?: number; spreadMul?: number; magSizeAdd?: number }) {
+function modBlurb(mod: {
+  slot: string;
+  damageMod?: number;
+  spreadMul?: number;
+  magSizeAdd?: number;
+}) {
   const parts: string[] = [];
-  if (mod.damageMod && mod.damageMod !== 1) parts.push(`+${Math.round((mod.damageMod - 1) * 100)}% DMG`);
+  if (mod.damageMod && mod.damageMod !== 1)
+    parts.push(`+${Math.round((mod.damageMod - 1) * 100)}% DMG`);
   if (mod.spreadMul && mod.spreadMul < 1) parts.push("tighter spread");
   if (mod.spreadMul && mod.spreadMul > 1) parts.push("wider spread");
   if (mod.magSizeAdd && mod.magSizeAdd > 0) parts.push(`+${mod.magSizeAdd} mag`);

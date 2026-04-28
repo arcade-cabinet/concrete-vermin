@@ -158,16 +158,21 @@ function runProfile(profile: ProfileName): void {
       const t = thresholds.get(s.missionId);
       if (!t) continue;
       if (g === "median") {
-        if (s.clearRate < 0.4) failures.push(`${s.missionId}: median clear ${pct(s.clearRate)} < 40% floor`);
+        if (s.clearRate < 0.4)
+          failures.push(`${s.missionId}: median clear ${pct(s.clearRate)} < 40% floor`);
         const dur = s.meanDurationS;
         const lo = t.parDurationS - t.parDurationWindowS;
         const hi = t.parDurationS + t.parDurationWindowS;
         if (dur < lo || dur > hi) {
-          failures.push(`${s.missionId}: median duration ${dur.toFixed(0)}s outside par ${lo}-${hi}s`);
+          failures.push(
+            `${s.missionId}: median duration ${dur.toFixed(0)}s outside par ${lo}-${hi}s`,
+          );
         }
       }
       if (g === "trash" && s.clearRate < t.trashClearRateMin) {
-        failures.push(`${s.missionId}: trash clear ${pct(s.clearRate)} < ${pct(t.trashClearRateMin)} floor`);
+        failures.push(
+          `${s.missionId}: trash clear ${pct(s.clearRate)} < ${pct(t.trashClearRateMin)} floor`,
+        );
       }
     }
   }

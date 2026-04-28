@@ -88,8 +88,8 @@ export function pollGamepadFrame(
   }
 
   const fireNow = (gamepad.buttons[7]?.value ?? 0) > triggerThreshold;
-  const reloadNow = !!(gamepad.buttons[4]?.pressed);
-  const pauseNow = !!(gamepad.buttons[9]?.pressed);
+  const reloadNow = !!gamepad.buttons[4]?.pressed;
+  const pauseNow = !!gamepad.buttons[9]?.pressed;
 
   if (fireNow && !prev.fire) handler.onFire();
   if (!fireNow && prev.fire) handler.onFireRelease?.();
@@ -104,10 +104,7 @@ export function pollGamepadFrame(
  * function. Safe in node/SSR (no-op if navigator.getGamepads is
  * missing).
  */
-export function installGamepad(
-  handler: GamepadHandler,
-  opts: GamepadOptions = {},
-): () => void {
+export function installGamepad(handler: GamepadHandler, opts: GamepadOptions = {}): () => void {
   if (
     typeof navigator === "undefined" ||
     typeof navigator.getGamepads !== "function" ||

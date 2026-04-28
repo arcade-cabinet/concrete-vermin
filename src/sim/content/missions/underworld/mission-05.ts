@@ -52,7 +52,7 @@ export const mission05: Mission = defineMission({
     {
       id: "pawn-mac10-warning",
       trigger: { kind: "at-time", seconds: 2 },
-      effect: { kind: "boss-bark", text: "Pawnbroker: \"Mac-10 dumps the mag fast. Pace it.\"" },
+      effect: { kind: "boss-bark", text: 'Pawnbroker: "Mac-10 dumps the mag fast. Pace it."' },
     },
     {
       id: "tunnel-cats",
@@ -71,7 +71,12 @@ export const mission05: Mission = defineMission({
     {
       id: "tunnel-roach-extra",
       trigger: { kind: "at-kill-count", threshold: 18 },
-      effect: { kind: "surprise-wave", variant: "roach-massive", count: 3, pattern: "pop-from-vent" },
+      effect: {
+        kind: "surprise-wave",
+        variant: "roach-massive",
+        count: 3,
+        pattern: "pop-from-vent",
+      },
     },
   ],
   seed: 1979_02_05,

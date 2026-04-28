@@ -47,7 +47,7 @@ export const secretStreetsCellar: Mission = defineMission({
       trigger: { kind: "at-time", seconds: 3 },
       effect: {
         kind: "boss-bark",
-        text: "Halpern: \"Whatever you find down there, leave it.\"",
+        text: 'Halpern: "Whatever you find down there, leave it."',
       },
     },
     {

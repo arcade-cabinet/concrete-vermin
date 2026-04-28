@@ -47,7 +47,7 @@ export const mission06: Mission = defineMission({
     {
       id: "warm-water-warning",
       trigger: { kind: "at-time", seconds: 4 },
-      effect: { kind: "boss-bark", text: "Pawnbroker: \"If the water boils, run.\"" },
+      effect: { kind: "boss-bark", text: 'Pawnbroker: "If the water boils, run."' },
     },
     {
       id: "pipe-burst",
@@ -61,12 +61,20 @@ export const mission06: Mission = defineMission({
     {
       id: "deeper-encounter-bark",
       trigger: { kind: "at-encounter-start", index: 1 },
-      effect: { kind: "boss-bark", text: "DiSalvo's tag is in the deeper water. Don't dive for it." },
+      effect: {
+        kind: "boss-bark",
+        text: "DiSalvo's tag is in the deeper water. Don't dive for it.",
+      },
     },
     {
       id: "roach-flood-extra",
       trigger: { kind: "at-kill-count", threshold: 14 },
-      effect: { kind: "surprise-wave", variant: "roach-radioactive", count: 3, pattern: "pop-from-vent" },
+      effect: {
+        kind: "surprise-wave",
+        variant: "roach-radioactive",
+        count: 3,
+        pattern: "pop-from-vent",
+      },
     },
     {
       id: "current-shifts",

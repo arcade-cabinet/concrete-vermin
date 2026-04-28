@@ -51,7 +51,7 @@ export const mission02: Mission = defineMission({
     {
       id: "carter-bark",
       trigger: { kind: "at-kill-count", threshold: 5 },
-      effect: { kind: "boss-bark", text: "Pawnbroker: \"Don't step on the matchbook.\"" },
+      effect: { kind: "boss-bark", text: 'Pawnbroker: "Don\'t step on the matchbook."' },
     },
     {
       id: "vent-pop",

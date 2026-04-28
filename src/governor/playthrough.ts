@@ -80,7 +80,8 @@ export function playMissionWithGovernor(
   opts: PlaythroughOpts = {},
 ): PlaythroughResult {
   const profileOverride = MISSION_PROFILE_OVERRIDES[mission.id];
-  const profile = opts.profile ?? (profileOverride ? { ...PLAYTHROUGH, ...profileOverride } : PLAYTHROUGH);
+  const profile =
+    opts.profile ?? (profileOverride ? { ...PLAYTHROUGH, ...profileOverride } : PLAYTHROUGH);
   const maxSimSeconds = opts.maxSimSeconds ?? 180;
   const override = MISSION_SHOOTER_OVERRIDES[mission.id];
   const defaultPos = { x: 240, y: 260 };

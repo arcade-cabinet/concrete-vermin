@@ -231,7 +231,15 @@ export function MissionResult() {
           </blockquote>
         ) : null}
 
-        <div style={{ marginTop: 18, fontSize: 11, color: "#5a4838", textAlign: "right", letterSpacing: "0.1em" }}>
+        <div
+          style={{
+            marginTop: 18,
+            fontSize: 11,
+            color: "#5a4838",
+            textAlign: "right",
+            letterSpacing: "0.1em",
+          }}
+        >
           BY THE PAWNBROKER, STAFF
         </div>
       </article>
@@ -332,7 +340,8 @@ function gradeFromScore(score: number): "S+" | "S" | "A" | "B" | "C" | "D" {
 
 function winCallouts(grade: string, kills: number): ReadonlyArray<string> {
   const out: string[] = [];
-  if (grade === "S+" || grade === "S") out.push("Witnesses describe a 'rhythmic, almost musical' clearance.");
+  if (grade === "S+" || grade === "S")
+    out.push("Witnesses describe a 'rhythmic, almost musical' clearance.");
   if (kills >= 14) out.push("Pawnbroker raises a glass: 'I knew the kid had it.'");
   if (kills >= 6) out.push("Health Department grateful for the assist.");
   if (out.length === 0) out.push("The block sleeps a little easier tonight.");

@@ -187,9 +187,7 @@ describe("GameRunner mission events", () => {
   it("event barks evict from the snapshot after their TTL", () => {
     const r = new GameRunner(mission01, [], 1234);
     step(r, 4.5);
-    expect(
-      useGameStore.getState().eventBarks.find((b) => b.id === "halpern-call-1"),
-    ).toBeDefined();
+    expect(useGameStore.getState().eventBarks.find((b) => b.id === "halpern-call-1")).toBeDefined();
     // EVENT_BARK_TTL_S is 5 s; advance another 6 s of sim time.
     step(r, 6);
     expect(

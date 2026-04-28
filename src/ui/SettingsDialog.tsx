@@ -126,13 +126,22 @@ function DbSlider({
         height: 24,
       }}
     >
-      <Slider.Track style={{ background: COLOR.borderMute, position: "relative", flexGrow: 1, height: 2 }}>
+      <Slider.Track
+        style={{ background: COLOR.borderMute, position: "relative", flexGrow: 1, height: 2 }}
+      >
         <Slider.Range style={{ position: "absolute", background: COLOR.sodium, height: 2 }} />
       </Slider.Track>
       <Slider.Thumb
         aria-label={ariaLabel}
         aria-describedby={ariaDescribedBy}
-        style={{ display: "block", width: 14, height: 14, background: COLOR.sodium, borderRadius: "50%", cursor: "pointer" }}
+        style={{
+          display: "block",
+          width: 14,
+          height: 14,
+          background: COLOR.sodium,
+          borderRadius: "50%",
+          cursor: "pointer",
+        }}
       />
     </Slider.Root>
   );
@@ -229,7 +238,14 @@ function Category({ value, title, caption, children }: CategoryProps) {
           >
             <span>
               {title}
-              <span style={{ marginLeft: 10, color: COLOR.creamDim, letterSpacing: "0.1em", fontSize: 10 }}>
+              <span
+                style={{
+                  marginLeft: 10,
+                  color: COLOR.creamDim,
+                  letterSpacing: "0.1em",
+                  fontSize: 10,
+                }}
+              >
                 {caption}
               </span>
             </span>

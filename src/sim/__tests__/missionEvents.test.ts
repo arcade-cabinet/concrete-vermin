@@ -24,10 +24,9 @@ describe("mission events catalog", () => {
     for (const m of ALL) {
       for (const ev of m.events) {
         if (ev.trigger.kind !== "at-encounter-start") continue;
-        expect(
-          ev.trigger.index,
-          `${m.id}/${ev.id}: encounter index out of range`,
-        ).toBeLessThan(m.encounters.length);
+        expect(ev.trigger.index, `${m.id}/${ev.id}: encounter index out of range`).toBeLessThan(
+          m.encounters.length,
+        );
       }
     }
   });

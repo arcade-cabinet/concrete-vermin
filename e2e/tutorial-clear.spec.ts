@@ -58,7 +58,11 @@ test.describe("tutorial clear", () => {
     await expect(deploy).toBeVisible({ timeout: 10_000 });
     await deploy.click();
     // Wait for the Pixi canvas to mount before continuing.
-    await page.waitForFunction(() => document.querySelector('[data-testid="game-stage"]') !== null, null, { timeout: 15_000 });
+    await page.waitForFunction(
+      () => document.querySelector('[data-testid="game-stage"]') !== null,
+      null,
+      { timeout: 15_000 },
+    );
 
     // Game canvas
     const stage = page.getByTestId("game-stage");

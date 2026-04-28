@@ -23,20 +23,20 @@ export function NapalmPoolLayer() {
         const alpha = Math.max(0, Math.min(1, baseAlpha + pulse));
 
         // Outer halo — transparent sodium amber ring.
-        g.circle(pool.x, pool.y, pool.radius)
-          .fill({ color: 0xd4943a, alpha: alpha * 0.25 });
+        g.circle(pool.x, pool.y, pool.radius).fill({ color: 0xd4943a, alpha: alpha * 0.25 });
 
         // Core — brighter amber, smaller radius.
-        g.circle(pool.x, pool.y, pool.radius * 0.55)
-          .fill({ color: 0xf0a830, alpha: alpha * 0.55 });
+        g.circle(pool.x, pool.y, pool.radius * 0.55).fill({ color: 0xf0a830, alpha: alpha * 0.55 });
 
         // Hot center pip — near-white, tightest.
-        g.circle(pool.x, pool.y, pool.radius * 0.2)
-          .fill({ color: 0xfff0c8, alpha: alpha * 0.7 });
+        g.circle(pool.x, pool.y, pool.radius * 0.2).fill({ color: 0xfff0c8, alpha: alpha * 0.7 });
 
         // Brick-red ember ring stroke.
-        g.circle(pool.x, pool.y, pool.radius)
-          .stroke({ color: 0x8a2810, width: 1.5, alpha: alpha * 0.6 });
+        g.circle(pool.x, pool.y, pool.radius).stroke({
+          color: 0x8a2810,
+          width: 1.5,
+          alpha: alpha * 0.6,
+        });
       }
     },
     [napalmPools, now],

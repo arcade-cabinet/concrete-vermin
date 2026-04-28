@@ -125,7 +125,13 @@ function MenuButton({
 function CornerBrackets({ color }: { color: string }) {
   const len = 8;
   const w = 1;
-  const corners: Array<{ top?: number; left?: number; right?: number; bottom?: number; rot: number }> = [
+  const corners: Array<{
+    top?: number;
+    left?: number;
+    right?: number;
+    bottom?: number;
+    rot: number;
+  }> = [
     { top: -2, left: -2, rot: 0 },
     { top: -2, right: -2, rot: 90 },
     { bottom: -2, right: -2, rot: 180 },
@@ -216,8 +222,8 @@ export function MainMenu() {
           maxWidth: 540,
         }}
       >
-        Bedford-Stuyvesant, summer 1979. The vermin are not behaving normally.
-        The Pawnbroker is hiring.
+        Bedford-Stuyvesant, summer 1979. The vermin are not behaving normally. The Pawnbroker is
+        hiring.
       </p>
       <div ref={gridRef} style={{ display: "flex", flexDirection: "column", gap: 12 }}>
         <button
@@ -247,9 +253,7 @@ export function MainMenu() {
           <CornerBrackets color={COLOR.bgConcreteDark} />
           {hasProgress ? "Continue" : "Press Start"}
         </button>
-        {hasProgress ? (
-          <MenuButton label="New Run" onClick={() => setPhase("briefing")} />
-        ) : null}
+        {hasProgress ? <MenuButton label="New Run" onClick={() => setPhase("briefing")} /> : null}
         <MenuButton label="Market" onClick={() => setMarketOpen(true)} />
         <MenuButton label="Achievements" onClick={() => setAchievementsOpen(true)} />
         <MenuButton label="Settings" onClick={() => setSettingsOpen(true)} />

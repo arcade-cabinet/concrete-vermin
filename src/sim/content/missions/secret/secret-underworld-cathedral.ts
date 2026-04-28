@@ -45,7 +45,7 @@ export const secretUnderworldCathedral: Mission = defineMission({
     {
       id: "chalk-warning",
       trigger: { kind: "at-time", seconds: 4 },
-      effect: { kind: "boss-bark", text: "Pawnbroker: \"Don't touch the walls.\"" },
+      effect: { kind: "boss-bark", text: 'Pawnbroker: "Don\'t touch the walls."' },
     },
     {
       id: "third-rail-glow",
@@ -64,7 +64,12 @@ export const secretUnderworldCathedral: Mission = defineMission({
     {
       id: "fish-from-altar",
       trigger: { kind: "at-kill-count", threshold: 10 },
-      effect: { kind: "surprise-wave", variant: "sewer-fish-engorged", count: 3, pattern: "surface-from-grate" },
+      effect: {
+        kind: "surprise-wave",
+        variant: "sewer-fish-engorged",
+        count: 3,
+        pattern: "surface-from-grate",
+      },
     },
     {
       id: "altar-rises",

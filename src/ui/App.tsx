@@ -109,10 +109,10 @@ export function App() {
         return acc + enc;
       }, 0);
       startMission(id, Math.max(MISSION_KILLS_REQUIRED, total), m.act);
-      const title = id
-        .replace(/^[a-z]+-\d+-/, "")
-        .replace(/-/g, " ");
-      useGameStore.getState().announceForScreenReader(srMissionStart(title, m.weapon).text, "polite");
+      const title = id.replace(/^[a-z]+-\d+-/, "").replace(/-/g, " ");
+      useGameStore
+        .getState()
+        .announceForScreenReader(srMissionStart(title, m.weapon).text, "polite");
     } catch {
       // Bad id — fallback to tutorial.
       startMission("streets-01-bodega", MISSION_KILLS_REQUIRED, "streets");

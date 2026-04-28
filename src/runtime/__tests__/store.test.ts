@@ -70,7 +70,18 @@ describe("startMission resets the snapshot but layers in the mission scaffolding
   it("zeroes vermin / projectiles / muzzle flashes / event barks", () => {
     useGameStore.setState({
       vermin: [
-        { id: 1, archetypeId: "rat", x: 0, y: 0, vx: 0, vy: 0, width: 0, height: 0, health: 0, maxHealth: 0 },
+        {
+          id: 1,
+          archetypeId: "rat",
+          x: 0,
+          y: 0,
+          vx: 0,
+          vy: 0,
+          width: 0,
+          height: 0,
+          health: 0,
+          maxHealth: 0,
+        },
       ],
       projectiles: [{ id: 1, x: 0, y: 0, vx: 0, vy: 0 }],
       muzzleFlashes: [{ x: 0, y: 0, targetX: 0, targetY: 0, firedAt: 0, ttlS: 0 }],

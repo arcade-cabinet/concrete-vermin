@@ -118,10 +118,9 @@ export function Briefing() {
             margin: "0 0 16px",
           }}
         >
-          The backroom of <strong>Mangione's News &amp; Tobacco</strong> has been
-          moving since dawn. Eight, by the count of the kid sweeping up. The
-          old man hands you the shotgun your father carried.{" "}
-          <em>Tap anywhere to fire.</em>
+          The backroom of <strong>Mangione's News &amp; Tobacco</strong> has been moving since dawn.
+          Eight, by the count of the kid sweeping up. The old man hands you the shotgun your father
+          carried. <em>Tap anywhere to fire.</em>
         </p>
 
         <section

@@ -24,9 +24,7 @@ export function installAchievementsTracker(): () => void {
   const unsubGame = useGameStore.subscribe((s, prev) => {
     // Mission-end pulses: evaluate when phase flips into won or lost.
     const ended =
-      (s.phase === "won" || s.phase === "lost") &&
-      prev.phase !== "won" &&
-      prev.phase !== "lost";
+      (s.phase === "won" || s.phase === "lost") && prev.phase !== "won" && prev.phase !== "lost";
     if (!ended) return;
     evaluateOnce(s.phase === "won");
   });

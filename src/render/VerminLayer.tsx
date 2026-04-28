@@ -409,7 +409,11 @@ const drawDefault = (
  * waggle. Keeps the actual draw functions deterministic; animation is
  * a transform applied at draw time.
  */
-function idleModulator(archetypeId: string, x: number, now: number): {
+function idleModulator(
+  archetypeId: string,
+  x: number,
+  now: number,
+): {
   bobY: number;
   wiggle: number;
 } {

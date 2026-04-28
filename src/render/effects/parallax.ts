@@ -30,7 +30,11 @@ export interface ParallaxOffset {
  * Per-layer offset at sim time `nowS`. Reduced-motion zeroes the
  * result so reduced-motion players see a fixed camera.
  */
-export function parallaxOffset(layer: ParallaxLayer, nowS: number, reduced: boolean): ParallaxOffset {
+export function parallaxOffset(
+  layer: ParallaxLayer,
+  nowS: number,
+  reduced: boolean,
+): ParallaxOffset {
   if (reduced) return { dx: 0, dy: 0 };
   const amp = AMPLITUDE_PX[layer];
   const phase = (nowS / PERIOD_S) * Math.PI * 2;

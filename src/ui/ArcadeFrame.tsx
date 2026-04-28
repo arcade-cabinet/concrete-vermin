@@ -251,8 +251,7 @@ function ScoreReadout() {
         flex: "none",
       }}
     >
-      <span style={{ color: COLOR.sodium }}>SCORE</span>{" "}
-      {displayed.toString().padStart(6, "0")}
+      <span style={{ color: COLOR.sodium }}>SCORE</span> {displayed.toString().padStart(6, "0")}
       {"  "}
       <span style={{ color: COLOR.sodium }}>×{score.multiplier.toFixed(1)}</span>
     </span>
@@ -597,9 +596,7 @@ function EventBarks() {
   // assistive tech that doesn't reach SrLiveRegion still picks up the
   // message in context.
   const latest = visible[0] ?? null;
-  const liveText = latest
-    ? `${latest.text}${latest.detail ? ` — ${latest.detail}` : ""}`
-    : "";
+  const liveText = latest ? `${latest.text}${latest.detail ? ` — ${latest.detail}` : ""}` : "";
   return (
     <div
       data-testid="hud-event-barks"

@@ -1,10 +1,6 @@
 import { useGameStore } from "../runtime/store";
 import { getMissionLore } from "../sim/content/lore";
-import {
-  getMission,
-  listMissionsByAct,
-  listSecretMissionsByAct,
-} from "../sim/content/missions";
+import { getMission, listMissionsByAct, listSecretMissionsByAct } from "../sim/content/missions";
 import { ACT_IDS, type ActId } from "../sim/factories/mission";
 import { useArrowGridNav } from "./hooks/useArrowGridNav";
 import { useIsNarrow } from "./hooks/useViewport";
@@ -177,10 +173,20 @@ export function MissionSelect({ onPickMission }: { onPickMission: (id: string) =
         }}
       >
         <div>
-          <h2 style={{ color: COLOR.sodium, margin: 0, letterSpacing: "0.2em", fontSize: "1.6rem" }}>
+          <h2
+            style={{ color: COLOR.sodium, margin: 0, letterSpacing: "0.2em", fontSize: "1.6rem" }}
+          >
             SELECT LINE · STOP
           </h2>
-          <p style={{ color: COLOR.creamDim, fontFamily: TYPE.faceMono, fontSize: 11, margin: "4px 0 0", letterSpacing: "0.15em" }}>
+          <p
+            style={{
+              color: COLOR.creamDim,
+              fontFamily: TYPE.faceMono,
+              fontSize: 11,
+              margin: "4px 0 0",
+              letterSpacing: "0.15em",
+            }}
+          >
             METRO TRANSIT AUTHORITY · 1979
           </p>
         </div>

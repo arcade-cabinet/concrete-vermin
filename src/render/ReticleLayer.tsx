@@ -139,7 +139,14 @@ function drawTicks(g: PixiGraphics, x: number, y: number, r: number, tickW: numb
  * @param progress Charge progress in [0, 1]
  */
 // biome-ignore lint/suspicious/noExplicitAny: Graphics type erased for testability outside pixi.js
-export function drawChargeRing(g: any, x: number, y: number, radius: number, shape: string, progress: number): void {
+export function drawChargeRing(
+  g: any,
+  x: number,
+  y: number,
+  radius: number,
+  shape: string,
+  progress: number,
+): void {
   if (progress <= 0) return;
   const alpha = 0.8 + 0.2 * progress;
   const endAngle = -Math.PI / 2 + 2 * Math.PI * progress;

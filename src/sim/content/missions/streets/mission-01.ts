@@ -39,7 +39,7 @@ export const mission01: Mission = defineMission({
     {
       id: "halpern-call-1",
       trigger: { kind: "at-time", seconds: 4 },
-      effect: { kind: "boss-bark", text: "Halpern: \"Don't shoot up the freezer!\"" },
+      effect: { kind: "boss-bark", text: 'Halpern: "Don\'t shoot up the freezer!"' },
     },
     {
       id: "freezer-leak",
@@ -53,7 +53,7 @@ export const mission01: Mission = defineMission({
     {
       id: "second-room-pop",
       trigger: { kind: "at-encounter-start", index: 1 },
-      effect: { kind: "boss-bark", text: "Halpern: \"There's more behind the soda rack.\"" },
+      effect: { kind: "boss-bark", text: 'Halpern: "There\'s more behind the soda rack."' },
     },
     {
       id: "runt-ambush",

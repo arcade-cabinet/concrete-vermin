@@ -105,15 +105,17 @@ export class GameRunner {
     burstIndex: number;
     isCone: boolean;
   } | null = null;
-  private readonly muzzleFlashPool: ObjectPool<import("./store").MuzzleFlash> =
-    createObjectPool(MUZZLE_FLASH_POOL, () => ({
+  private readonly muzzleFlashPool: ObjectPool<import("./store").MuzzleFlash> = createObjectPool(
+    MUZZLE_FLASH_POOL,
+    () => ({
       x: 0,
       y: 0,
       targetX: 0,
       targetY: 0,
       firedAt: 0,
       ttlS: 0,
-    }));
+    }),
+  );
   private modifierFlashes: import("./store").ModifierFlashSnapshot[] = [];
   // Mid-mission event dispatch — each event fires at most once per
   // mission run. We track ids of fired events here so we don't double-
@@ -264,7 +266,11 @@ export class GameRunner {
     }
 
     // Auto-start reload when player tapped R / long-pressed.
-    if (this.pendingReload && this.reloadStartedAt === null && this.mag < this.tunedWeapon.magSize) {
+    if (
+      this.pendingReload &&
+      this.reloadStartedAt === null &&
+      this.mag < this.tunedWeapon.magSize
+    ) {
       this.reloadStartedAt = this.now;
       playWeaponReload(this.tunedWeapon.base.id);
     }
@@ -358,7 +364,12 @@ export class GameRunner {
         const tuned = this.tunedWeapon;
         const playerPos = { x: this.zone.maxX / 2, y: this.zone.maxY - 24 };
         const target = { x: bq.x, y: bq.y };
-        const fireOpts = { origin: playerPos, target, now: this.now, ownerEntity: this.gw.playerEntity };
+        const fireOpts = {
+          origin: playerPos,
+          target,
+          now: this.now,
+          ownerEntity: this.gw.playerEntity,
+        };
 
         if (bq.isCone) {
           // Widen spread per shot for the cone effect.
@@ -488,7 +499,10 @@ export class GameRunner {
           .awardCash(this.mission.cashAward ?? defaultCashFor(this.mission.act));
         // S-grade fanfare on a flawless run (no lives lost), otherwise
         // the standard win sting.
-        if (this.livesRemaining === this.mission.livesAllowance && this.playerHp === this.maxHpPerLife) {
+        if (
+          this.livesRemaining === this.mission.livesAllowance &&
+          this.playerHp === this.maxHpPerLife
+        ) {
           playSGradeFanfare();
         } else {
           playWinSting();
@@ -646,19 +660,26 @@ export class GameRunner {
     const tuned = this.tunedWeapon;
     const playerPos = { x: this.zone.maxX / 2, y: this.zone.maxY - 24 };
     const target = { x: aimX, y: aimY };
-    const fireOpts = { origin: playerPos, target, now: this.now, ownerEntity: this.gw.playerEntity };
+    const fireOpts = {
+      origin: playerPos,
+      target,
+      now: this.now,
+      ownerEntity: this.gw.playerEntity,
+    };
 
     switch (profile.effect) {
       case "double-barrel": {
         // Both barrels fire at the same coords — two independent shots.
         const spreads = Array.from(
           { length: tuned.base.pellets },
-          () => (this.gw.rng.fork(`charge:db1:${this.now.toFixed(3)}`).next() * 2 - 1) * tuned.spread,
+          () =>
+            (this.gw.rng.fork(`charge:db1:${this.now.toFixed(3)}`).next() * 2 - 1) * tuned.spread,
         );
         fireWeapon(this.gw.world, tuned, fireOpts, spreads);
         const spreads2 = Array.from(
           { length: tuned.base.pellets },
-          () => (this.gw.rng.fork(`charge:db2:${this.now.toFixed(3)}`).next() * 2 - 1) * tuned.spread,
+          () =>
+            (this.gw.rng.fork(`charge:db2:${this.now.toFixed(3)}`).next() * 2 - 1) * tuned.spread,
         );
         fireWeapon(this.gw.world, tuned, fireOpts, spreads2);
         break;
@@ -668,7 +689,8 @@ export class GameRunner {
         const extraPellets = Math.ceil(tuned.base.pellets * (1 + chargeProgress));
         const spreads = Array.from(
           { length: extraPellets },
-          () => (this.gw.rng.fork(`charge:ws:${this.now.toFixed(3)}`).next() * 2 - 1) * tuned.spread,
+          () =>
+            (this.gw.rng.fork(`charge:ws:${this.now.toFixed(3)}`).next() * 2 - 1) * tuned.spread,
         );
         fireWeapon(this.gw.world, tuned, fireOpts, spreads, extraPellets);
         break;
@@ -677,7 +699,8 @@ export class GameRunner {
         // 3 rapid single-pellet arcs.
         for (let i = 0; i < 3; i++) {
           const spreads = [
-            (this.gw.rng.fork(`charge:arc:${i}:${this.now.toFixed(3)}`).next() * 2 - 1) * tuned.spread,
+            (this.gw.rng.fork(`charge:arc:${i}:${this.now.toFixed(3)}`).next() * 2 - 1) *
+              tuned.spread,
           ];
           fireWeapon(this.gw.world, tuned, fireOpts, spreads, 1);
         }
@@ -722,16 +745,18 @@ export class GameRunner {
       case "napalm-pool": {
         // Spawn a burning puddle. Radius and DPS scale with charge progress.
         const ttlMs = 1000 + chargeProgress * 3000; // 1–4 s
-        const radius = 24 + chargeProgress * 16;    // 24–40 px
-        const dps = 15 + chargeProgress * 25;       // 15–40 dps
-        this.gw.world.spawn(NapalmPool({
-          x: aimX,
-          y: aimY,
-          radius,
-          dps,
-          ttlMs,
-          expiresAt: this.now * 1000 + ttlMs,
-        }));
+        const radius = 24 + chargeProgress * 16; // 24–40 px
+        const dps = 15 + chargeProgress * 25; // 15–40 dps
+        this.gw.world.spawn(
+          NapalmPool({
+            x: aimX,
+            y: aimY,
+            radius,
+            dps,
+            ttlMs,
+            expiresAt: this.now * 1000 + ttlMs,
+          }),
+        );
         break;
       }
     }

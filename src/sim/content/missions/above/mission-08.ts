@@ -43,7 +43,10 @@ export const mission08: Mission = defineMission({
     {
       id: "tesla-warning",
       trigger: { kind: "at-time", seconds: 3 },
-      effect: { kind: "boss-bark", text: "Pawnbroker: \"The rifle bites both ways. Don't ground yourself.\"" },
+      effect: {
+        kind: "boss-bark",
+        text: 'Pawnbroker: "The rifle bites both ways. Don\'t ground yourself."',
+      },
     },
     {
       id: "tar-soft",

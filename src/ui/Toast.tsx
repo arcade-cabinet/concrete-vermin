@@ -22,8 +22,16 @@ const _subs = new Set<(e: ToastEvent) => void>();
  * Use sparingly: cash earned, weapon unlocked, achievement unlocked.
  * Anything time-critical goes through the SR live region instead.
  */
-export function toast(title: string, opts: { body?: string; kind?: "info" | "win" | "warn" } = {}): void {
-  const e: ToastEvent = { id: ++_id, title, ...(opts.body ? { body: opts.body } : {}), kind: opts.kind ?? "info" };
+export function toast(
+  title: string,
+  opts: { body?: string; kind?: "info" | "win" | "warn" } = {},
+): void {
+  const e: ToastEvent = {
+    id: ++_id,
+    title,
+    ...(opts.body ? { body: opts.body } : {}),
+    kind: opts.kind ?? "info",
+  };
   for (const s of _subs) s(e);
 }
 
@@ -72,7 +80,14 @@ export function ToastHost() {
               : "cv-toast-slide-in 220ms cubic-bezier(0.16, 1, 0.3, 1)",
           }}
         >
-          <RToast.Title style={{ color: ACCENT[t.kind], letterSpacing: "0.15em", fontSize: 11, marginBottom: t.body ? 2 : 0 }}>
+          <RToast.Title
+            style={{
+              color: ACCENT[t.kind],
+              letterSpacing: "0.15em",
+              fontSize: 11,
+              marginBottom: t.body ? 2 : 0,
+            }}
+          >
             {t.title}
           </RToast.Title>
           {t.body ? (

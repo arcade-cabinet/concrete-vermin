@@ -62,7 +62,10 @@ describe("evaluateAchievements — bronze", () => {
 
   it("first-cash triggers at lifetime $100", () => {
     expect(
-      evaluateAchievements(baseCtx({ lifetime: { cashEarned: 100, missionsCompleted: 0, achievementsUnlocked: 0 } }), []),
+      evaluateAchievements(
+        baseCtx({ lifetime: { cashEarned: 100, missionsCompleted: 0, achievementsUnlocked: 0 } }),
+        [],
+      ),
     ).toContain("first-cash");
   });
 
@@ -72,7 +75,10 @@ describe("evaluateAchievements — bronze", () => {
 
   it("first-multi-kill triggers on twoKill", () => {
     expect(
-      evaluateAchievements(baseCtx({ missionMultiKill: { twoKill: 1, threeKill: 0, fiveKill: 0 } }), []),
+      evaluateAchievements(
+        baseCtx({ missionMultiKill: { twoKill: 1, threeKill: 0, fiveKill: 0 } }),
+        [],
+      ),
     ).toContain("first-multi-kill");
   });
 });
@@ -100,7 +106,10 @@ describe("evaluateAchievements — silver", () => {
 
   it("five-kill triggers on fiveKill multi", () => {
     expect(
-      evaluateAchievements(baseCtx({ missionMultiKill: { twoKill: 0, threeKill: 0, fiveKill: 1 } }), []),
+      evaluateAchievements(
+        baseCtx({ missionMultiKill: { twoKill: 0, threeKill: 0, fiveKill: 1 } }),
+        [],
+      ),
     ).toContain("five-kill");
   });
 

@@ -227,7 +227,11 @@ export interface GameState {
       >
     >,
   ) => void;
-  startMission: (id: string, killsRequired: number, act?: "streets" | "underworld" | "above") => void;
+  startMission: (
+    id: string,
+    killsRequired: number,
+    act?: "streets" | "underworld" | "above",
+  ) => void;
   endMission: (won: boolean) => void;
   awardCash: (amount: number) => void;
   resetCash: () => void;
