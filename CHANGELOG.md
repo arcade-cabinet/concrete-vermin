@@ -6,6 +6,13 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 Releases are managed by [release-please](https://github.com/googleapis/release-please).
 
+## [1.19.0](https://github.com/arcade-cabinet/concrete-vermin/compare/v1.18.0...v1.19.0) (2026-04-28)
+
+
+### Features
+
+* **ci:** release-gate test + balance/browser/e2e jobs + analysis-nightly workflow ([#48](https://github.com/arcade-cabinet/concrete-vermin/issues/48)) ([7024f24](https://github.com/arcade-cabinet/concrete-vermin/commit/7024f248931827c9d28b847afc6aaab3bca7447f))
+
 ## [1.18.0](https://github.com/arcade-cabinet/concrete-vermin/compare/v1.17.0...v1.18.0) (2026-04-28)
 
 
