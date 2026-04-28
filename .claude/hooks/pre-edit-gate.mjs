@@ -62,12 +62,16 @@ const reject = (msg) => {
 };
 
 const isInSim = path.includes("/src/sim/");
+// Test files inside sim are allowed to reference forbidden patterns in
+// regex literals / string assertions — that's how the purity test itself
+// works. Skip the import + Math.random scan for them.
+const isSimTest = isInSim && /\.test\.ts$/.test(path);
 const isInRender = path.includes("/src/render/");
 const isInUi = path.includes("/src/ui/");
 const isCrtFile = path.endsWith("src/render/effects/crt.ts");
 
 // 1. Sim-purity
-if (isInSim) {
+if (isInSim && !isSimTest) {
   // Strip line/block comments before checking — comments may legitimately
   // reference Math.random / forbidden libraries.
   const stripped = content.replace(/\/\*[\s\S]*?\*\//g, "").replace(/\/\/[^\n]*/g, "");
