@@ -99,6 +99,7 @@ export const Trail = trait(
 
 export const Splash = trait({
   variantId: "" as string,
+  archetypeId: "rat" as ArchetypeId,
   intensity: 1,
   ttlS: 0,
 });

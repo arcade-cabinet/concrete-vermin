@@ -82,7 +82,7 @@ describe("takeDamage", () => {
 describe("spawnSplash", () => {
   it("creates a Splash + Position + Lifecycle entity with deadAt set", () => {
     const { world } = createGameWorld(1);
-    const e = spawnSplash(world, { x: 50, y: 50 }, "rat-mangy", 1, 0.3);
+    const e = spawnSplash(world, { x: 50, y: 50 }, "rat-mangy", "rat", 1, 0.3);
     expect(e.has(Splash)).toBe(true);
     expect(e.get(Lifecycle)?.deadAt).toBeCloseTo(1.3);
   });

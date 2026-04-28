@@ -38,6 +38,7 @@ export interface SplashSnapshot {
   y: number;
   ageS: number;
   ttlS: number;
+  archetypeId: string;
 }
 
 export interface GameState {

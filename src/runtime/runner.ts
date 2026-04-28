@@ -192,7 +192,14 @@ export class GameRunner {
       const l = e.get(Lifecycle)!;
       const p = e.get(Position)!;
       const ageS = this.now - l.spawnedAt;
-      splashes.push({ id: e.id(), x: p.x, y: p.y, ageS, ttlS: s.ttlS });
+      splashes.push({
+        id: e.id(),
+        x: p.x,
+        y: p.y,
+        ageS,
+        ttlS: s.ttlS,
+        archetypeId: s.archetypeId,
+      });
     }
 
     let total = 0;
