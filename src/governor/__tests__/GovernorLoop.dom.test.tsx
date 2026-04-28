@@ -1,5 +1,5 @@
-import { describe, it, expect, beforeEach, vi } from "vitest";
-import { render } from "@testing-library/react";
+import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
+import { cleanup, render } from "@testing-library/react";
 import { useGameStore } from "../../runtime/store";
 import { WEAPON_REGISTRY } from "../../sim/archetypes/weapons";
 import { GovernorLoop, PLAYTHROUGH } from "../GovernorLoop";
@@ -34,6 +34,10 @@ beforeEach(() => {
   });
 });
 
+afterEach(() => {
+  cleanup();
+});
+
 describe("GovernorLoop", () => {
   it("does nothing when disabled", () => {
     const runner = makeRunner();
@@ -66,6 +70,24 @@ describe("GovernorLoop", () => {
     tickCb?.();
     expect(runner.queueReload).toHaveBeenCalledOnce();
     expect(runner.queueShot).not.toHaveBeenCalled();
+  });
+
+  it("does not double-queue a reload across consecutive empty-ammo ticks", () => {
+    const runner = makeRunner();
+    useGameStore.setState({ player: { ammoCurrent: 0, ammoMax: 6, livesRemaining: 3 } });
+    render(
+      <GovernorLoop
+        runner={runner as never}
+        weapon={WEAPON_REGISTRY.revolver}
+        enabled={true}
+        playerLineY={270}
+        shooterPos={{ x: 240, y: 260 }}
+      />,
+    );
+    tickCb?.();
+    tickCb?.();
+    tickCb?.();
+    expect(runner.queueReload).toHaveBeenCalledOnce();
   });
 
   it("does not fire while reload is in progress", () => {
