@@ -74,11 +74,11 @@ Each `[ ]` is one commit. Group small ones into one PR; large ones get their own
 - [x] Settings: master volume / mute toggle (Radix slider)
 
 ### CV-INPUT — drag-to-aim + mobile (PR #7)
-- [ ] Drag-to-aim: pointer-down + drag tracks reticle without firing; pointer-up fires
-- [ ] Long-press → reload; short-press → shoot
-- [ ] Keyboard fallback: arrow keys move reticle, space fires, R reloads
-- [ ] Touch: prevent scroll/zoom on the stage div (touch-action: none verified)
-- [ ] Mobile safe-area: respect viewport insets in the HUD positioning
+- [x] Drag-to-aim: pointer-down + drag tracks reticle without firing; pointer-up fires
+- [x] Long-press → reload; short-press → shoot
+- [x] Keyboard fallback: arrow keys move reticle, space fires, R reloads
+- [x] Touch: prevent scroll/zoom on the stage div (touch-action: none verified)
+- [x] Mobile safe-area: respect viewport insets in the HUD positioning
 
 ### CV-CONTENT — actual missions + game flow (PR #8a)
 - [ ] src/sim/content/missions/streets/mission-01.ts: bodega backroom (current tutorial, formalized)

@@ -50,6 +50,7 @@ export class GameRunner {
   private killsTarget = 0;
   private kills = 0;
   private pendingShot: { x: number; y: number } | null = null;
+  private pendingReload = false;
   // Muzzle flashes are too short-lived (80ms) to be worth ECS entities;
   // hold them in a rolling list pruned by TTL each tick.
   private muzzleFlashes: import("./store").MuzzleFlash[] = [];
@@ -78,6 +79,11 @@ export class GameRunner {
   /** Player clicked / tapped — queue a shot to fire on the next tick. */
   queueShot(x: number, y: number): void {
     this.pendingShot = { x, y };
+  }
+
+  /** Player long-pressed or pressed R — reload (drops the no-reload streak). */
+  queueReload(): void {
+    this.pendingReload = true;
   }
 
   /** Run as many fixed substeps as fit in the elapsed real time. */
@@ -174,7 +180,9 @@ export class GameRunner {
       events,
       localMissCount,
       this.now,
+      this.pendingReload,
     );
+    this.pendingReload = false;
     // Append new flashes to the rolling list, prune anything older than the
     // HUD fade window (1.2s).
     for (const f of flashes) {
