@@ -3,9 +3,11 @@ import { setMasterVolumeDb, setMute } from "../audio/setup";
 import { useGameStore } from "../runtime/store";
 import { Briefing } from "./Briefing";
 import { GameStage } from "./GameStage";
+import { GlobalStyles } from "./GlobalStyles";
 import { HUD } from "./HUD";
 import { MissionResult } from "./MissionResult";
 import { MissionSelect } from "./MissionSelect";
+import { PauseMenu } from "./PauseMenu";
 import { PawnShop } from "./PawnShop";
 import { usePlayerProgress } from "./PlayerProgress";
 import { autoPersistPlayerProgress, loadPlayerProgress } from "./PlayerProgressPersistence";
@@ -57,8 +59,14 @@ export function App() {
     }
   };
 
+  const restart = () => {
+    const id = useGameStore.getState().missionId;
+    if (id) deploy(id);
+  };
+
   return (
     <div style={{ width: "100%", height: "100%" }}>
+      <GlobalStyles />
       {phase === "briefing" ? <Briefing /> : null}
       {phase === "mission-select" ? (
         <MissionSelect onPickMission={() => setPhase("pawn-shop")} />
@@ -73,6 +81,7 @@ export function App() {
         <>
           <GameStage />
           <HUD />
+          <PauseMenu onRestart={restart} />
         </>
       ) : null}
       {phase === "won" || phase === "lost" ? (

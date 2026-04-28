@@ -144,14 +144,14 @@ Each `[ ]` is one commit. Group small ones into one PR; large ones get their own
 - [x] HUD ammo: brick pulse when empty (refill bar deferred — needs reload-window state in runner; tracked under CV-INPUT)
 - [x] HUD: critical-life pulse when livesRemaining <= 1
 - [x] HUD: streak badge slot — variety / no-reload / hot-streak chips
-- [ ] Pause menu (Radix Dialog): resume / restart / settings / quit-to-menu
-- [ ] Settings dialog: master volume / mute / motion-reduction / contrast / haptics toggle
+- [x] Pause menu (Radix Dialog): resume / restart / settings / quit-to-menu
+- [x] Settings dialog: master volume / mute / reduce-motion / high-contrast / CRT toggle (haptics deferred — needs @capacitor/haptics wired in CV-DEPLOYMENT)
 - [x] Motion-reduction (prefers-reduced-motion): disable splash flashes, slow-down score tick-up
-- [ ] High-contrast mode: bump foreground vs background ratio to AAA
-- [ ] Keyboard focus rings: visible 2px sodium-amber outline on every focusable element
-- [ ] Tab order: Briefing → Begin button focused on mount; Result → Again button focused on mount
-- [ ] aria-live="polite" region for HUD score so screen-readers narrate kill bonuses
-- [ ] aria-label on the canvas: "game canvas — drag to aim, tap to fire"
+- [x] High-contrast mode: bump foreground vs background ratio to AAA
+- [x] Keyboard focus rings: visible 2px sodium-amber outline on every focusable element
+- [x] Tab order: Briefing → Begin button focused on mount; Result → Again button focused on mount
+- [x] aria-live="polite" region for HUD score so screen-readers narrate kill bonuses
+- [x] aria-label on the canvas: "game canvas — drag to aim, tap to fire"
 - [ ] Loading spinner / splash screen between mount and Pixi Application ready
 - [ ] First-launch overlay: 3-step explanatory tooltip (aim, fire, reload) auto-dismissed on first input
 - [ ] Vibration via @capacitor/haptics: light on hit, medium on kill, heavy on boss damage; fallback no-op on web
