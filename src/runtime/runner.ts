@@ -1,4 +1,5 @@
 import {
+  playChargeWhine,
   playEmpty,
   playWeaponFire,
   playWeaponReload,
@@ -90,6 +91,8 @@ export class GameRunner {
   private encounterIndex = 0;
   private pendingShot: { x: number; y: number } | null = null;
   private pendingReload = false;
+  private chargeStartedAt: number | null = null;
+  private chargePending = false;
   private readonly muzzleFlashPool: ObjectPool<import("./store").MuzzleFlash> =
     createObjectPool(MUZZLE_FLASH_POOL, () => ({
       x: 0,
@@ -181,6 +184,33 @@ export class GameRunner {
   /** Player long-pressed or pressed R — start a reload window. */
   queueReload(): void {
     this.pendingReload = true;
+  }
+
+  /** Player pressed and held — begin charging a charge-shot. */
+  queueChargeStart(): void {
+    if (this.mag > 0 && this.reloadStartedAt === null && !this.chargePending) {
+      this.chargeStartedAt = this.now;
+      this.chargePending = true;
+      playChargeWhine();
+    }
+  }
+
+  /** Player released after holding — fire the charge effect (or tap fallback). */
+  queueChargeRelease(aimX: number, aimY: number): void {
+    if (!this.chargePending || this.chargeStartedAt === null) return;
+    const chargeProgress = Math.min(
+      1,
+      ((this.now - this.chargeStartedAt) * 1000) /
+        (this.tunedWeapon.chargeProfile?.maxChargeMs ?? 1000),
+    );
+    this.chargePending = false;
+    this.chargeStartedAt = null;
+    if (chargeProgress < 0.1) {
+      // Too short — treat as tap
+      this.queueShot(aimX, aimY);
+      return;
+    }
+    this.applyChargeEffect(aimX, aimY, chargeProgress);
   }
 
   pause(): void {
@@ -531,6 +561,98 @@ export class GameRunner {
     if (this.livesRemaining <= 0) this.playerHp = 0;
   }
 
+  /**
+   * Execute the charge-shot effect for the active weapon. Consumes
+   * shellsConsumed from mag (floored at 0). Implements simple effects
+   * inline; deferred effects (burst-loop, napalm-pool) log a warning
+   * and fall back to a single shot until their respective phases land.
+   */
+  private applyChargeEffect(aimX: number, aimY: number, chargeProgress: number): void {
+    const profile = this.tunedWeapon.chargeProfile;
+    if (!profile) {
+      // Weapon has no charge profile — treat as normal shot.
+      this.queueShot(aimX, aimY);
+      return;
+    }
+
+    // Consume shells (never below zero).
+    this.mag = Math.max(0, this.mag - profile.shellsConsumed);
+
+    const tuned = this.tunedWeapon;
+    const playerPos = { x: this.zone.maxX / 2, y: this.zone.maxY - 24 };
+    const target = { x: aimX, y: aimY };
+    const fireOpts = { origin: playerPos, target, now: this.now, ownerEntity: this.gw.playerEntity };
+
+    switch (profile.effect) {
+      case "double-barrel": {
+        // Both barrels fire at the same coords — two independent shots.
+        const spreads = Array.from(
+          { length: tuned.base.pellets },
+          () => (this.gw.rng.fork(`charge:db1:${this.now.toFixed(3)}`).next() * 2 - 1) * tuned.spread,
+        );
+        fireWeapon(this.gw.world, tuned, fireOpts, spreads);
+        const spreads2 = Array.from(
+          { length: tuned.base.pellets },
+          () => (this.gw.rng.fork(`charge:db2:${this.now.toFixed(3)}`).next() * 2 - 1) * tuned.spread,
+        );
+        fireWeapon(this.gw.world, tuned, fireOpts, spreads2);
+        break;
+      }
+      case "wide-spray": {
+        // Extra pellets proportional to charge progress.
+        const extraPellets = Math.ceil(tuned.base.pellets * (1 + chargeProgress));
+        const spreads = Array.from(
+          { length: extraPellets },
+          () => (this.gw.rng.fork(`charge:ws:${this.now.toFixed(3)}`).next() * 2 - 1) * tuned.spread,
+        );
+        fireWeapon(this.gw.world, tuned, fireOpts, spreads, extraPellets);
+        break;
+      }
+      case "arc-repeater": {
+        // 3 rapid single-pellet arcs.
+        for (let i = 0; i < 3; i++) {
+          const spreads = [
+            (this.gw.rng.fork(`charge:arc:${i}:${this.now.toFixed(3)}`).next() * 2 - 1) * tuned.spread,
+          ];
+          fireWeapon(this.gw.world, tuned, fireOpts, spreads, 1);
+        }
+        break;
+      }
+      case "auto-burst":
+      case "mag-dump-cone": {
+        // Phase 2.3 — burst-loop queue not yet implemented.
+        // Fall back to a single shot so the action isn't silent.
+        console.warn(`[charge-shot] effect "${profile.effect}" deferred to Phase 2.3 — firing single shot`);
+        const spreads = Array.from(
+          { length: tuned.base.pellets },
+          () => (this.gw.rng.fork(`charge:fb:${this.now.toFixed(3)}`).next() * 2 - 1) * tuned.spread,
+        );
+        fireWeapon(this.gw.world, tuned, fireOpts, spreads);
+        break;
+      }
+      case "napalm-pool": {
+        // Phase 2.4 — napalm pool DoT not yet implemented.
+        // Fall back to a single shot.
+        console.warn(`[charge-shot] effect "napalm-pool" deferred to Phase 2.4 — firing single shot`);
+        const spreads = Array.from(
+          { length: tuned.base.pellets },
+          () => (this.gw.rng.fork(`charge:np:${this.now.toFixed(3)}`).next() * 2 - 1) * tuned.spread,
+        );
+        fireWeapon(this.gw.world, tuned, fireOpts, spreads);
+        break;
+      }
+    }
+
+    playWeaponFire(tuned.base.id);
+    duckBus("music", 4, 0.18, 0.25);
+
+    // Auto-reload if mag is now empty.
+    if (this.mag === 0 && this.reloadStartedAt === null) {
+      this.reloadStartedAt = this.now;
+      playWeaponReload(tuned.base.id);
+    }
+  }
+
   /** Read traits → plain snapshots → push into the zustand store. */
   private publishSnapshot(): void {
     const w = this.gw.world;
@@ -600,6 +722,15 @@ export class GameRunner {
         ? null
         : Math.min(1, ((this.now - this.reloadStartedAt) * 1000) / this.tunedWeapon.reloadMs);
 
+    const chargeProgress =
+      this.chargeStartedAt !== null
+        ? Math.min(
+            1,
+            ((this.now - this.chargeStartedAt) * 1000) /
+              (this.tunedWeapon.chargeProfile?.maxChargeMs ?? 1000),
+          )
+        : null;
+
     useGameStore.getState().setSnapshot({
       vermin,
       projectiles,
@@ -620,6 +751,7 @@ export class GameRunner {
       reloadDurationMs: this.tunedWeapon.reloadMs,
       reticleRadius: this.tunedWeapon.reticleRadius,
       reticleShape: this.tunedWeapon.reticleShape,
+      chargeProgress,
     });
   }
 }

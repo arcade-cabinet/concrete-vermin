@@ -68,20 +68,26 @@ export interface FireWeaponOptions {
  * Spread is applied as a small angle perturbation per pellet — the
  * caller can pre-compute a deterministic spread sequence via rng to
  * keep visuals stable.
+ *
+ * @param pelletOverride - When provided, overrides weapon.base.pellets for
+ *   the pellet loop count (used by charge-shot effects). Damage calculation
+ *   still uses weapon.base.damage unchanged.
  */
 export function fireWeapon(
   world: World,
   weapon: TunedWeapon,
   opts: FireWeaponOptions,
   spreadAngles: ReadonlyArray<number> = [],
+  pelletOverride?: number,
 ): Entity[] {
   const entities: Entity[] = [];
   const dx = opts.target.x - opts.origin.x;
   const dy = opts.target.y - opts.origin.y;
   const baseAngle = Math.atan2(dy, dx);
   const speed = 1200; // projectile speed in units/sec; tunable later
+  const pelletCount = pelletOverride ?? weapon.base.pellets;
 
-  for (let p = 0; p < weapon.base.pellets; p++) {
+  for (let p = 0; p < pelletCount; p++) {
     const a = baseAngle + (spreadAngles[p] ?? 0);
     const e = world.spawn(
       Position({ x: opts.origin.x, y: opts.origin.y }),

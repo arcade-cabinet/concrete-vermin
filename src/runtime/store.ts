@@ -170,6 +170,11 @@ export interface GameState {
   reloadProgress: number | null;
   /** Total reload duration in ms for the active mission's weapon. */
   reloadDurationMs: number;
+  /**
+   * Charge-shot progress. null = not charging; 0..1 = charge fraction.
+   * The reticle charge ring visual reads this every frame.
+   */
+  chargeProgress: number | null;
   /** Cash awarded across the current session (sums per-mission awards). */
   cashAwarded: number;
   missionId: string;
@@ -206,6 +211,7 @@ export interface GameState {
         | "damageEvents"
         | "reticleRadius"
         | "reticleShape"
+        | "chargeProgress"
       >
     >,
   ) => void;
@@ -251,6 +257,7 @@ export const INITIAL_SNAPSHOT: Pick<
   | "reticleRadius"
   | "reticleShape"
   | "reticle"
+  | "chargeProgress"
 > = {
   phase: "main-menu",
   now: 0,
@@ -273,6 +280,7 @@ export const INITIAL_SNAPSHOT: Pick<
   reticleRadius: 8,
   reticleShape: "cross",
   reticle: { x: 240, y: 200 },
+  chargeProgress: null,
 };
 
 export const useGameStore = create<GameState>((set) => ({

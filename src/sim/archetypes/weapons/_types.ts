@@ -59,6 +59,25 @@ export const weaponArchetypeSchema = z
      */
     reticleRadius: z.number().positive().default(8),
     reticleShape: z.enum(RETICLE_SHAPES).default("cross"),
+    /**
+     * Optional charge-shot profile. When present, the player can hold
+     * to charge before releasing for a powerful variant effect. The
+     * effect key drives the effect logic in the runtime.
+     */
+    chargeProfile: z
+      .object({
+        maxChargeMs: z.number().int().positive(),
+        shellsConsumed: z.number().int().positive(),
+        effect: z.enum([
+          "wide-spray",
+          "auto-burst",
+          "double-barrel",
+          "mag-dump-cone",
+          "arc-repeater",
+          "napalm-pool",
+        ] as const),
+      })
+      .optional(),
   })
   .strict();
 

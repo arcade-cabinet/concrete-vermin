@@ -245,6 +245,19 @@ export function playVerminDeath(archetypeId?: string): void {
 }
 
 /**
+ * Charge-whine stub: plays a low-pitched version of the weapon-fire sample
+ * to indicate a charge is building. Best-effort — silently skips if audio
+ * context is not yet unlocked.
+ */
+export function playChargeWhine(): void {
+  ensureInstruments();
+  // Use the tesla synth (capacitor charge feel) at low octave as a generic
+  // charge-building whine. It's distinct from any weapon fire and short enough
+  // not to clash with the release SFX.
+  _tesla?.triggerAttackRelease("C2", "32n");
+}
+
+/**
  * Dispatcher: pick the per-weapon SFX given a weapon archetype id.
  * Falls back to shotgun for unknown ids.
  */

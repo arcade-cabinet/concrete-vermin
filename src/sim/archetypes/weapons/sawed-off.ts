@@ -24,5 +24,6 @@ export const sawedOff: Readonly<WeaponArchetype> = Object.freeze(
     },
     reticleRadius: 18,
     reticleShape: "wide",
+    chargeProfile: { maxChargeMs: 600, shellsConsumed: 2, effect: "double-barrel" },
   }),
 );

@@ -24,5 +24,6 @@ export const revolver: Readonly<WeaponArchetype> = Object.freeze(
     },
     reticleRadius: 6,
     reticleShape: "diamond",
+    chargeProfile: { maxChargeMs: 1200, shellsConsumed: 3, effect: "auto-burst" },
   }),
 );

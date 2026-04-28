@@ -24,5 +24,6 @@ export const shotgun: Readonly<WeaponArchetype> = Object.freeze(
     },
     reticleRadius: 14,
     reticleShape: "wide",
+    chargeProfile: { maxChargeMs: 800, shellsConsumed: 2, effect: "wide-spray" },
   }),
 );
