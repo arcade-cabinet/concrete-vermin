@@ -6,6 +6,8 @@
  * rule (planned) will eventually enforce it for all hex.
  */
 
+import type { ActId } from "../sim/factories/mission";
+
 export const COLOR = Object.freeze({
   // Backgrounds & surfaces
   bgAsphalt: "#0d0c0a",
@@ -24,11 +26,27 @@ export const COLOR = Object.freeze({
   cream: "#e8dcc4",
   creamDim: "#a89887",
   mute: "#5a544c",
+
+  // UI scaffolding
+  borderMute: "#3a342c", // disabled/inactive 1 px stroke
+
+  // Modifier-flash chips — non-brand pop colors used by the HUD
+  // to differentiate kill modifiers (HEADSHOT / 2-FOR-1 / MID-AIR /
+  // VARIETY / NO-RELOAD). Sodium-derived, never neon.
+  flashSodiumLight: "#ffd07a", // 2-FOR-1
+  flashGreen: "#a8d04a", // MID-AIR
 } as const);
 
 export type ColorToken = keyof typeof COLOR;
 
-import type { ActId } from "../../sim/factories/mission";
+/**
+ * Convert a `#rrggbb` brand token into the `0xRRGGBB` numeric Pixi
+ * expects. Use this in render/* so both UI and renderer share one color
+ * source of truth instead of drifting per-file.
+ */
+export function pixi(hex: string): number {
+  return Number.parseInt(hex.replace(/^#/, ""), 16);
+}
 
 /**
  * Per-act streetlight color shift. See DESIGN.md "Per-act color shift"

@@ -1,8 +1,9 @@
 import type { Graphics as PixiGraphics } from "pixi.js";
 import { useCallback } from "react";
 import { useGameStore } from "../runtime/store";
+import { COLOR, pixi } from "../theme/colors";
 
-const SODIUM = 0xd4943a;
+const SODIUM = pixi(COLOR.sodium);
 
 export function ReticleLayer() {
   const reticle = useGameStore((s) => s.reticle);

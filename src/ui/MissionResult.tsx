@@ -1,10 +1,7 @@
 import { useEffect, useRef } from "react";
 import { useGameStore } from "../runtime/store";
 import { usePlayerProgress } from "./PlayerProgress";
-
-const SODIUM = "#d4943a";
-const PARCHMENT = "#e8dcc4";
-const BRICK = "#7a2818";
+import { COLOR, TYPE } from "../theme/tokens";
 
 const CASH_PER_KILL = 12;
 
@@ -38,17 +35,20 @@ export function MissionResult() {
         alignItems: "center",
         justifyContent: "center",
         gap: 24,
+        // Translucent asphalt overlay — keeps the stage dimly visible
+        // behind the result so it reads as "the mission ended" rather
+        // than a hard cut to a separate screen.
         background: "rgba(13, 12, 10, 0.92)",
-        color: PARCHMENT,
-        fontFamily: "'Big Shoulders Display', sans-serif",
+        color: COLOR.cream,
+        fontFamily: TYPE.faceDisplay,
         textAlign: "center",
         padding: 32,
       }}
     >
       <h1
         style={{
-          color: won ? SODIUM : BRICK,
-          fontSize: "clamp(2rem, 6vw, 4rem)",
+          color: won ? COLOR.sodium : COLOR.brick,
+          fontSize: TYPE.display.size,
           margin: 0,
           letterSpacing: 4,
           textTransform: "uppercase",
@@ -57,11 +57,11 @@ export function MissionResult() {
         {won ? "Cleared" : "Wiped Out"}
       </h1>
       <p style={{ fontSize: "1.2rem", margin: 0 }}>
-        Score <span style={{ color: SODIUM }}>{score.total}</span>
+        Score <span style={{ color: COLOR.sodium }}>{score.total}</span>
         {won ? (
           <>
             {"  ·  "}
-            Earned <span style={{ color: SODIUM }}>${killCount * CASH_PER_KILL}</span>
+            Earned <span style={{ color: COLOR.sodium }}>${killCount * CASH_PER_KILL}</span>
           </>
         ) : null}
       </p>
@@ -70,8 +70,8 @@ export function MissionResult() {
           type="button"
           onClick={() => setPhase("mission-select")}
           style={{
-            background: SODIUM,
-            color: "#0d0c0a",
+            background: COLOR.sodium,
+            color: COLOR.bgAsphalt,
             border: "none",
             padding: "12px 28px",
             fontFamily: "inherit",
