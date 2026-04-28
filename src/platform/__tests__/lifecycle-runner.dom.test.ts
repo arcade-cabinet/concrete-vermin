@@ -62,8 +62,14 @@ beforeEach(() => {
   });
   // Full snapshot reset — partial reset would leak state between
   // tests because the store is a Zustand singleton. INITIAL_SNAPSHOT
-  // carries every field the runner publishes via setSnapshot.
-  useGameStore.setState({ ...INITIAL_SNAPSHOT, phase: "briefing" });
+  // covers everything except runner-owned `player`, which we reset
+  // alongside it (see store.ts INITIAL_SNAPSHOT JSDoc for the
+  // exclusion rationale).
+  useGameStore.setState({
+    ...INITIAL_SNAPSHOT,
+    phase: "briefing",
+    player: { ammoCurrent: 6, ammoMax: 6, livesRemaining: 3 },
+  });
   Object.defineProperty(document, "visibilityState", {
     value: "visible",
     configurable: true,
