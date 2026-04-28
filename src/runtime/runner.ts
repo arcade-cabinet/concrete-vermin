@@ -48,6 +48,7 @@ import { applyLoadout, MOD_REGISTRY, type WeaponMod } from "../sim/archetypes/mo
 import { WEAPON_REGISTRY } from "../sim/archetypes/weapons";
 import { composeEncounter } from "../sim/factories/encounter";
 import type { Mission } from "../sim/factories/mission";
+import { createObjectPool, type ObjectPool } from "./objectPool";
 import { pushShake } from "./screenShake";
 import { useGameStore } from "./store";
 import type {
@@ -56,6 +57,15 @@ import type {
   SplashSnapshot,
   VerminSnapshot,
 } from "./store";
+
+/**
+ * Pre-allocated pool capacities. Sized to comfortably exceed the worst-
+ * case live count for any single mission tick on the most chaotic
+ * encounters (boss + 12-vermin flood + smg burst). The pool will evict
+ * the oldest entry if exceeded — visually fine for transients.
+ */
+const MUZZLE_FLASH_POOL = 32;
+const DAMAGE_EVENT_POOL = 96;
 
 /**
  * GameRunner: holds the Koota world + sim clock and ticks the
@@ -79,7 +89,15 @@ export class GameRunner {
   private encounterIndex = 0;
   private pendingShot: { x: number; y: number } | null = null;
   private pendingReload = false;
-  private muzzleFlashes: import("./store").MuzzleFlash[] = [];
+  private readonly muzzleFlashPool: ObjectPool<import("./store").MuzzleFlash> =
+    createObjectPool(MUZZLE_FLASH_POOL, () => ({
+      x: 0,
+      y: 0,
+      targetX: 0,
+      targetY: 0,
+      firedAt: 0,
+      ttlS: 0,
+    }));
   private modifierFlashes: import("./store").ModifierFlashSnapshot[] = [];
   // Weapon state — the player carries one weapon for the whole mission.
   private readonly tunedWeapon: ReturnType<typeof applyLoadout>;
@@ -97,7 +115,10 @@ export class GameRunner {
   private readonly maxHpPerLife = 100;
   private ended = false;
   private bossLeitmotifActive = false;
-  private damageEvents: DamageEvent[] = [];
+  private readonly damageEventPool: ObjectPool<DamageEvent> = createObjectPool(
+    DAMAGE_EVENT_POOL,
+    () => ({ at: 0, x: 0, y: 0, amount: 0, crit: false, headshot: false }),
+  );
   private static readonly DAMAGE_TTL_S = 0.4;
 
   constructor(mission: Readonly<Mission>, modIds: ReadonlyArray<string> = [], seed?: number) {
@@ -248,14 +269,13 @@ export class GameRunner {
           },
           spreads,
         );
-        this.muzzleFlashes.push({
-          x: playerPos.x,
-          y: playerPos.y,
-          targetX: reticle.x,
-          targetY: reticle.y,
-          firedAt: this.now,
-          ttlS: 0.08,
-        });
+        const flash = this.muzzleFlashPool.acquire();
+        flash.x = playerPos.x;
+        flash.y = playerPos.y;
+        flash.targetX = reticle.x;
+        flash.targetY = reticle.y;
+        flash.firedAt = this.now;
+        flash.ttlS = 0.08;
         this.mag--;
         shotFired = true;
         playWeaponFire(tuned.base.id);
@@ -270,7 +290,7 @@ export class GameRunner {
       }
       this.pendingShot = null;
     }
-    this.muzzleFlashes = this.muzzleFlashes.filter((m) => this.now - m.firedAt < m.ttlS);
+    this.muzzleFlashPool.retainWhere((m) => this.now - m.firedAt < m.ttlS);
 
     // 4. Integrate motion; advance projectiles.
     motionSystem(this.gw.world, dt);
@@ -287,14 +307,13 @@ export class GameRunner {
     const newKills = events.filter((e) => e.kind === "kill").length;
     this.kills += newKills;
     for (const e of events) {
-      this.damageEvents.push({
-        at: this.now,
-        x: e.position.x,
-        y: e.position.y,
-        amount: e.damage,
-        crit: e.isCrit,
-        headshot: e.isHeadshot,
-      });
+      const dmg = this.damageEventPool.acquire();
+      dmg.at = this.now;
+      dmg.x = e.position.x;
+      dmg.y = e.position.y;
+      dmg.amount = e.damage;
+      dmg.crit = e.isCrit;
+      dmg.headshot = e.isHeadshot;
       if (e.kind === "kill") {
         playVerminDeath(e.archetypeId);
         if (e.archetypeId.startsWith("boss-")) {
@@ -337,7 +356,7 @@ export class GameRunner {
       }
     }
     this.modifierFlashes = this.modifierFlashes.filter((f) => this.now - f.at < 1.2);
-    this.damageEvents = this.damageEvents.filter((d) => this.now - d.at < GameRunner.DAMAGE_TTL_S);
+    this.damageEventPool.retainWhere((d) => this.now - d.at < GameRunner.DAMAGE_TTL_S);
 
     // 7. Cull off-screen + lifecycle GC. Off-screen vermin (those that
     // crossed the player line) bite — deduct contact damage proportional
@@ -484,9 +503,9 @@ export class GameRunner {
       vermin,
       projectiles,
       splashes,
-      muzzleFlashes: this.muzzleFlashes.slice(),
+      muzzleFlashes: this.muzzleFlashPool.liveSnapshot(),
       modifierFlashes: this.modifierFlashes.slice(),
-      damageEvents: this.damageEvents.slice(),
+      damageEvents: this.damageEventPool.liveSnapshot(),
       now: this.now,
       score: { total, multiplier },
       killCount: this.kills,
