@@ -42,33 +42,33 @@ Each `[ ]` is one commit. Group small ones into one PR; large surfaces get their
 
 ### v1.0-CALIBRATE — every mission lands inside its band, benchmark gate becomes hard-required
 
-- [ ] src/sim/analysis/benchmarks.ts: rewrite simulateEncounter to model partial damage — accumulate hits per target across multiple shots, only count contact damage when player engagement-time elapses with target alive (not per-miss tick)
-- [ ] src/sim/analysis/benchmarks.ts: per-archetype dodge factor honoring archetype.baseStats.health as health pool not binary kill
-- [ ] src/sim/analysis/benchmarks.ts: weapon recoil + reload windows reduce shots-per-second realistically
-- [ ] src/sim/analysis/benchmarks.ts: mod effects applied (incendiary DoT, scope crit chance, choke spread)
-- [ ] Run pnpm analysis:smoke; tune raw mission/archetype/weapon data via analysis:autobalance until streets-04, underworld-05, underworld-07, above-08 land in band
-- [ ] Re-run RELEASE_GATING=1 — every mission STABLE
-- [ ] .github/workflows/ci.yml: remove `continue-on-error: true` from balance-benchmark; flip to required gate
-- [ ] tests: src/sim/analysis/__tests__/benchmarks.test.ts — unit assertions on simulateEncounter for each weapon × each archetype combination
+- [x] src/sim/analysis/benchmarks.ts: rewrite simulateEncounter to model partial damage — accumulate hits per target across multiple shots, only count contact damage when player engagement-time elapses with target alive (not per-miss tick)
+- [x] src/sim/analysis/benchmarks.ts: per-archetype dodge factor honoring archetype.baseStats.health as health pool not binary kill
+- [x] src/sim/analysis/benchmarks.ts: weapon recoil + reload windows reduce shots-per-second realistically
+- [x] src/sim/analysis/benchmarks.ts: mod effects applied (incendiary DoT, scope crit chance, choke spread)
+- [x] Run pnpm analysis:smoke; tune raw mission/archetype/weapon data via analysis:autobalance until streets-04, underworld-05, underworld-07, above-08 land in band
+- [x] Re-run RELEASE_GATING=1 — every mission STABLE
+- [x] .github/workflows/ci.yml: remove `continue-on-error: true` from balance-benchmark; flip to required gate
+- [x] tests: src/sim/analysis/__tests__/benchmarks.test.ts — unit assertions on simulateEncounter for each weapon × each archetype combination
 
 ### v1.0-RUNTIME — fill every runner gap
 
-- [ ] src/runtime/runner.ts: real reload-window state — reloadStartedAt, reloadDurationS, blocks fire input until elapsed
-- [ ] src/runtime/store.ts: publish reloadProgress: number | null (0..1) and reloadDurationMs for HUD bar
-- [ ] src/sim/factories/mission.ts: per-mission livesAllowance field (default 3, bosses 5, tutorial 5)
-- [ ] src/sim/factories/mission.ts: per-mission cashAward override (boss missions pay double)
-- [ ] src/runtime/runner.ts: respect mission.livesAllowance (no more hardcoded 3)
-- [ ] src/runtime/runner.ts: emit pendingReload AND reload-complete events for audio bridge
-- [ ] src/runtime/runner.ts: pause/resume hooks accessible from React (already partial; complete + test)
-- [ ] tests: src/runtime/__tests__/runner.reload.test.ts — reload window blocks fire, completes correctly
-- [ ] tests: src/runtime/__tests__/runner.lives.test.ts — livesAllowance respected per mission
+- [x] src/runtime/runner.ts: real reload-window state — reloadStartedAt, reloadDurationS, blocks fire input until elapsed
+- [x] src/runtime/store.ts: publish reloadProgress: number | null (0..1) and reloadDurationMs for HUD bar
+- [x] src/sim/factories/mission.ts: per-mission livesAllowance field (default 3, bosses 5, tutorial 5)
+- [x] src/sim/factories/mission.ts: per-mission cashAward override (boss missions pay double)
+- [x] src/runtime/runner.ts: respect mission.livesAllowance (no more hardcoded 3)
+- [x] src/runtime/runner.ts: emit pendingReload AND reload-complete events for audio bridge
+- [x] src/runtime/runner.ts: pause/resume hooks accessible from React (already partial; complete + test)
+- [x] tests: src/runtime/__tests__/runner.reload.test.ts — reload window blocks fire, completes correctly
+- [x] tests: src/runtime/__tests__/runner.lives.test.ts — livesAllowance respected per mission
 
 ### v1.0-AUDIO-WIRE — every weapon, every vermin, every transition has its sound
 
-- [ ] src/audio/sfx.ts: per-weapon fire synth (revolver bark, smg chitter, sawed-off wet boom, flamethrower roar loop, tesla arc-snap) — match docs/AUDIO.md brief
-- [ ] src/audio/sfx.ts: per-weapon reload cue (shotgun pump, revolver cylinder, smg mag, sawed-off break, flame purge, tesla cap charge)
-- [ ] src/audio/sfx.ts: per-archetype death cue (rat squeal, roach crunch, pigeon flutter-thud, sewer-fish wet flop, dumpster-bear groan, river-mutant gurgle, goose honk-snap, seagull cry, pigeon-king bell-toll)
-- [ ] src/audio/sfx.ts: per-archetype hit cue (lighter than death)
+- [x] src/audio/sfx.ts: per-weapon fire synth (revolver bark, smg chitter, sawed-off wet boom, flamethrower roar loop, tesla arc-snap) — match docs/AUDIO.md brief
+- [x] src/audio/sfx.ts: per-weapon reload cue (shotgun pump, revolver cylinder, smg mag, sawed-off break, flame purge, tesla cap charge)
+- [x] src/audio/sfx.ts: per-archetype death cue (rat squeal, roach crunch, pigeon flutter-thud, sewer-fish wet flop, dumpster-bear groan, river-mutant gurgle, goose honk-snap, seagull cry, pigeon-king bell-toll)
+- [x] src/audio/sfx.ts: per-archetype hit cue (lighter than death)
 - [ ] src/audio/music.ts: per-act ambient bed switcher — Streets (horn + steam + traffic), Underworld (drips + low rumble), Above (wind + bird-ambience)
 - [ ] src/audio/music.ts: stings — mission-start chime, win sting, loss sting, S-grade fanfare
 - [ ] src/audio/music.ts: boss leitmotif (4-beat 90 BPM ostinato) — fires when boss spawned

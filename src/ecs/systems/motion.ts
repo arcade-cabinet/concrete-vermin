@@ -1,5 +1,6 @@
 import type { World } from "koota";
-import { Lifecycle, Position, Velocity } from "../traits";
+import { ARCHETYPES, type ArchetypeId } from "../../sim/archetypes/vermin";
+import { Lifecycle, Position, Velocity, Vermin } from "../traits";
 
 /**
  * Motion system: integrates position from velocity for every entity
@@ -15,27 +16,49 @@ export function motionSystem(world: World, dt: number): void {
   }
 }
 
+export interface CullEvent {
+  /** Whether the culled entity was a vermin that reached the player line. */
+  vermin: boolean;
+  archetypeId: string;
+  /** Contact damage to apply if vermin === true. */
+  contactDamage: number;
+}
+
 /**
  * Off-screen culler: marks entities outside the camera bounds as
  * dead so the lifecycle system collects them. Bounds are inclusive.
+ *
+ * Returns CullEvents for vermin culled past the player line (bottom of
+ * the play area) — the runner uses these to deduct contact damage. A
+ * vermin culled because it left the top/sides (escaped) doesn't bite.
  */
 export function cullOffscreenSystem(
   world: World,
   bounds: Readonly<{ minX: number; maxX: number; minY: number; maxY: number }>,
   now: number,
   margin = 64,
-): void {
+): ReadonlyArray<CullEvent> {
+  const events: CullEvent[] = [];
   for (const e of world.query(Position, Lifecycle)) {
     const p = e.get(Position);
     const l = e.get(Lifecycle);
     if (!p || !l || l.deadAt > 0) continue;
-    if (
-      p.x < bounds.minX - margin ||
-      p.x > bounds.maxX + margin ||
-      p.y < bounds.minY - margin ||
-      p.y > bounds.maxY + margin
-    ) {
-      e.set(Lifecycle, { spawnedAt: l.spawnedAt, deadAt: now });
+    const offX = p.x < bounds.minX - margin || p.x > bounds.maxX + margin;
+    const offBelow = p.y > bounds.maxY + margin;
+    const offAbove = p.y < bounds.minY - margin;
+    if (!(offX || offBelow || offAbove)) continue;
+    e.set(Lifecycle, { spawnedAt: l.spawnedAt, deadAt: now });
+    const v = e.get(Vermin);
+    if (v && offBelow) {
+      const arch = ARCHETYPES[v.archetypeId as ArchetypeId];
+      if (arch) {
+        events.push({
+          vermin: true,
+          archetypeId: v.archetypeId,
+          contactDamage: arch.baseStats.contactDamage,
+        });
+      }
     }
   }
+  return events;
 }

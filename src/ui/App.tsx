@@ -15,7 +15,7 @@ import { usePlayerProgress } from "./PlayerProgress";
 import { autoPersistPlayerProgress, loadPlayerProgress } from "./PlayerProgressPersistence";
 import { getMission } from "../sim/content/missions";
 
-const MISSION_KILLS_REQUIRED = 8;
+const MISSION_KILLS_REQUIRED = 1;
 
 export function App() {
   const phase = useGameStore((s) => s.phase);
@@ -32,6 +32,23 @@ export function App() {
   useEffect(() => {
     loadPlayerProgress();
     return autoPersistPlayerProgress();
+  }, []);
+
+  // When the runner finishes a mission and credits cashAwarded into the
+  // game store, sync that into PlayerProgress (which the pawn shop reads
+  // and persistence saves), then unlock the mission. Resets the
+  // per-session cashAwarded so the next mission starts at zero.
+  useEffect(() => {
+    const unsub = useGameStore.subscribe((s, prev) => {
+      if (s.cashAwarded > prev.cashAwarded) {
+        const delta = s.cashAwarded - prev.cashAwarded;
+        usePlayerProgress.getState().awardCash(delta);
+      }
+      if (s.phase === "won" && prev.phase !== "won" && s.missionId) {
+        usePlayerProgress.getState().unlockMission(s.missionId);
+      }
+    });
+    return unsub;
   }, []);
 
   // Seed the reduced-motion setting from the OS preference at boot, then
