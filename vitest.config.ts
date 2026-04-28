@@ -16,6 +16,7 @@ export default defineConfig({
       "src/theme/**/*.test.ts",
       "src/runtime/**/*.test.ts",
       "src/audio/**/*.test.ts",
+      "src/input/**/*.test.ts",
       // Pure-logic UI tests (stores, copy modules, helpers) — no DOM.
       // Anything that needs jsdom uses the .dom.test.ts suffix and goes
       // through vitest.dom.config.ts.

@@ -9,6 +9,8 @@ import { ReticleLayer } from "../render/ReticleLayer";
 import { SplashLayer } from "../render/SplashLayer";
 import { Stage } from "../render/Stage";
 import { VerminLayer } from "../render/VerminLayer";
+import { applyAimAssist } from "../input/aimAssist";
+import { installGamepad } from "../input/gamepad";
 import { GameRunner } from "../runtime/runner";
 import { useGameStore } from "../runtime/store";
 import { getMission } from "../sim/content/missions";
@@ -51,8 +53,14 @@ export function GameStage() {
   const setReticle = useGameStore((s) => s.setReticle);
   const reticle = useGameStore((s) => s.reticle);
   const crtOn = useGameStore((s) => s.settings.crtOverlay);
+  const aimAssistOn = useGameStore((s) => s.settings.aimAssist);
+  const invertY = useGameStore((s) => s.settings.invertY);
   const shake = useScreenShake();
   const [pixiReady, setPixiReady] = useState(false);
+  // Live ref so closures (timers, gamepad poll, pointer handlers)
+  // always read the current settings without re-installing.
+  const aimAssistRef = useRef(aimAssistOn);
+  aimAssistRef.current = aimAssistOn;
 
   // Reset the splash visibility every time the player re-enters the
   // playing phase (next mission, restart). The Application unmounts +
@@ -96,7 +104,7 @@ export function GameStage() {
     }
   }, [phase]);
 
-  // Keyboard handlers — arrows aim, space fires, R reloads.
+  // biome-ignore lint/correctness/useExhaustiveDependencies: fireWithAssist closes over stable refs (runnerRef + aimAssistRef)
   useEffect(() => {
     const onDown = (e: KeyboardEvent) => {
       if (phase !== "playing") return;
@@ -119,7 +127,7 @@ export function GameStage() {
           break;
         case " ":
         case "Enter":
-          runnerRef.current?.queueShot(lastReticleRef.current.x, lastReticleRef.current.y);
+          fireWithAssist(lastReticleRef.current.x, lastReticleRef.current.y);
           e.preventDefault();
           break;
         case "r":
@@ -152,6 +160,44 @@ export function GameStage() {
       window.removeEventListener("keyup", onUp);
     };
   }, [phase]);
+
+  // Gamepad: poll connected pads each frame, map standard layout to
+  // game actions. Installed only while playing so an attached pad
+  // doesn't fire shots while the briefing is up.
+  // biome-ignore lint/correctness/useExhaustiveDependencies: fireWithAssist closes over stable refs (runnerRef + aimAssistRef)
+  useEffect(() => {
+    if (phase !== "playing") return;
+    const reticleRef = lastReticleRef;
+    const speedPxPerS = RETICLE_KEY_SPEED_PX;
+    let lastTick = performance.now();
+    const uninstall = installGamepad(
+      {
+        onAim: (dx, dy) => {
+          const now = performance.now();
+          const dt = (now - lastTick) / 1000;
+          lastTick = now;
+          if (dx === 0 && dy === 0) return;
+          const r = reticleRef.current;
+          const nx = Math.max(0, Math.min(STAGE_W, r.x + dx * speedPxPerS * dt));
+          const ny = Math.max(0, Math.min(STAGE_H, r.y + dy * speedPxPerS * dt));
+          setReticle(nx, ny);
+        },
+        onFire: () => {
+          fireWithAssist(reticleRef.current.x, reticleRef.current.y);
+        },
+        onReload: () => {
+          runnerRef.current?.queueReload();
+        },
+        onPause: () => {
+          const isPaused = runnerRef.current?.isPaused() ?? false;
+          if (isPaused) runnerRef.current?.resume();
+          else runnerRef.current?.pause();
+        },
+      },
+      { invertY },
+    );
+    return uninstall;
+  }, [phase, invertY, setReticle]);
 
   // Per-frame keyboard reticle integration via rAF.
   useEffect(() => {
@@ -204,6 +250,18 @@ export function GameStage() {
     }
   }
 
+  function fireWithAssist(x: number, y: number) {
+    const r = runnerRef.current;
+    if (!r) return;
+    if (!aimAssistRef.current) {
+      r.queueShot(x, y);
+      return;
+    }
+    const vermin = useGameStore.getState().vermin;
+    const snapped = applyAimAssist(x, y, vermin);
+    r.queueShot(snapped.x, snapped.y);
+  }
+
   function onPointerDown(e: React.PointerEvent<HTMLDivElement>) {
     const p = clientToStage(e, e.currentTarget);
     setReticle(p.x, p.y);
@@ -211,12 +269,17 @@ export function GameStage() {
     pointerDownPos.current = p;
     pointerMoved.current = false;
     e.currentTarget.setPointerCapture(e.pointerId);
-    // Long-press → reload. Any drag cancels via clearLongPress in onPointerMove.
+    // Touch tap-to-fire: coarse pointer fires on pointerDown so the
+    // player gets immediate feedback without having to wait for the
+    // pointerUp edge. Long-press still reloads. Mouse stays
+    // press-and-release so drag-to-aim works.
+    if (e.pointerType === "touch") {
+      fireWithAssist(p.x, p.y);
+    }
     clearLongPress();
     longPressTimer.current = window.setTimeout(() => {
       if (!pointerMoved.current) {
         runnerRef.current?.queueReload();
-        // Mark as consumed so onPointerUp doesn't also fire.
         pointerDownAt.current = null;
       }
     }, LONG_PRESS_MS);
@@ -231,9 +294,11 @@ export function GameStage() {
     if (downAt === null) return; // long-press already fired
     const heldMs = performance.now() - downAt;
     if (heldMs >= LONG_PRESS_MS) return; // safety
-    // Short press → fire at the current reticle (which the drag updated).
+    // Mouse: fire on release so drag-to-aim works naturally. Touch
+    // already fired on pointerDown — skip to avoid double-fire.
+    if (e.pointerType === "touch") return;
     const p = clientToStage(e, e.currentTarget);
-    runnerRef.current?.queueShot(p.x, p.y);
+    fireWithAssist(p.x, p.y);
   }
 
   function onPointerCancel() {
