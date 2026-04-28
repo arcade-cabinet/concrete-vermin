@@ -1,0 +1,21 @@
+{
+  "era": "October 1979",
+  "city": "New York City",
+  "premise": "The blackout was last summer. The fiscal crisis bit hard. The trash hasn't been picked up in three weeks. Something is wrong with the rats. The Pawnbroker pays cash and asks no questions.",
+  "tone": "Pulpy, Adult-Swim adjacent, Saturday-morning-violent. Catholic-flavored. 1970s noir. Comic, never grimdark.",
+  "antiTone": "Cyberpunk, neon, futurist, gore-realistic, lore-dump-heavy, joyless.",
+  "acts": {
+    "streets": {
+      "title": "ACT I — STREETS",
+      "intro": "It is October 1979. The city is broke. Sanitation is on rolling slowdowns. The sidewalks are stacked. You took the job from a man on Mott Street who paid cash and asked no questions. He hands you the family shotgun across the counter. He says: clear them out before the city notices. He says: don't go down. He says: come back, and I'll tell you the rest."
+    },
+    "underworld": {
+      "title": "ACT II — UNDERWORLD",
+      "intro": "The MTA is not running tonight. Someone has clawed the route map off the platform wall and replaced it with a rosary diagram in chalk. The Pawnbroker has given you a Mac-10 he says fell off a truck — you don't ask which truck. The platform is full. The tunnel mouths are fuller. You go down anyway."
+    },
+    "above": {
+      "title": "ACT III — ABOVE",
+      "intro": "Late October now. The leaves are down on Riverside and the wind off the Hudson is bad. The Pawnbroker has been drinking. He gives you a tesla coil rifle that he says belonged to your grandfather. You did not know your grandfather was a pest controller. He says there are things he hasn't told you. He says the rooftops aren't safe at noon, and he means it literally."
+    }
+  }
+}

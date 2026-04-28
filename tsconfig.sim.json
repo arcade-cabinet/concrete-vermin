@@ -27,6 +27,6 @@
       "@/lib/*": ["src/lib/*"]
     }
   },
-  "include": ["src/sim/**/*.ts", "src/lib/**/*.ts"],
+  "include": ["src/sim/**/*.ts", "src/sim/**/*.json", "src/lib/**/*.ts"],
   "exclude": ["node_modules", "dist", "build", "**/__tests__/**"]
 }

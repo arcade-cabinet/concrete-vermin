@@ -25,7 +25,8 @@
     "cap:open:android": "pnpm exec cap open android",
     "cap:open:ios": "pnpm exec cap open ios",
     "cap:run:android": "pnpm exec cap run android",
-    "cap:run:ios": "pnpm exec cap run ios"
+    "cap:run:ios": "pnpm exec cap run ios",
+    "lore:print": "tsx scripts/lore-print.ts"
   },
   "dependencies": {
     "@capacitor-community/sqlite": "^8.1.0",
