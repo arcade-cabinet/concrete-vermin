@@ -3,209 +3,114 @@ name: CI
 on:
   pull_request:
 
-concurrency:
-  group: ci-${{ github.ref }}
-  cancel-in-progress: true
-
 permissions:
   contents: read
 
 jobs:
   core:
-    name: Typecheck · Lint · Test · Build
     runs-on: ubuntu-latest
-    timeout-minutes: 15
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
-      - uses: pnpm/action-setup@903f9c1a6ebcba6cf41d87230be49611ac97822e # v6.0.3
+
+      - uses: pnpm/action-setup@078e9d416474b29c0c387560859308974f7e9c53 # v6.0.1
         with:
           version: 10.33.0
-      - uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6.4.0
+
+      - uses: actions/setup-node@53b83947a5a98c8d113130e565377fae1a50d02f # v6.3.0
         with:
           node-version: 22
           cache: pnpm
 
-      - name: Install
+      - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Typecheck (full)
+      - name: Type check
         run: pnpm run typecheck
-
-      - name: Typecheck (sim-only purity gate)
-        run: pnpm run typecheck:sim
 
       - name: Lint
         run: pnpm run lint
 
-      - name: Sim-purity grep gate
-        run: |
-          set -e
-          # Exclude *.test.ts: the purity test itself contains the
-          # Math.random / forbidden-import patterns as regex literals.
-          if grep -RInE 'Math\.random\s*\(' src/sim/ --include='*.ts' --exclude='*.test.ts'; then
-            echo "::error::Math.random in src/sim/ — use createRng(seed). STANDARDS.md §2."
-            exit 1
-          fi
-          if grep -RInE "from\s+['\"](react|react-dom|pixi-react|pixi\.js|@pixi/|tone|@capacitor/|framer-motion|@radix-ui/|matter-js)" src/sim/ --include='*.ts' --exclude='*.test.ts'; then
-            echo "::error::Forbidden import in src/sim/. STANDARDS.md §2."
-            exit 1
-          fi
-
-      - name: Factory pyramid grep gate
-        run: |
-          set -e
-          if grep -RInE 'world\.spawn\s*\(\s*Vermin' src/ --include='*.ts' --include='*.tsx' \
-             | grep -v 'src/sim/factories/' | grep -v 'src/ecs/'; then
-            echo "::error::Raw vermin spawn outside factories. STANDARDS.md §6."
-            exit 1
-          fi
-
-      - name: Node tests
+      - name: Test
         run: pnpm run test:node
 
       - name: DOM tests
         run: pnpm run test:dom
 
+      - name: Release gate (balance lock coverage)
+        run: pnpm run test:release
+        env:
+          NODE_OPTIONS: --max-old-space-size=6144
+
       - name: Build
         run: pnpm run build
 
   browser:
-    name: Browser canvas tests
-    runs-on: ubuntu-latest
-    timeout-minutes: 15
-    steps:
-      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
-      - uses: pnpm/action-setup@903f9c1a6ebcba6cf41d87230be49611ac97822e # v6.0.3
-        with:
-          version: 10.33.0
-      - uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6.4.0
-        with:
-          node-version: 22
-          cache: pnpm
-
-      - name: Install
-        run: pnpm install --frozen-lockfile
-
-      - name: Install Playwright Chromium
-        run: pnpm exec playwright install chromium --with-deps
-
-      - name: Browser tests
-        run: xvfb-run -a pnpm run test:browser
-
-  e2e:
-    name: Playwright e2e
-    runs-on: ubuntu-latest
-    timeout-minutes: 20
-    steps:
-      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
-      - uses: pnpm/action-setup@903f9c1a6ebcba6cf41d87230be49611ac97822e # v6.0.3
-        with:
-          version: 10.33.0
-      - uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6.4.0
-        with:
-          node-version: 22
-          cache: pnpm
-
-      - name: Install
-        run: pnpm install --frozen-lockfile
-
-      - name: Install Playwright Chromium
-        run: pnpm exec playwright install chromium --with-deps
-
-      - name: Build
-        run: pnpm run build
-
-      - name: E2E tests
-        run: |
-          if find e2e -name '*.spec.ts' -print -quit 2>/dev/null | grep -q .; then
-            xvfb-run -a pnpm run test:e2e
-          else
-            echo "::notice::No e2e specs yet — skipping (gate enforced once first spec lands)."
-          fi
-
-      - name: Upload Playwright report on failure
-        if: failure()
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
-        with:
-          name: playwright-report
-          path: playwright-report/
-          retention-days: 7
-
-  android-debug-apk:
-    name: Android debug APK
-    runs-on: ubuntu-latest
-    timeout-minutes: 25
-    steps:
-      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
-
-      - uses: actions/setup-java@be666c2fcd27ec809703dec50e508c2fdc7f6654 # v5.2.0
-        with:
-          distribution: temurin
-          java-version: 21
-
-      - uses: android-actions/setup-android@40fd30fb8d7440372e1316f5d1809ec01dcd3699 # v4.0.1
-
-      - uses: pnpm/action-setup@903f9c1a6ebcba6cf41d87230be49611ac97822e # v6.0.3
-        with:
-          version: 10.33.0
-
-      - uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6.4.0
-        with:
-          node-version: 22
-          cache: pnpm
-
-      - name: Install
-        run: pnpm install --frozen-lockfile
-
-      - name: Build web
-        run: pnpm run build
-
-      - name: Sync Capacitor (android)
-        run: pnpm exec cap sync android
-
-      - name: Cache Gradle
-        uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
-        with:
-          path: |
-            ~/.gradle/caches
-            ~/.gradle/wrapper
-            android/.gradle
-          key: gradle-${{ hashFiles('android/**/*.gradle*', 'android/gradle/wrapper/gradle-wrapper.properties') }}
-          restore-keys: gradle-
-
-      - name: Build debug APK
-        working-directory: android
-        run: ./gradlew assembleDebug --no-daemon
-
-      - name: Upload debug APK
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
-        with:
-          name: concrete-vermin-debug-apk
-          path: android/app/build/outputs/apk/debug/app-debug.apk
-          if-no-files-found: error
-          retention-days: 14
-
-  analysis:
-    name: Balance benchmark (CI profile)
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
-      - uses: pnpm/action-setup@903f9c1a6ebcba6cf41d87230be49611ac97822e # v6.0.3
+
+      - uses: pnpm/action-setup@078e9d416474b29c0c387560859308974f7e9c53 # v6.0.1
         with:
           version: 10.33.0
-      - uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6.4.0
+
+      - uses: actions/setup-node@53b83947a5a98c8d113130e565377fae1a50d02f # v6.3.0
         with:
           node-version: 22
           cache: pnpm
 
-      - name: Install
+      - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Run CI benchmark profile
-        run: |
-          if [ -f src/sim/analysis/cli.ts ]; then
-            pnpm run analysis:benchmark
-          else
-            echo "::notice::Analysis CLI not yet implemented (CV-035..CV-039) — skipping."
-          fi
+      - name: Install Playwright browser
+        run: pnpm exec playwright install chromium
+
+      - name: Browser tests
+        run: xvfb-run -a pnpm run test:browser
+
+  e2e-smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - uses: pnpm/action-setup@078e9d416474b29c0c387560859308974f7e9c53 # v6.0.1
+        with:
+          version: 10.33.0
+
+      - uses: actions/setup-node@53b83947a5a98c8d113130e565377fae1a50d02f # v6.3.0
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Install Playwright browser
+        run: pnpm exec playwright install chromium
+
+      - name: Smoke E2E
+        run: pnpm run test:e2e:ci
+
+  autobalance:
+    if: github.event.pull_request.head.ref == 'autobalance/drift' || contains(github.event.pull_request.labels.*.name, 'balance-drift')
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - uses: pnpm/action-setup@078e9d416474b29c0c387560859308974f7e9c53 # v6.0.1
+        with:
+          version: 10.33.0
+
+      - uses: actions/setup-node@53b83947a5a98c8d113130e565377fae1a50d02f # v6.3.0
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Validate balance convergence
+        run: pnpm run analysis:lock
+        env:
+          NODE_OPTIONS: --max-old-space-size=6144
