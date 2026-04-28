@@ -1,4 +1,5 @@
 import { useGameStore } from "../runtime/store";
+import { getMissionLore } from "../sim/content/lore";
 import {
   getMission,
   listMissionsByAct,
@@ -387,9 +388,12 @@ function SecretRail({
       {secrets.map((m) => {
         const unlocked = isMissionUnlocked(m.id, completed, sGradeMissions);
         const isSelected = selected === m.id;
-        const label = unlocked
-          ? m.id.replace(/^[a-z]+-secret-/, "").replace(/-/g, " ").toUpperCase()
-          : "??? ??? ???";
+        // Source the human-readable title from lore instead of slug-
+        // regexing the mission id, so renaming an id (or adding a
+        // mission whose id doesn't match the `*-secret-*` pattern)
+        // doesn't surface raw slug text to the player or screen reader.
+        const secretReadableName = getMissionLore(m.id).title;
+        const label = unlocked ? secretReadableName : "??? ??? ???";
         return (
           <button
             key={m.id}
@@ -401,7 +405,7 @@ function SecretRail({
             aria-label={
               unlocked
                 ? `Secret mission: ${label}`
-                : `Secret mission ${m.id.replace(/^[a-z]+-secret-/, "").replace(/-/g, " ")}, locked, S-grade required`
+                : `Secret mission ${secretReadableName}, locked, S-grade required`
             }
             onClick={() => unlocked && onSelect(m.id)}
             style={{

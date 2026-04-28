@@ -1,6 +1,6 @@
 import { useEffect, useRef } from "react";
 import { useGameStore } from "../runtime/store";
-import { pawnbrokerDebriefFor } from "../sim/content/lore";
+import { getMissionLore, pawnbrokerDebriefFor } from "../sim/content/lore";
 import { SECRET_MISSIONS } from "../sim/content/missions";
 import { useIsNarrow } from "./hooks/useViewport";
 import { usePlayerProgress } from "./PlayerProgress";
@@ -30,18 +30,18 @@ export function MissionResult() {
   const debrief = missionId ? pawnbrokerDebriefFor(missionId, outcome) : null;
   const sGradeEarned = won && (grade === "S" || grade === "S+");
 
-  const awarded = useRef(false);
+  // Idempotency: gate on `completedMissionIds.includes(missionId)`
+  // instead of a render-cycle ref. The ref guard is fragile under
+  // React 18 strict-mode double-invoke and across unmount/remount —
+  // both windows would let `awardCash` (which has no internal dedupe)
+  // fire twice. Reading from PlayerProgress on each render is cheap.
   useEffect(() => {
-    if (awarded.current) return;
-    awarded.current = true;
-    if (won) {
-      const p = usePlayerProgress.getState();
-      p.awardCash(killCount * CASH_PER_KILL);
-      if (missionId) {
-        p.unlockMission(missionId);
-        if (sGradeEarned) p.markSGradeEarned(missionId);
-      }
-    }
+    if (!won || !missionId) return;
+    const p = usePlayerProgress.getState();
+    if (p.completedMissionIds.includes(missionId)) return;
+    p.awardCash(killCount * CASH_PER_KILL);
+    p.unlockMission(missionId);
+    if (sGradeEarned) p.markSGradeEarned(missionId);
   }, [won, killCount, missionId, sGradeEarned]);
 
   const ctaRef = useRef<HTMLButtonElement>(null);
@@ -51,11 +51,10 @@ export function MissionResult() {
 
   // Did this mission's S/S+ clear unlock a secret bonus mission? If so
   // we surface a one-line callout above the BY THE PAWNBROKER byline.
-  const secretUnlock = (() => {
-    if (!sGradeEarned || !missionId) return null;
-    const secret = SECRET_MISSIONS.find((m) => m.sGradeUnlockFrom === missionId);
-    return secret ?? null;
-  })();
+  const secretUnlock =
+    sGradeEarned && missionId
+      ? (SECRET_MISSIONS.find((m) => m.sGradeUnlockFrom === missionId) ?? null)
+      : null;
 
   return (
     <div
@@ -207,7 +206,7 @@ export function MissionResult() {
             <span aria-hidden="true" style={{ color: "#7a2818", marginRight: 8 }}>
               ✦
             </span>
-            Secret unlocked: {secretUnlock.id.replace(/-/g, " ")}
+            Secret unlocked: {getMissionLore(secretUnlock.id).title}
           </div>
         ) : null}
 

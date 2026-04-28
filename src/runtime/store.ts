@@ -215,15 +215,21 @@ export interface GameState {
 /**
  * Snapshot fields the runner publishes every frame via setSnapshot
  * (plus the mission/score/phase scaffolding that startMission resets).
- * Exported so test setups can reset the singleton store cleanly without
- * having to maintain a parallel copy of the field list.
+ * Exported so test setups can reset the singleton store cleanly.
+ *
+ * Excludes fields the runner OWNS and re-publishes on every tick:
+ *   - `player` (ammoCurrent/Max/livesRemaining come from the active
+ *     weapon + mission, not from a static initial)
+ *
+ * Including those would let `startMission`'s spread silently stomp
+ * weapon-mod or shop-upgraded values during the one-frame window
+ * before the runner's first publishSnapshot().
  */
 export const INITIAL_SNAPSHOT: Pick<
   GameState,
   | "phase"
   | "now"
   | "score"
-  | "player"
   | "vermin"
   | "projectiles"
   | "splashes"
@@ -246,7 +252,6 @@ export const INITIAL_SNAPSHOT: Pick<
   phase: "main-menu",
   now: 0,
   score: { total: 0, multiplier: 1 },
-  player: { ammoCurrent: 6, ammoMax: 6, livesRemaining: 3 },
   vermin: [],
   projectiles: [],
   splashes: [],
@@ -269,6 +274,9 @@ export const INITIAL_SNAPSHOT: Pick<
 
 export const useGameStore = create<GameState>((set) => ({
   ...INITIAL_SNAPSHOT,
+  // Runner-owned: re-published every tick, but needs an initial so the
+  // store has a defined shape before the first GameRunner constructs.
+  player: { ammoCurrent: 6, ammoMax: 6, livesRemaining: 3 },
   viewport: { width: 480, height: 270 },
   settings: {
     crtOverlay: false,
