@@ -1,4 +1,5 @@
 import { playShotgun, playVerminDeath, playVerminHit, playVerminSpawn } from "../audio/sfx";
+import { bossDamageHaptic, hitHaptic, killHaptic } from "../platform/haptics";
 import { fireWeapon } from "../ecs/actions";
 import {
   aiSystem,
@@ -166,8 +167,24 @@ export class GameRunner {
     const newKills = events.filter((e) => e.kind === "kill").length;
     this.kills += newKills;
     for (const e of events) {
-      if (e.kind === "kill") playVerminDeath();
-      else playVerminHit();
+      if (e.kind === "kill") {
+        playVerminDeath();
+        // Boss kills are rare → use the heaviest haptic. Non-boss kills
+        // get medium. Hits get light. All three are no-ops on web.
+        if (e.archetypeId.startsWith("boss-")) {
+          void bossDamageHaptic();
+        } else {
+          void killHaptic();
+        }
+      } else {
+        playVerminHit();
+        // Boss hits during phase damage also feel meaty.
+        if (e.archetypeId.startsWith("boss-")) {
+          void bossDamageHaptic();
+        } else {
+          void hitHaptic();
+        }
+      }
     }
 
     // Misses — only count if we fired AND nothing was hit.

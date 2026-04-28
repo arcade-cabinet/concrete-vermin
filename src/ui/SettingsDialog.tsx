@@ -90,6 +90,7 @@ export function SettingsDialog({
   const setReducedMotion = useGameStore((s) => s.setReducedMotion);
   const setHighContrast = useGameStore((s) => s.setHighContrast);
   const setCrtOverlay = useGameStore((s) => s.setCrtOverlay);
+  const setHaptics = useGameStore((s) => s.setHaptics);
 
   return (
     <Dialog.Root open={open} onOpenChange={onOpenChange}>
@@ -212,6 +213,17 @@ export function SettingsDialog({
                 checked={settings.crtOverlay}
                 onChange={setCrtOverlay}
                 ariaLabel="CRT overlay"
+              />
+            }
+          />
+          <SettingRow
+            label="Haptics"
+            description="Vibration on hit, kill, and boss damage. Mobile only."
+            control={
+              <ToggleSwitch
+                checked={settings.haptics}
+                onChange={setHaptics}
+                ariaLabel="Haptics (vibration)"
               />
             }
           />

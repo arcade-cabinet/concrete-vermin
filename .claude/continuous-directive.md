@@ -145,7 +145,7 @@ Each `[ ]` is one commit. Group small ones into one PR; large ones get their own
 - [x] HUD: critical-life pulse when livesRemaining <= 1
 - [x] HUD: streak badge slot — variety / no-reload / hot-streak chips
 - [x] Pause menu (Radix Dialog): resume / restart / settings / quit-to-menu
-- [x] Settings dialog: master volume / mute / reduce-motion / high-contrast / CRT toggle (haptics deferred — needs @capacitor/haptics wired in CV-DEPLOYMENT)
+- [x] Settings dialog: master volume / mute / reduce-motion / high-contrast / CRT / haptics toggle
 - [x] Motion-reduction (prefers-reduced-motion): disable splash flashes, slow-down score tick-up
 - [x] High-contrast mode: bump foreground vs background ratio to AAA
 - [x] Keyboard focus rings: visible 2px sodium-amber outline on every focusable element
@@ -154,7 +154,7 @@ Each `[ ]` is one commit. Group small ones into one PR; large ones get their own
 - [x] aria-label on the canvas: "game canvas — drag to aim, tap to fire"
 - [x] Loading spinner / splash screen between mount and Pixi Application ready
 - [x] First-launch overlay: 3-step explanatory tooltip (aim, fire, reload) auto-dismissed on first input
-- [ ] Vibration via @capacitor/haptics: light on hit, medium on kill, heavy on boss damage; fallback no-op on web
+- [x] Vibration via @capacitor/haptics: light on hit, medium on kill, heavy on boss damage; fallback no-op on web
 - [x] Screen-shake on kill (Pixi container offset, 80ms decay) — respects motion-reduction
 - [x] CRT overlay (src/render/effects/crt.ts) — the one allowed neon-cyan POC color, behind a setting toggle, off by default
 - [x] Performance: Pixi resolution caps at min(devicePixelRatio, 2) on mobile to keep frame rate
@@ -162,11 +162,11 @@ Each `[ ]` is one commit. Group small ones into one PR; large ones get their own
 - [ ] Visual regression: take Pages screenshots at 320×568, 375×812, 768×1024, 1280×720, 1920×1080 + commit to docs/screenshots/
 
 ### CV-AUDIO-DESIGN — sound bible (PR #8d — creative)
-- [ ] docs/AUDIO.md: per-weapon sonic signature description (shotgun = thumpy thwack-pop; revolver = sharp bark; smg = chittering rip; sawed-off = wet boom; flame = sustained roar; tesla = arc-snap)
-- [ ] docs/AUDIO.md: per-vermin death-sound description (rat squeal, roach crunch, pigeon flutter-thud, etc.)
-- [ ] docs/AUDIO.md: ambient bed per-act (Streets: distant horn + steam + traffic; Underworld: drips + low rumble; Above: wind + bird-ambiance)
-- [ ] docs/AUDIO.md: music brief — opening title, mission start sting, boss leitmotif, win/loss stings; describe in plain English with reference tracks
-- [ ] docs/AUDIO.md: ducking/mix policy (when sfx should duck music, when narration should duck both)
+- [x] docs/AUDIO.md: per-weapon sonic signature description (shotgun = thumpy thwack-pop; revolver = sharp bark; smg = chittering rip; sawed-off = wet boom; flame = sustained roar; tesla = arc-snap)
+- [x] docs/AUDIO.md: per-vermin death-sound description (rat squeal, roach crunch, pigeon flutter-thud, etc.)
+- [x] docs/AUDIO.md: ambient bed per-act (Streets: distant horn + steam + traffic; Underworld: drips + low rumble; Above: wind + bird-ambiance)
+- [x] docs/AUDIO.md: music brief — opening title, mission start sting, boss leitmotif, win/loss stings; describe in plain English with reference tracks
+- [x] docs/AUDIO.md: ducking/mix policy (when sfx should duck music, when narration should duck both)
 
 ### CV-ANALYSIS — balance sweeper + lock (PR #9)
 - [ ] src/sim/analysis/effects.ts: per-card / per-variant effect estimator
