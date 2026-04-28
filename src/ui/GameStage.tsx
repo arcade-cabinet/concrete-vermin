@@ -1,6 +1,7 @@
 import { Application, useTick } from "@pixi/react";
 import { useEffect, useRef } from "react";
 import "../render/extend";
+import { MuzzleFlashLayer } from "../render/MuzzleFlashLayer";
 import { ProjectileLayer } from "../render/ProjectileLayer";
 import { ReticleLayer } from "../render/ReticleLayer";
 import { SplashLayer } from "../render/SplashLayer";
@@ -94,6 +95,7 @@ export function GameStage() {
           <Stage />
           <VerminLayer />
           <ProjectileLayer />
+          <MuzzleFlashLayer />
           <SplashLayer />
           <ReticleLayer />
           {runnerRef.current ? <Loop runner={runnerRef.current} /> : null}

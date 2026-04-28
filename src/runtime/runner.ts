@@ -49,6 +49,9 @@ export class GameRunner {
   private killsTarget = 0;
   private kills = 0;
   private pendingShot: { x: number; y: number } | null = null;
+  // Muzzle flashes are too short-lived (80ms) to be worth ECS entities;
+  // hold them in a rolling list pruned by TTL each tick.
+  private muzzleFlashes: import("./store").MuzzleFlash[] = [];
 
   constructor(seed: number) {
     this.gw = createGameWorld(seed);
@@ -120,9 +123,21 @@ export class GameRunner {
         },
         spreads,
       );
+      // Spawn the muzzle flash — sodium amber pulse pointing at the
+      // reticle for 80ms (matches design's "snap-pop" weapon feel).
+      this.muzzleFlashes.push({
+        x: playerPos.x,
+        y: playerPos.y,
+        targetX: reticle.x,
+        targetY: reticle.y,
+        firedAt: this.now,
+        ttlS: 0.08,
+      });
       this.pendingShot = null;
       shotFired = true;
     }
+    // Prune expired muzzle flashes regardless of whether we just fired.
+    this.muzzleFlashes = this.muzzleFlashes.filter((m) => this.now - m.firedAt < m.ttlS);
 
     // 4. Integrate motion; advance projectiles.
     motionSystem(this.gw.world, dt);
@@ -215,6 +230,8 @@ export class GameRunner {
       vermin,
       projectiles,
       splashes,
+      muzzleFlashes: this.muzzleFlashes.slice(),
+      now: this.now,
       score: { total, multiplier },
       killCount: this.kills,
     });
