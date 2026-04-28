@@ -123,11 +123,11 @@ Each `[ ]` is one commit. Group small ones into one PR; large surfaces get their
 - [x] src/ui/MissionResult.tsx: redesign as a tabloid front-page — grade as headline, stats as columns, callouts as bylines
 - [x] src/ui/HUD.tsx: redesign — corner brackets like a CRT viewfinder; SCORE/AMMO/LIVES with neon-tube-amber underglow (sodium amber, NOT cyberpunk neon — within brand)
 - [x] src/ui/PauseMenu.tsx: redesign as a Polaroid stack — paused frame on top, options as torn-edge cards
-- [ ] src/ui/Settings.tsx: redesign — categorized accordion (Audio/Visual/Input/Accessibility), live preview chips
+- [x] src/ui/Settings.tsx: redesign — categorized accordion (Audio/Visual/Input/Accessibility), live preview chips
 - [x] src/ui/Credits.tsx: NEW — scrolling credits with role attribution, lore Easter eggs
 - [x] src/ui/Toast.tsx: NEW — Radix Toast wired for non-blocking notifications (cash earned, weapon unlocked, achievement)
 - [x] src/ui/transitions/: page transitions via Framer Motion — newspaper-fold between menus, cinematic letterbox into missions
-- [ ] tests: src/ui/__tests__/screens.dom.test.ts — every new screen renders + interactive
+- [x] tests: src/ui/__tests__/screens.dom.test.ts — every new screen renders + interactive
 
 ### v1.0-CONTENT-DEPTH — make missions LIVE
 

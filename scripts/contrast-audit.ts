@@ -40,8 +40,12 @@ const ROW = (p: Pair, ratio: number, ok: boolean) =>
   `${ok ? "✓" : "✗"}  ${p.fgName.padEnd(16)} on ${p.bgName.padEnd(20)} ${ratio.toFixed(2)}:1  [${p.kind}]  ${p.context}`;
 
 let failed = 0;
-const out = (s: string) => process.stdout.write(`${s}\n`);
-const err = (s: string) => process.stderr.write(`${s}\n`);
+const out = (s: string): void => {
+  process.stdout.write(`${s}\n`);
+};
+const err = (s: string): void => {
+  process.stderr.write(`${s}\n`);
+};
 out("# WCAG 2.1 AA brand-token contrast audit\n");
 for (const p of PAIRS) {
   const ratio = contrast(p.fg, p.bg);
@@ -53,6 +57,9 @@ for (const p of PAIRS) {
 out("");
 if (failed > 0) {
   err(`FAIL: ${failed} pair(s) below WCAG AA threshold.`);
-  process.exit(1);
+  // Set exitCode rather than calling process.exit so Node fully flushes
+  // stdout/stderr before terminating — important for CI log readability.
+  process.exitCode = 1;
+} else {
+  out(`OK: all ${PAIRS.length} pairs meet WCAG AA.`);
 }
-out(`OK: all ${PAIRS.length} pairs meet WCAG AA.`);
