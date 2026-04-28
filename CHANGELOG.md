@@ -28,6 +28,13 @@ For the per-PR record, see the autogen sections below.
 
 Releases are managed by [release-please](https://github.com/googleapis/release-please).
 
+## [1.20.0](https://github.com/arcade-cabinet/concrete-vermin/compare/v1.19.1...v1.20.0) (2026-04-28)
+
+
+### Features
+
+* **docs:** visual-regression screenshots + README quickstart + CHANGELOG narrative ([#53](https://github.com/arcade-cabinet/concrete-vermin/issues/53)) ([ac55fd8](https://github.com/arcade-cabinet/concrete-vermin/commit/ac55fd8eeafa9747e1c1202647915d1548b4e7cf))
+
 ## [1.19.1](https://github.com/arcade-cabinet/concrete-vermin/compare/v1.19.0...v1.19.1) (2026-04-28)
 
 
