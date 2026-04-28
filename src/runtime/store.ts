@@ -54,9 +54,16 @@ export interface MuzzleFlash {
   ttlS: number;
 }
 
+export interface Settings {
+  /** Optional retro CRT overlay (off by default per design — pulpy not glitchy). */
+  crtOverlay: boolean;
+}
+
 export interface GameState {
   phase: MissionPhase;
   viewport: { width: number; height: number };
+  settings: Settings;
+  setCrtOverlay: (on: boolean) => void;
   reticle: { x: number; y: number };
   score: { total: number; multiplier: number };
   player: { ammoCurrent: number; ammoMax: number; livesRemaining: number };
@@ -96,6 +103,8 @@ export interface GameState {
 export const useGameStore = create<GameState>((set) => ({
   phase: "briefing",
   viewport: { width: 480, height: 270 },
+  settings: { crtOverlay: false },
+  setCrtOverlay: (on) => set((s) => ({ settings: { ...s.settings, crtOverlay: on } })),
   reticle: { x: 240, y: 200 },
   score: { total: 0, multiplier: 1 },
   player: { ammoCurrent: 6, ammoMax: 6, livesRemaining: 3 },
