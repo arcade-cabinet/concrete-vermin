@@ -52,6 +52,18 @@ export const missionSpecSchema = z
     encounters: z.array(encounterSpecSchema).min(1),
     /** Optional designer-authored seed for replay. */
     seed: z.number().int().optional(),
+    /**
+     * Lives the player gets to clear this mission. Defaults to 3.
+     * Boss missions and the tutorial extend to 5 so a single bad
+     * spawn doesn't ice the run.
+     */
+    livesAllowance: z.number().int().positive().max(9).default(3),
+    /**
+     * Cash awarded on first clear. Optional; falls back to a per-act
+     * default in the runner (Streets 100 / Underworld 200 / Above 350
+     * for boss tiers).
+     */
+    cashAward: z.number().int().nonnegative().optional(),
   })
   .strict();
 

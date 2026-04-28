@@ -10,13 +10,14 @@ import { Stage } from "../render/Stage";
 import { VerminLayer } from "../render/VerminLayer";
 import { GameRunner } from "../runtime/runner";
 import { useGameStore } from "../runtime/store";
+import { getMission } from "../sim/content/missions";
 import { COLOR } from "../theme/tokens";
 import { useScreenShake } from "./hooks/useScreenShake";
 import { LoadingSplash } from "./LoadingSplash";
+import { usePlayerProgress } from "./PlayerProgress";
 
 const STAGE_W = 480;
 const STAGE_H = 270;
-const KILLS_REQUIRED = 8;
 const RETICLE_KEY_SPEED_PX = 220; // sim units per second when held
 const LONG_PRESS_MS = 350; // hold past this on press → reload, not fire
 
@@ -78,9 +79,16 @@ export function GameStage() {
 
   useEffect(() => {
     if (phase === "playing" && !runnerRef.current) {
-      const r = new GameRunner(Date.now() & 0x7fffffff);
-      r.startTutorialMission(KILLS_REQUIRED);
-      runnerRef.current = r;
+      const missionId = useGameStore.getState().missionId || "streets-01-bodega";
+      const mission = (() => {
+        try {
+          return getMission(missionId);
+        } catch {
+          return getMission("streets-01-bodega");
+        }
+      })();
+      const activeMods = usePlayerProgress.getState().activeMods;
+      runnerRef.current = new GameRunner(mission, activeMods);
     }
     if (phase === "briefing" && runnerRef.current) {
       runnerRef.current = null;

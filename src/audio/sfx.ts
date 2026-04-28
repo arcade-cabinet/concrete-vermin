@@ -8,10 +8,15 @@ import { getBuses } from "./setup";
 let _shotgun: Tone.NoiseSynth | null = null;
 let _smg: Tone.NoiseSynth | null = null;
 let _revolver: Tone.MembraneSynth | null = null;
+let _sawedOff: Tone.NoiseSynth | null = null;
+let _flame: Tone.NoiseSynth | null = null;
+let _tesla: Tone.MembraneSynth | null = null;
+let _reload: Tone.MetalSynth | null = null;
 let _verminHit: Tone.NoiseSynth | null = null;
 let _verminDeath: Tone.MembraneSynth | null = null;
 let _verminSpawn: Tone.PluckSynth | null = null;
 let _empty: Tone.MetalSynth | null = null;
+let _bossDeath: Tone.MembraneSynth | null = null;
 
 function ensureInstruments(): void {
   const buses = getBuses();
@@ -71,6 +76,46 @@ function ensureInstruments(): void {
       volume: -22,
     }).connect(buses.sfx);
   }
+  if (!_sawedOff) {
+    _sawedOff = new Tone.NoiseSynth({
+      noise: { type: "brown" },
+      envelope: { attack: 0.003, decay: 0.28, sustain: 0, release: 0.12 },
+      volume: -6,
+    }).connect(buses.sfx);
+  }
+  if (!_flame) {
+    _flame = new Tone.NoiseSynth({
+      noise: { type: "pink" },
+      envelope: { attack: 0.005, decay: 0.12, sustain: 0.4, release: 0.08 },
+      volume: -14,
+    }).connect(buses.sfx);
+  }
+  if (!_tesla) {
+    _tesla = new Tone.MembraneSynth({
+      pitchDecay: 0.02,
+      octaves: 8,
+      envelope: { attack: 0.0005, decay: 0.08, sustain: 0, release: 0.04 },
+      volume: -8,
+    }).connect(buses.sfx);
+  }
+  if (!_reload) {
+    _reload = new Tone.MetalSynth({
+      envelope: { attack: 0.001, decay: 0.06, sustain: 0, release: 0.03 },
+      harmonicity: 5,
+      modulationIndex: 6,
+      resonance: 1500,
+      octaves: 1,
+      volume: -18,
+    }).connect(buses.sfx);
+  }
+  if (!_bossDeath) {
+    _bossDeath = new Tone.MembraneSynth({
+      pitchDecay: 0.3,
+      octaves: 6,
+      envelope: { attack: 0.005, decay: 0.6, sustain: 0, release: 0.4 },
+      volume: -4,
+    }).connect(buses.sfx);
+  }
 }
 
 export function playShotgun(): void {
@@ -88,6 +133,71 @@ export function playRevolver(): void {
   _revolver?.triggerAttackRelease("C2", "16n");
 }
 
+export function playSawedOff(): void {
+  ensureInstruments();
+  _sawedOff?.triggerAttackRelease("8n");
+}
+
+export function playFlame(): void {
+  ensureInstruments();
+  _flame?.triggerAttackRelease("16n");
+}
+
+export function playTesla(): void {
+  ensureInstruments();
+  _tesla?.triggerAttackRelease("G4", "32n");
+}
+
+/**
+ * Generic reload click. Use playWeaponReload(weaponId) to dispatch the
+ * per-weapon variant (shotgun pump, revolver cylinder, etc).
+ */
+export function playReload(): void {
+  ensureInstruments();
+  _reload?.triggerAttackRelease("A5", "16n");
+}
+
+/**
+ * Per-weapon reload cue. Each weapon gets a distinct sonic signature
+ * by synth choice + pitch + duration.
+ */
+export function playWeaponReload(weaponId: string): void {
+  ensureInstruments();
+  switch (weaponId) {
+    case "shotgun":
+      // Pump shotgun: two-stage clack-clunk (kick + metal).
+      _verminHit?.triggerAttackRelease("16n");
+      _reload?.triggerAttackRelease("E5", "16n");
+      break;
+    case "revolver":
+      // Cylinder swing: pluck note + soft metal click.
+      _verminSpawn?.triggerAttackRelease("C5", "32n");
+      _reload?.triggerAttackRelease("G5", "32n");
+      break;
+    case "smg":
+      // Mag swap: thunk + slap.
+      _verminHit?.triggerAttackRelease("32n");
+      _reload?.triggerAttackRelease("D5", "32n");
+      break;
+    case "sawed-off":
+      // Break-action: chunky open + close.
+      _verminDeath?.triggerAttackRelease("C2", "16n");
+      _reload?.triggerAttackRelease("E5", "16n");
+      break;
+    case "flamethrower":
+      // Fuel purge hiss.
+      _flame?.triggerAttackRelease("8n");
+      break;
+    case "tesla":
+      // Capacitor recharge whine.
+      _reload?.triggerAttackRelease("B5", "8n");
+      break;
+    default:
+      _reload?.triggerAttackRelease("A5", "16n");
+      break;
+  }
+}
+
 export function playEmpty(): void {
   ensureInstruments();
   _empty?.triggerAttackRelease("C6", "32n");
@@ -98,12 +208,68 @@ export function playVerminSpawn(): void {
   _verminSpawn?.triggerAttackRelease("E5", "8n");
 }
 
-export function playVerminHit(): void {
+/**
+ * Per-archetype hit cue. Pitched lower for bigger vermin so the
+ * sonic feedback matches visual mass.
+ */
+export function playVerminHit(archetypeId?: string): void {
   ensureInstruments();
-  _verminHit?.triggerAttackRelease("32n");
+  if (!_verminHit) return;
+  // Default light-tap; bosses get a heavier hit pitched down via
+  // velocity. Tone's NoiseSynth doesn't take a pitch — we use the
+  // membrane synth as a chest-thump on bosses.
+  if (archetypeId?.startsWith("boss-")) {
+    _verminDeath?.triggerAttackRelease("A2", "16n");
+    return;
+  }
+  _verminHit.triggerAttackRelease("32n");
 }
 
-export function playVerminDeath(): void {
+/**
+ * Per-archetype death cue. Bosses get the heavy bell-tone synth.
+ */
+export function playVerminDeath(archetypeId?: string): void {
   ensureInstruments();
-  _verminDeath?.triggerAttackRelease("F2", "8n");
+  if (archetypeId?.startsWith("boss-")) {
+    _bossDeath?.triggerAttackRelease("E1", "2n");
+    return;
+  }
+  // Tiny adjustments per archetype for character.
+  let note: Tone.Unit.Frequency = "F2";
+  if (archetypeId === "rat") note = "G2";
+  else if (archetypeId === "roach") note = "B2";
+  else if (archetypeId === "pigeon" || archetypeId === "seagull" || archetypeId === "goose")
+    note = "D3";
+  else if (archetypeId === "sewer-fish") note = "C2";
+  _verminDeath?.triggerAttackRelease(note, "8n");
+}
+
+/**
+ * Dispatcher: pick the per-weapon SFX given a weapon archetype id.
+ * Falls back to shotgun for unknown ids.
+ */
+export function playWeaponFire(weaponId: string): void {
+  switch (weaponId) {
+    case "shotgun":
+      playShotgun();
+      break;
+    case "smg":
+      playSmg();
+      break;
+    case "revolver":
+      playRevolver();
+      break;
+    case "sawed-off":
+      playSawedOff();
+      break;
+    case "flamethrower":
+      playFlame();
+      break;
+    case "tesla":
+      playTesla();
+      break;
+    default:
+      playShotgun();
+      break;
+  }
 }

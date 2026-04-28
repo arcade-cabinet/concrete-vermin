@@ -43,4 +43,6 @@ export const mission09: Mission = defineMission({
     },
   ],
   seed: 1979_03_09,
+  livesAllowance: 5,
+  cashAward: 1000,
 });

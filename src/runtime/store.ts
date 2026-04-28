@@ -99,6 +99,15 @@ export interface GameState {
   modifierFlashes: ReadonlyArray<ModifierFlashSnapshot>;
   /** Sim seconds since mission start — published every frame for time-based fades. */
   now: number;
+  /**
+   * Reload window. null = not reloading; 0..1 = fraction complete.
+   * The HUD renders a fill bar; the game-stage uses it to disable fire.
+   */
+  reloadProgress: number | null;
+  /** Total reload duration in ms for the active mission's weapon. */
+  reloadDurationMs: number;
+  /** Cash awarded across the current session (sums per-mission awards). */
+  cashAwarded: number;
   missionId: string;
   missionStartedAt: number;
   killsRequired: number;
@@ -120,11 +129,15 @@ export interface GameState {
         | "player"
         | "killCount"
         | "now"
+        | "reloadProgress"
+        | "reloadDurationMs"
       >
     >,
   ) => void;
   startMission: (id: string, killsRequired: number) => void;
   endMission: (won: boolean) => void;
+  awardCash: (amount: number) => void;
+  resetCash: () => void;
 }
 
 export const useGameStore = create<GameState>((set) => ({
@@ -153,6 +166,9 @@ export const useGameStore = create<GameState>((set) => ({
   muzzleFlashes: [],
   modifierFlashes: [],
   now: 0,
+  reloadProgress: null,
+  reloadDurationMs: 1400,
+  cashAwarded: 0,
   missionId: "",
   missionStartedAt: 0,
   killsRequired: 0,
@@ -177,4 +193,6 @@ export const useGameStore = create<GameState>((set) => ({
       now: 0,
     }),
   endMission: (won) => set({ phase: won ? "won" : "lost" }),
+  awardCash: (amount) => set((s) => ({ cashAwarded: s.cashAwarded + Math.max(0, amount) })),
+  resetCash: () => set({ cashAwarded: 0 }),
 }));

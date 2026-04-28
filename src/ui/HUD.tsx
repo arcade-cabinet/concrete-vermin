@@ -150,6 +150,7 @@ export function HUD() {
   const player = useGameStore((s) => s.player);
   const killCount = useGameStore((s) => s.killCount);
   const killsRequired = useGameStore((s) => s.killsRequired);
+  const reloadProgress = useGameStore((s) => s.reloadProgress);
   const narrow = useIsNarrow();
   const reduced = useReducedMotion();
 
@@ -157,6 +158,7 @@ export function HUD() {
   const displayedTotal = useTickedNumber(score.total, { instant: reduced });
   const ammoEmpty = player.ammoCurrent === 0;
   const livesCritical = player.livesRemaining <= 1;
+  const reloading = reloadProgress !== null;
 
   return (
     <>
@@ -194,12 +196,50 @@ export function HUD() {
             // Sodium → brick pulse when the tube is empty. Suppressed
             // under reduced-motion so the player sees a static brick
             // "SHELLS 0/6" (still differentiable, just not noisy).
-            className={ammoEmpty && !reduced ? "cv-pulse-empty" : undefined}
+            className={ammoEmpty && !reduced && !reloading ? "cv-pulse-empty" : undefined}
             style={{ color: ammoEmpty ? COLOR.brick : COLOR.sodium }}
           >
             SHELLS
           </span>{" "}
-          {player.ammoCurrent}/{player.ammoMax}
+          {reloading && reduced ? (
+            <span data-testid="hud-reload-text" style={{ color: COLOR.sodium }}>
+              RELOAD
+            </span>
+          ) : (
+            <>
+              {player.ammoCurrent}/{player.ammoMax}
+            </>
+          )}
+          {reloading && !reduced ? (
+            <span
+              data-testid="hud-reload-bar"
+              role="progressbar"
+              aria-label="Reloading"
+              aria-valuenow={Math.round((reloadProgress ?? 0) * 100)}
+              aria-valuemin={0}
+              aria-valuemax={100}
+              style={{
+                display: "inline-block",
+                marginLeft: 6,
+                width: 36,
+                height: 4,
+                background: COLOR.bgConcreteDark,
+                verticalAlign: "middle",
+                borderRadius: 1,
+                overflow: "hidden",
+              }}
+            >
+              <span
+                style={{
+                  display: "block",
+                  height: "100%",
+                  width: `${(reloadProgress ?? 0) * 100}%`,
+                  background: COLOR.sodium,
+                  transition: "width 60ms linear",
+                }}
+              />
+            </span>
+          ) : null}
           {"  "}
           <span
             className={livesCritical && !reduced ? "cv-pulse-critical" : undefined}
