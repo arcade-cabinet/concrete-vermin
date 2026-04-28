@@ -152,13 +152,13 @@ Each `[ ]` is one commit. Group small ones into one PR; large ones get their own
 - [x] Tab order: Briefing → Begin button focused on mount; Result → Again button focused on mount
 - [x] aria-live="polite" region for HUD score so screen-readers narrate kill bonuses
 - [x] aria-label on the canvas: "game canvas — drag to aim, tap to fire"
-- [ ] Loading spinner / splash screen between mount and Pixi Application ready
-- [ ] First-launch overlay: 3-step explanatory tooltip (aim, fire, reload) auto-dismissed on first input
+- [x] Loading spinner / splash screen between mount and Pixi Application ready
+- [x] First-launch overlay: 3-step explanatory tooltip (aim, fire, reload) auto-dismissed on first input
 - [ ] Vibration via @capacitor/haptics: light on hit, medium on kill, heavy on boss damage; fallback no-op on web
-- [ ] Screen-shake on kill (Pixi container offset, 80ms decay) — respects motion-reduction
-- [ ] CRT overlay (src/render/effects/crt.ts) — the one allowed neon-cyan POC color, behind a setting toggle, off by default
-- [ ] Performance: Pixi resolution caps at min(devicePixelRatio, 2) on mobile to keep frame rate
-- [ ] Performance: useMemo on all draw callbacks; profile with Chrome devtools to confirm < 16ms/frame on a 2018-era mobile
+- [x] Screen-shake on kill (Pixi container offset, 80ms decay) — respects motion-reduction
+- [x] CRT overlay (src/render/effects/crt.ts) — the one allowed neon-cyan POC color, behind a setting toggle, off by default
+- [x] Performance: Pixi resolution caps at min(devicePixelRatio, 2) on mobile to keep frame rate
+- [x] Performance: useCallback on every render draw — done at write time. Live profile on a 2018-era mobile deferred to CV-DEPLOYMENT (needs an actual device).
 - [ ] Visual regression: take Pages screenshots at 320×568, 375×812, 768×1024, 1280×720, 1920×1080 + commit to docs/screenshots/
 
 ### CV-AUDIO-DESIGN — sound bible (PR #8d — creative)
