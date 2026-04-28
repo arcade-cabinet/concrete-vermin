@@ -133,17 +133,17 @@ Each `[ ]` is one commit. Group small ones into one PR; large ones get their own
 - [x] Replace every hard-coded font-family with theme.typography refs
 - [x] Type scale: define h1/h2/h3/body/hud-mono/hud-display sizes; apply via theme
 - [ ] Responsive stage scaling: GameStage already uses aspect-ratio container; add CSS clamp() for type sizes; verify on 320px portrait, 480p, 720p, 1080p, 4K, ultrawide
-- [ ] Responsive HUD: stack columns on narrow viewports (<480px); reposition score/ammo/lives so they don't overlap on portrait phone
-- [ ] Safe-area insets: padding-top/bottom respect env(safe-area-inset-*) for iPhone notch + Android gesture bar
-- [ ] Touch target minimums: every interactive button >= 44×44 CSS px
-- [ ] Reticle: scales with viewport DPR; thicker stroke on high-DPR
-- [ ] Briefing screen: layout works on 9:16 portrait, 16:9 landscape, ultrawide
-- [ ] MissionResult: same — flexbox column on portrait, row on landscape
-- [ ] HUD multiplier flash: fade+scale animation tied to scoring modifier flashes
+- [x] Responsive HUD: stack columns on narrow viewports (<480px); reposition score/ammo/lives so they don't overlap on portrait phone
+- [x] Safe-area insets: padding-top/bottom respect env(safe-area-inset-*) for iPhone notch + Android gesture bar
+- [x] Touch target minimums: every interactive button >= 44×44 CSS px
+- [x] Reticle: scales with viewport DPR; thicker stroke on high-DPR
+- [x] Briefing screen: layout works on 9:16 portrait, 16:9 landscape, ultrawide
+- [x] MissionResult: same — flexbox column on portrait, row on landscape
+- [x] HUD multiplier flash: fade+scale animation tied to scoring modifier flashes
 - [ ] HUD score counter: tick-up animation (rolls from old value to new across 200ms)
 - [ ] HUD ammo: red flash when empty, slow refill bar during reload window
 - [ ] HUD: critical-life pulse when livesRemaining <= 1
-- [ ] HUD: streak badge slot — variety / no-reload / hot-streak chips
+- [x] HUD: streak badge slot — variety / no-reload / hot-streak chips
 - [ ] Pause menu (Radix Dialog): resume / restart / settings / quit-to-menu
 - [ ] Settings dialog: master volume / mute / motion-reduction / contrast / haptics toggle
 - [ ] Motion-reduction (prefers-reduced-motion): disable splash flashes, slow-down score tick-up

@@ -1,6 +1,7 @@
 import { useMemo } from "react";
 import { MAX_LOADOUT_SLOTS, MOD_REGISTRY } from "../sim/archetypes/mods";
 import { getMission } from "../sim/content/missions";
+import { useIsNarrow } from "./hooks/useViewport";
 import { usePlayerProgress } from "./PlayerProgress";
 import { COLOR, TYPE } from "../theme/tokens";
 
@@ -9,6 +10,7 @@ export function PawnShop({ onContinue, onBack }: { onContinue: () => void; onBac
   const cash = usePlayerProgress((s) => s.cash);
   const activeMods = usePlayerProgress((s) => s.activeMods);
   const toggleMod = usePlayerProgress((s) => s.toggleMod);
+  const narrow = useIsNarrow();
 
   const mission = useMemo(() => {
     try {
@@ -35,7 +37,9 @@ export function PawnShop({ onContinue, onBack }: { onContinue: () => void; onBac
         background: COLOR.bgAsphalt,
         color: COLOR.cream,
         overflowY: "auto",
-        padding: "calc(24px + env(safe-area-inset-top)) 24px 24px",
+        padding:
+          "calc(24px + env(safe-area-inset-top)) calc(24px + env(safe-area-inset-right)) " +
+          "calc(24px + env(safe-area-inset-bottom)) calc(24px + env(safe-area-inset-left))",
         fontFamily: TYPE.faceDisplay,
       }}
     >
@@ -78,7 +82,9 @@ export function PawnShop({ onContinue, onBack }: { onContinue: () => void; onBac
                   background: equipped ? COLOR.sodium : "transparent",
                   color: equipped ? COLOR.bgConcreteDark : slotsFull ? COLOR.mute : COLOR.cream,
                   border: `1px solid ${equipped ? COLOR.sodium : COLOR.borderMute}`,
-                  padding: "8px 12px",
+                  // Touch-target floor.
+                  minHeight: 44,
+                  padding: "10px 12px",
                   fontFamily: TYPE.faceMono,
                   fontSize: 13,
                   cursor: slotsFull ? "not-allowed" : "pointer",
@@ -103,7 +109,14 @@ export function PawnShop({ onContinue, onBack }: { onContinue: () => void; onBac
         })}
       </ul>
 
-      <footer style={{ marginTop: 24, display: "flex", gap: 12 }}>
+      <footer
+        style={{
+          marginTop: 24,
+          display: "flex",
+          flexDirection: narrow ? "column" : "row",
+          gap: 12,
+        }}
+      >
         <button
           type="button"
           onClick={onBack}
@@ -111,7 +124,9 @@ export function PawnShop({ onContinue, onBack }: { onContinue: () => void; onBac
             background: "transparent",
             color: COLOR.sodium,
             border: `1px solid ${COLOR.sodium}`,
-            padding: "10px 18px",
+            minWidth: 44,
+            minHeight: 44,
+            padding: "12px 18px",
             fontFamily: "inherit",
             letterSpacing: 1,
             cursor: "pointer",
@@ -126,7 +141,9 @@ export function PawnShop({ onContinue, onBack }: { onContinue: () => void; onBac
             background: COLOR.brick,
             color: COLOR.cream,
             border: "none",
-            padding: "10px 22px",
+            minWidth: 44,
+            minHeight: 44,
+            padding: "12px 22px",
             fontFamily: "inherit",
             letterSpacing: 1,
             cursor: "pointer",

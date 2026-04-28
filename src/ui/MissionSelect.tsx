@@ -1,6 +1,7 @@
 import { useGameStore } from "../runtime/store";
 import { listMissionsByAct, MISSIONS } from "../sim/content/missions";
 import { ACT_IDS, type ActId } from "../sim/factories/mission";
+import { useIsNarrow } from "./hooks/useViewport";
 import { isMissionUnlocked, usePlayerProgress } from "./PlayerProgress";
 import { COLOR, TYPE } from "../theme/tokens";
 
@@ -35,11 +36,14 @@ function MissionTile({
         background: selected ? COLOR.sodium : "transparent",
         color: selected ? COLOR.bgConcreteDark : unlocked ? COLOR.cream : COLOR.mute,
         border: `1px solid ${unlocked ? COLOR.sodium : COLOR.borderMute}`,
-        padding: "10px 14px",
+        padding: "12px 14px",
         textAlign: "left",
         fontFamily: TYPE.faceMono,
         fontSize: 13,
         cursor: unlocked ? "pointer" : "not-allowed",
+        // Touch-target floor (44 CSS px height); width responsive on
+        // narrow viewports so tiles aren't clipped on a 320 px portrait.
+        minHeight: 44,
         minWidth: 220,
       }}
     >
@@ -57,6 +61,7 @@ export function MissionSelect({ onPickMission }: { onPickMission: (id: string) =
   const select = usePlayerProgress((s) => s.selectMission);
   const cash = usePlayerProgress((s) => s.cash);
   const setPhase = useGameStore((s) => s.setPhase);
+  const narrow = useIsNarrow();
 
   return (
     <div
@@ -67,7 +72,9 @@ export function MissionSelect({ onPickMission }: { onPickMission: (id: string) =
         background: COLOR.bgAsphalt,
         color: COLOR.cream,
         overflowY: "auto",
-        padding: "calc(24px + env(safe-area-inset-top)) 24px 24px",
+        padding:
+          "calc(24px + env(safe-area-inset-top)) calc(24px + env(safe-area-inset-right)) " +
+          "calc(24px + env(safe-area-inset-bottom)) calc(24px + env(safe-area-inset-left))",
         fontFamily: TYPE.faceDisplay,
       }}
     >
@@ -102,7 +109,14 @@ export function MissionSelect({ onPickMission }: { onPickMission: (id: string) =
         </section>
       ))}
 
-      <footer style={{ marginTop: 32, display: "flex", gap: 12 }}>
+      <footer
+        style={{
+          marginTop: 32,
+          display: "flex",
+          flexDirection: narrow ? "column" : "row",
+          gap: 12,
+        }}
+      >
         <button
           type="button"
           onClick={() => setPhase("briefing")}
@@ -110,7 +124,9 @@ export function MissionSelect({ onPickMission }: { onPickMission: (id: string) =
             background: "transparent",
             color: COLOR.sodium,
             border: `1px solid ${COLOR.sodium}`,
-            padding: "10px 18px",
+            minWidth: 44,
+            minHeight: 44,
+            padding: "12px 18px",
             fontFamily: "inherit",
             letterSpacing: 1,
             cursor: "pointer",
@@ -126,7 +142,9 @@ export function MissionSelect({ onPickMission }: { onPickMission: (id: string) =
             background: COLOR.sodium,
             color: COLOR.bgConcreteDark,
             border: "none",
-            padding: "10px 22px",
+            minWidth: 44,
+            minHeight: 44,
+            padding: "12px 22px",
             fontFamily: "inherit",
             letterSpacing: 1,
             cursor: "pointer",
