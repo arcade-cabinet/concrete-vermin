@@ -40,11 +40,13 @@ jobs:
       - name: Sim-purity grep gate
         run: |
           set -e
-          if grep -RInE 'Math\.random\s*\(' src/sim/ --include='*.ts'; then
+          # Exclude *.test.ts: the purity test itself contains the
+          # Math.random / forbidden-import patterns as regex literals.
+          if grep -RInE 'Math\.random\s*\(' src/sim/ --include='*.ts' --exclude='*.test.ts'; then
             echo "::error::Math.random in src/sim/ — use createRng(seed). STANDARDS.md §2."
             exit 1
           fi
-          if grep -RInE "from\s+['\"](react|react-dom|pixi-react|pixi\.js|@pixi/|tone|@capacitor/|framer-motion|@radix-ui/|matter-js)" src/sim/ --include='*.ts'; then
+          if grep -RInE "from\s+['\"](react|react-dom|pixi-react|pixi\.js|@pixi/|tone|@capacitor/|framer-motion|@radix-ui/|matter-js)" src/sim/ --include='*.ts' --exclude='*.test.ts'; then
             echo "::error::Forbidden import in src/sim/. STANDARDS.md §2."
             exit 1
           fi
