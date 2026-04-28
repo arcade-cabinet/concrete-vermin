@@ -6,6 +6,13 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 Releases are managed by [release-please](https://github.com/googleapis/release-please).
 
+## [1.7.0](https://github.com/arcade-cabinet/concrete-vermin/compare/v1.6.0...v1.7.0) (2026-04-28)
+
+
+### Features
+
+* **audio:** Tone.js synth sfx + ambient drone bed + mute toggle ([#19](https://github.com/arcade-cabinet/concrete-vermin/issues/19)) ([cc7e486](https://github.com/arcade-cabinet/concrete-vermin/commit/cc7e48616cb309a691de86598bec17334c0aa4f8))
+
 ## [1.6.0](https://github.com/arcade-cabinet/concrete-vermin/compare/v1.5.0...v1.6.0) (2026-04-28)
 
 
