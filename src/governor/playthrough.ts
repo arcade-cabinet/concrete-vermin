@@ -61,7 +61,8 @@ export function playMissionWithGovernor(
   const profile = opts.profile ?? PLAYTHROUGH;
   const maxSimSeconds = opts.maxSimSeconds ?? 180;
   const override = MISSION_SHOOTER_OVERRIDES[mission.id];
-  const shooterPos = opts.shooterPos ?? override ?? { x: 240, y: 260 };
+  const defaultPos = { x: 240, y: 260 };
+  const shooterPos = opts.shooterPos ?? override ?? defaultPos;
   const playerLineY = opts.playerLineY ?? override?.playerLineY ?? 270;
   const weapon = WEAPON_REGISTRY[mission.weapon];
 

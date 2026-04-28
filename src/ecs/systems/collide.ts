@@ -83,8 +83,10 @@ export function collideSystem(world: World, rng: Rng, now: number): CollideEvent
       // first enters. For a nearly-vertical approach (|vx| ≈ 0), fall back
       // to current pp.y.
       const headX = v.pos.x + v.box.headX;
-      const interceptY =
-        Math.abs(pv.x) > 0.1 ? pp.y + pv.y * ((headX - pp.x) / pv.x) : pp.y;
+      let interceptY = pp.y;
+      if (Math.abs(pv.x) > 0.1) {
+        interceptY = pp.y + pv.y * ((headX - pp.x) / pv.x);
+      }
       const isHeadshot = interceptY < v.pos.y + v.box.headY;
       const target = {
         health: v.e.get(Health)?.current ?? 0,

@@ -5,6 +5,13 @@ import type { WeaponArchetype } from "../sim/archetypes/weapons/_types";
 import { selectHighestThreat } from "./threat";
 import { leadPoint } from "./yuka-adapters";
 
+function applyOffset(
+  pos: { x: number; y: number },
+  offset?: { x: number; y: number },
+): { x: number; y: number } {
+  return { x: pos.x + (offset?.x ?? 0), y: pos.y + (offset?.y ?? 0) };
+}
+
 export interface GovernorProfile {
   predictionFactor: number; // 1 = canonical Reynolds; <1 dampens lookahead
   reticleMaxSpeed: number; // sim-units/sec; reticle snaps, knob only
@@ -82,11 +89,10 @@ export function governorTick(input: GovernorTickInput): void {
   const leadOvershoot = Math.hypot(leadOnly.x - target.x, leadOnly.y - target.y);
 
   // Aim point: lead + head offset (aim at head zone for headshot bonus).
-  const aimX = leadOnly.x + (headOffset?.x ?? 0);
-  const aimY = leadOnly.y + (headOffset?.y ?? 0);
+  const aim = applyOffset(leadOnly, headOffset);
 
   if (leadOvershoot <= tolerance) {
-    runner.queueShot(aimX, aimY);
+    runner.queueShot(aim.x, aim.y);
     state.lastShotAtMs = nowMs;
     return;
   }
@@ -94,8 +100,7 @@ export function governorTick(input: GovernorTickInput): void {
   // Fallback: body-center + head offset (no velocity lead).
   // Fires when the target is moving fast enough that the velocity lead
   // overshoots — we take the certain body-center shot rather than skipping.
-  const fallbackX = target.x + (headOffset?.x ?? 0);
-  const fallbackY = target.y + (headOffset?.y ?? 0);
-  runner.queueShot(fallbackX, fallbackY);
+  const fallback = applyOffset({ x: target.x, y: target.y }, headOffset);
+  runner.queueShot(fallback.x, fallback.y);
   state.lastShotAtMs = nowMs;
 }

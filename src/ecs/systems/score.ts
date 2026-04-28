@@ -25,22 +25,19 @@ function toKillEvent(ce: CollideEvent): KillEvent {
 
 /** Read the singleton Score trait into a ScoreState. */
 function readScoreState(world: World, scoreEntityId: number): ScoreState | null {
-  for (const e of world.query(Score)) {
-    if (e.id() !== scoreEntityId) continue;
-    const s = e.get(Score);
-    if (!s) return null;
-    return {
-      total: s.total,
-      multiplier: s.multiplier,
-      multiplierDecayAt: s.multiplierDecayAt,
-      multiplierGraceUntil: s.multiplierGraceUntil,
-      noReloadStreak: s.noReloadStreak,
-      lastArchetypeKilled: null,
-      varietyChain: [],
-      modifierFlashes: [],
-    };
-  }
-  return null;
+  const e = world.query(Score).find((e) => e.id() === scoreEntityId);
+  const s = e?.get(Score);
+  if (!s) return null;
+  return {
+    total: s.total,
+    multiplier: s.multiplier,
+    multiplierDecayAt: s.multiplierDecayAt,
+    multiplierGraceUntil: s.multiplierGraceUntil,
+    noReloadStreak: s.noReloadStreak,
+    lastArchetypeKilled: null,
+    varietyChain: [],
+    modifierFlashes: [],
+  };
 }
 
 /**

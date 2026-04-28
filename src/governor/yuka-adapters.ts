@@ -8,8 +8,6 @@ export interface Kinematic {
 export interface LeadOptions {
   reticleMaxSpeed: number;
   predictionFactor?: number;
-  /** If provided, added to the returned point so the governor aims at the head zone. */
-  headOffset?: { x: number; y: number };
 }
 
 /**
@@ -33,7 +31,7 @@ export function leadPoint(
   const sumSpeed = Math.max(Number.EPSILON, opts.reticleMaxSpeed + targetSpeed);
   const lookAhead = (distance / sumSpeed) * predictionFactor;
   return {
-    x: target.x + target.vx * lookAhead + (opts.headOffset?.x ?? 0),
-    y: target.y + target.vy * lookAhead + (opts.headOffset?.y ?? 0),
+    x: target.x + target.vx * lookAhead,
+    y: target.y + target.vy * lookAhead,
   };
 }
