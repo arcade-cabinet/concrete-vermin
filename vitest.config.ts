@@ -13,6 +13,10 @@ export default defineConfig({
       "src/lib/**/*.test.ts",
       "src/render/**/*.test.ts",
       "src/platform/**/*.test.ts",
+      // Pure-logic UI tests (stores, copy modules, helpers) — no DOM.
+      // Anything that needs jsdom uses the .dom.test.ts suffix and goes
+      // through vitest.dom.config.ts.
+      "src/ui/**/*.test.ts",
     ],
     exclude: ["e2e/**", "node_modules/**", "**/*.dom.test.*", "**/*.browser.test.*"],
     passWithNoTests: true,

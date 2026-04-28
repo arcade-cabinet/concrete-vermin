@@ -1,8 +1,11 @@
 import { z } from "zod";
 import barksData from "./barks.json" with { type: "json" };
+import calloutsData from "./callouts.json" with { type: "json" };
 import charactersData from "./characters.json" with { type: "json" };
+import deathData from "./death.json" with { type: "json" };
 import endingsData from "./endings.json" with { type: "json" };
 import frameData from "./frame.json" with { type: "json" };
+import loadingData from "./loading.json" with { type: "json" };
 import settingData from "./setting.json" with { type: "json" };
 import talismansData from "./talismans.json" with { type: "json" };
 // Per-mission lore
@@ -91,12 +94,35 @@ const missionLoreSchema = z
   })
   .strict();
 
+const loadingSchema = z.array(z.string().min(2)).min(30);
+
+const deathSchema = z.record(z.string(), z.string().min(4));
+
+const calloutsSchema = z
+  .object({
+    killStreak: z.record(z.string(), z.string()),
+    headshotStreak: z.record(z.string(), z.string()),
+    noReloadStreak: z.record(z.string(), z.string()),
+    twoForOne: z.string(),
+    midAir: z.string(),
+    variety: z.string(),
+    perfectMission: z.string(),
+    lastShellKill: z.string(),
+    comeback: z.string(),
+    bossOpen: z.string(),
+    bossDown: z.string(),
+  })
+  .strict();
+
 export const setting = Object.freeze(settingSchema.parse(settingData));
 export const characters = Object.freeze(charactersSchema.parse(charactersData));
 export const endings = Object.freeze(endingsSchema.parse(endingsData));
 export const talismans = Object.freeze(talismansSchema.parse(talismansData));
 export const barks = Object.freeze(barksSchema.parse(barksData));
 export const frame = Object.freeze(frameSchema.parse(frameData));
+export const loadingTips = Object.freeze(loadingSchema.parse(loadingData));
+export const deathLines = Object.freeze(deathSchema.parse(deathData));
+export const callouts = Object.freeze(calloutsSchema.parse(calloutsData));
 
 const MISSION_LORE_LIST = [
   streets01,
@@ -136,4 +162,18 @@ export function pickRumor(uniform: number): string {
   const arr = barks.rumorMill;
   const idx = Math.min(arr.length - 1, Math.max(0, Math.floor(uniform * arr.length)));
   return arr[idx] as string;
+}
+
+export function pickLoadingTip(uniform: number): string {
+  const arr = loadingTips;
+  const idx = Math.min(arr.length - 1, Math.max(0, Math.floor(uniform * arr.length)));
+  return arr[idx] as string;
+}
+
+export function deathLineFor(archetypeOrCause: string): string {
+  return (
+    (deathLines as Readonly<Record<string, string>>)[archetypeOrCause] ??
+    (deathLines as Readonly<Record<string, string>>).wipe ??
+    "He'll find another kid."
+  );
 }

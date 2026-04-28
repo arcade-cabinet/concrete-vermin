@@ -3,15 +3,21 @@ import { MISSIONS } from "../../missions";
 import {
   ALL_MISSION_LORE,
   barks,
+  callouts,
   characters,
+  deathLineFor,
+  deathLines,
   endings,
   frame,
   getMissionLore,
+  loadingTips,
   pickBark,
+  pickLoadingTip,
   pickRumor,
   setting,
   talismans,
 } from "../index";
+import { ARCHETYPE_IDS } from "../../../archetypes/vermin";
 
 describe("lore registry", () => {
   it("setting exposes all three acts", () => {
@@ -63,5 +69,29 @@ describe("lore registry", () => {
     expect(pickBark(0.999)).toBe(barks.pawnbroker[barks.pawnbroker.length - 1]);
     expect(pickRumor(-1)).toBe(barks.rumorMill[0]);
     expect(pickRumor(2)).toBe(barks.rumorMill[barks.rumorMill.length - 1]);
+  });
+
+  it("loadingTips: 30+ entries, picker clamps", () => {
+    expect(loadingTips.length).toBeGreaterThanOrEqual(30);
+    expect(pickLoadingTip(0)).toBe(loadingTips[0]);
+    expect(pickLoadingTip(1.5)).toBe(loadingTips[loadingTips.length - 1]);
+  });
+
+  it("deathLines: every archetype has a kill flavor + wipe fallback", () => {
+    for (const id of ARCHETYPE_IDS) {
+      expect(deathLineFor(id)).not.toBe("He'll find another kid.");
+      expect(deathLineFor(id).length).toBeGreaterThan(4);
+    }
+    expect(deathLines.wipe).toBeTruthy();
+    expect(deathLineFor("nonsense-id")).toBe(deathLines.wipe);
+  });
+
+  it("callouts: streak tables present + scalar callouts present", () => {
+    expect(Object.keys(callouts.killStreak).length).toBeGreaterThanOrEqual(3);
+    expect(Object.keys(callouts.headshotStreak).length).toBeGreaterThanOrEqual(2);
+    expect(Object.keys(callouts.noReloadStreak).length).toBeGreaterThanOrEqual(2);
+    expect(callouts.twoForOne).toBeTruthy();
+    expect(callouts.midAir).toBeTruthy();
+    expect(callouts.bossDown).toBeTruthy();
   });
 });
