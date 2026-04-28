@@ -492,6 +492,8 @@ export class GameRunner {
       },
       reloadProgress,
       reloadDurationMs: this.tunedWeapon.reloadMs,
+      reticleRadius: this.tunedWeapon.reticleRadius,
+      reticleShape: this.tunedWeapon.reticleShape,
     });
   }
 }

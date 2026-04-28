@@ -1,4 +1,5 @@
 import { create } from "zustand";
+import type { ReticleShape } from "../sim/archetypes/weapons/_types";
 
 /**
  * UI store. Holds the snapshot the renderer reads each frame plus the
@@ -128,6 +129,10 @@ export interface GameState {
   setAimAssist: (on: boolean) => void;
   setInvertY: (on: boolean) => void;
   reticle: { x: number; y: number };
+  /** Hit-box / visual radius of the reticle in sim units. Mission-scoped. */
+  reticleRadius: number;
+  /** Reticle visual + behavior shape from the active weapon + reticle mod. */
+  reticleShape: ReticleShape;
   score: { total: number; multiplier: number };
   player: { ammoCurrent: number; ammoMax: number; livesRemaining: number };
   vermin: ReadonlyArray<VerminSnapshot>;
@@ -177,6 +182,8 @@ export interface GameState {
         | "reloadProgress"
         | "reloadDurationMs"
         | "damageEvents"
+        | "reticleRadius"
+        | "reticleShape"
       >
     >,
   ) => void;
@@ -220,6 +227,8 @@ export const useGameStore = create<GameState>((set) => ({
   setAimAssist: (on) => set((s) => ({ settings: { ...s.settings, aimAssist: on } })),
   setInvertY: (on) => set((s) => ({ settings: { ...s.settings, invertY: on } })),
   reticle: { x: 240, y: 200 },
+  reticleRadius: 8,
+  reticleShape: "cross",
   score: { total: 0, multiplier: 1 },
   player: { ammoCurrent: 6, ammoMax: 6, livesRemaining: 3 },
   vermin: [],

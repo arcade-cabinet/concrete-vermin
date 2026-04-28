@@ -22,5 +22,7 @@ export const shotgun: Readonly<WeaponArchetype> = Object.freeze(
       reload: "sfx/weapon/shotgun-reload",
       empty: "sfx/weapon/empty-click",
     },
+    reticleRadius: 14,
+    reticleShape: "wide",
   }),
 );

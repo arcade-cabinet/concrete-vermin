@@ -22,6 +22,10 @@ export const TRAIL_TYPES = [
 ] as const;
 export type TrailType = (typeof TRAIL_TYPES)[number];
 
+/** Reticle shape — drives both the on-screen visual and the hit-box for tap-to-fire. */
+export const RETICLE_SHAPES = ["cross", "ring", "double", "wide", "diamond"] as const;
+export type ReticleShape = (typeof RETICLE_SHAPES)[number];
+
 export const weaponArchetypeSchema = z
   .object({
     id: z.enum(WEAPON_IDS),
@@ -46,6 +50,15 @@ export const weaponArchetypeSchema = z
       reload: z.string().min(1),
       empty: z.string().min(1),
     }),
+    /**
+     * Hit-box radius (sim units) for the click-as-reticle model. The
+     * reticle visual is drawn at this radius and any vermin centered
+     * within it on a tap counts as a hit. Larger weapons (shotgun,
+     * sawed-off) have wider reticles; precise weapons (revolver,
+     * tesla) have tight ones.
+     */
+    reticleRadius: z.number().positive().default(8),
+    reticleShape: z.enum(RETICLE_SHAPES).default("cross"),
   })
   .strict();
 

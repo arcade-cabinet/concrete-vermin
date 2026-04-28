@@ -22,5 +22,7 @@ export const smg: Readonly<WeaponArchetype> = Object.freeze(
       reload: "sfx/weapon/smg-reload",
       empty: "sfx/weapon/empty-click",
     },
+    reticleRadius: 9,
+    reticleShape: "ring",
   }),
 );

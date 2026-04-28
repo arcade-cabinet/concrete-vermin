@@ -3,21 +3,22 @@
  * given sim time; layers drift on a slow lissajous so the scene
  * breathes without a fixed camera. Pure function — no rng, no DOM.
  *
- *   far    (brick wall band)   — 0.20× drift, x: ±2.5 px
- *   mid    (streetlight pool)  — 0.45× drift, x: ±5.0 px
- *   near   (vermin / splash)   — 1.00× drift, x: ±10.0 px
+ *   far    (brick wall band)   — drifts ±6 px on a 14 s cycle
+ *   mid    (streetlight pool)  — drifts ±12 px on the same cycle
+ *   near   (vermin / splash)   — drifts ±22 px (already at full speed)
  *
- * Cycle period is long (~24 s) so the eye reads it as ambience, not
- * motion. Reduced-motion zeroes every layer.
+ * Amplitudes are sized so the motion reads on a 480×270 canvas without
+ * being distracting — roughly 1.2 % / 2.5 % / 4.5 % of stage width.
+ * Reduced-motion zeroes every layer.
  */
 
 export type ParallaxLayer = "far" | "mid" | "near";
 
-const PERIOD_S = 24;
+const PERIOD_S = 14;
 const AMPLITUDE_PX: Readonly<Record<ParallaxLayer, number>> = Object.freeze({
-  far: 2.5,
-  mid: 5.0,
-  near: 10.0,
+  far: 6.0,
+  mid: 12.0,
+  near: 22.0,
 });
 
 export interface ParallaxOffset {
