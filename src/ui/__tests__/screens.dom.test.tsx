@@ -54,10 +54,11 @@ describe("MainMenu", () => {
     unmount();
   });
 
-  it("opens the Settings dialog when Settings is clicked", () => {
+  it("opens the Settings dialog when Settings is clicked", async () => {
     const { unmount } = render(<MainMenu />);
     fireEvent.click(screen.getByRole("button", { name: /settings/i }));
-    expect(screen.getByTestId("settings-dialog")).toBeTruthy();
+    // SettingsDialog is lazy-loaded — wait for the Suspense boundary.
+    await screen.findByTestId("settings-dialog");
     unmount();
   });
 

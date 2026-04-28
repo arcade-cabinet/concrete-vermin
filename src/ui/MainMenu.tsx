@@ -1,12 +1,19 @@
 import * as Dialog from "@radix-ui/react-dialog";
-import { useEffect, useRef, useState } from "react";
+import { lazy, Suspense, useEffect, useRef, useState } from "react";
 import { useGameStore } from "../runtime/store";
 import { COLOR, TYPE } from "../theme/tokens";
-import { AchievementsScreen } from "./AchievementsScreen";
-import { PawnShop } from "./PawnShop";
-import { SettingsDialog } from "./SettingsDialog";
 import { useArrowGridNav } from "./hooks/useArrowGridNav";
 import { usePlayerProgress } from "./PlayerProgress";
+
+// Modal/overlay screens — only mounted on specific player choice.
+// Lazy-loaded so the title screen doesn't ship their JS upfront.
+const AchievementsScreen = lazy(() =>
+  import("./AchievementsScreen").then((m) => ({ default: m.AchievementsScreen })),
+);
+const PawnShop = lazy(() => import("./PawnShop").then((m) => ({ default: m.PawnShop })));
+const SettingsDialog = lazy(() =>
+  import("./SettingsDialog").then((m) => ({ default: m.SettingsDialog })),
+);
 
 const TITLE = "CONCRETE VERMIN";
 const SUBTITLE = "TACTICAL · REFORGED";
@@ -248,9 +255,17 @@ export function MainMenu() {
         <MenuButton label="Settings" onClick={() => setSettingsOpen(true)} />
         <MenuButton label="Credits" onClick={() => setPhase("credits")} />
       </div>
-      <SettingsDialog open={settingsOpen} onOpenChange={setSettingsOpen} />
-      <MarketDialog open={marketOpen} onOpenChange={setMarketOpen} />
-      {achievementsOpen ? <AchievementsScreen onBack={() => setAchievementsOpen(false)} /> : null}
+      {settingsOpen ? (
+        <Suspense fallback={null}>
+          <SettingsDialog open={settingsOpen} onOpenChange={setSettingsOpen} />
+        </Suspense>
+      ) : null}
+      {marketOpen ? <MarketDialog open={marketOpen} onOpenChange={setMarketOpen} /> : null}
+      {achievementsOpen ? (
+        <Suspense fallback={null}>
+          <AchievementsScreen onBack={() => setAchievementsOpen(false)} />
+        </Suspense>
+      ) : null}
       <style>{`
         @keyframes cv-press-start {
           0%, 100% { box-shadow: 0 0 22px ${COLOR.sodium}55, inset 0 0 10px ${COLOR.sodium}33; }
@@ -323,7 +338,9 @@ function MarketDialog({
           >
             Market
           </Dialog.Title>
-          <PawnShop onContinue={() => onOpenChange(false)} onBack={() => onOpenChange(false)} />
+          <Suspense fallback={null}>
+            <PawnShop onContinue={() => onOpenChange(false)} onBack={() => onOpenChange(false)} />
+          </Suspense>
         </Dialog.Content>
       </Dialog.Portal>
     </Dialog.Root>
