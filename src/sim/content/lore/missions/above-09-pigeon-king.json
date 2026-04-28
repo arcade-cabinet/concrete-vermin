@@ -3,5 +3,10 @@
   "title": "PIGEON KING",
   "blurb": "Top of the Woolworth Building. He has been waiting for you. Finish it.",
   "briefing": "The clouds will not move tonight. He has been waiting for you longer than you have been alive. Climb. The court of pigeons will part. The crown — twelve flattened bottle caps wired into a circlet — is bigger than a man's head and heavier than it looks. Put it down. Raise the rifle. Finish what your grandfather started.",
-  "epigraph": "\"He didn't kill it. He just made it wait. Make a better job of it than that.\""
+  "epigraph": "\"He didn't kill it. He just made it wait. Make a better job of it than that.\"",
+  "debrief": {
+    "win": "The clouds moved at first light. Your grandfather, wherever he is, takes the cigar out of his teeth and grins. The crown stays on the Woolworth. It belongs to nobody now. That's the whole point.",
+    "loss": "The court will choose another. They always choose another. We have time. Your father had time. Your grandfather had time. Eat. Heal. He'll wait. He always waits.",
+    "sGrade": "Whatever your grandfather couldn't finish, you finished. The shop is closing for the day. We are going to get a drink. You are going to drink water. I am going to drink everything else."
+  }
 }

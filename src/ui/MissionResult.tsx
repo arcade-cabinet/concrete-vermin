@@ -1,5 +1,6 @@
 import { useEffect, useRef } from "react";
 import { useGameStore } from "../runtime/store";
+import { pawnbrokerDebriefFor } from "../sim/content/lore";
 import { useIsNarrow } from "./hooks/useViewport";
 import { usePlayerProgress } from "./PlayerProgress";
 import { COLOR, TYPE } from "../theme/tokens";
@@ -40,6 +41,8 @@ export function MissionResult() {
   const grade = won ? gradeFromScore(score.total) : "F";
   const cashEarned = won ? killCount * CASH_PER_KILL : 0;
   const callouts = won ? winCallouts(grade, killCount) : lossCallouts(killCount);
+  const outcome = won ? (grade === "S" || grade === "S+" ? "sGrade" : "win") : "loss";
+  const debrief = missionId ? pawnbrokerDebriefFor(missionId, outcome) : null;
 
   return (
     <div
@@ -172,6 +175,27 @@ export function MissionResult() {
             </li>
           ))}
         </ul>
+
+        {debrief ? (
+          <blockquote
+            data-testid="pawnbroker-debrief"
+            style={{
+              margin: "20px 0 0",
+              padding: "12px 16px",
+              borderLeft: "3px solid #7a2818",
+              background: "rgba(122, 40, 24, 0.06)",
+              fontSize: 13,
+              lineHeight: 1.5,
+              color: "#1a1715",
+              fontStyle: "italic",
+            }}
+          >
+            <span aria-hidden="true" style={{ color: "#7a2818", fontWeight: 800, marginRight: 4 }}>
+              ❝
+            </span>
+            {debrief}
+          </blockquote>
+        ) : null}
 
         <div style={{ marginTop: 18, fontSize: 11, color: "#5a4838", textAlign: "right", letterSpacing: "0.1em" }}>
           BY THE PAWNBROKER, STAFF

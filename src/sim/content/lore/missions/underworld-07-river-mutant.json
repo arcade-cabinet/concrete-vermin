@@ -3,5 +3,10 @@
   "title": "RIVER MUTANT",
   "blurb": "Williamsburg piers, low tide. You'll know it when you see it. The flame works. Wear the medal. Don't look at it after.",
   "briefing": "Where the East River cuts under the piers. The Pawnbroker has no name for this one. Flamethrower and a Saint-Anthony medal on a leather thong — wear the medal. The wooden icon nailed to the pylon has been worn smooth by current or something less neutral. Do what you came to do. Do not look at the body.",
-  "epigraph": "\"He pays you two thousand dollars in cash and says: there's one more.\""
+  "epigraph": "\"He pays you two thousand dollars in cash and says: there's one more.\"",
+  "debrief": {
+    "win": "Two thousand cash. I won't say earned, exactly. Earned isn't the right word for that one. Take the medal off. Put it on the shelf with the others. Don't look at it after, like the man told you.",
+    "loss": "The pier patrol found the canister. They found nothing else. The Saint-Anthony medal was still on the pylon, which means you took it off, which means at the end you knew. I'm sorry.",
+    "sGrade": "The wooden icon is gone. The pylon is bare. Wherever that thing came from, it has nowhere to come back to now. Sleep tonight. Tomorrow we talk about the one that's left."
+  }
 }

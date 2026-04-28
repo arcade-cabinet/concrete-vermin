@@ -11,6 +11,7 @@ import {
   frame,
   getMissionLore,
   loadingTips,
+  pawnbrokerDebriefFor,
   pickBark,
   pickLoadingTip,
   pickRumor,
@@ -58,6 +59,31 @@ describe("lore registry", () => {
       expect(lore.briefing.length).toBeGreaterThan(40);
     }
     expect(ALL_MISSION_LORE).toHaveLength(MISSIONS.length);
+  });
+
+  it("every mission has a bespoke Pawnbroker debrief for win / loss / sGrade", () => {
+    const seen = new Set<string>();
+    for (const m of MISSIONS) {
+      const lore = getMissionLore(m.id);
+      expect(lore.debrief.win.length).toBeGreaterThan(20);
+      expect(lore.debrief.loss.length).toBeGreaterThan(20);
+      expect(lore.debrief.sGrade.length).toBeGreaterThan(20);
+      expect(lore.debrief.win).not.toBe(lore.debrief.loss);
+      expect(lore.debrief.win).not.toBe(lore.debrief.sGrade);
+      expect(lore.debrief.loss).not.toBe(lore.debrief.sGrade);
+      for (const line of [lore.debrief.win, lore.debrief.loss, lore.debrief.sGrade]) {
+        expect(seen.has(line)).toBe(false);
+        seen.add(line);
+      }
+    }
+  });
+
+  it("pawnbrokerDebriefFor selects the right outcome", () => {
+    const m = MISSIONS[0]!;
+    const lore = getMissionLore(m.id);
+    expect(pawnbrokerDebriefFor(m.id, "win")).toBe(lore.debrief.win);
+    expect(pawnbrokerDebriefFor(m.id, "loss")).toBe(lore.debrief.loss);
+    expect(pawnbrokerDebriefFor(m.id, "sGrade")).toBe(lore.debrief.sGrade);
   });
 
   it("getMissionLore throws on unknown id", () => {

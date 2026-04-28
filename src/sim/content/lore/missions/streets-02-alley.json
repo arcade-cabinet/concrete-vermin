@@ -3,5 +3,10 @@
   "title": "ALLEY",
   "blurb": "Mott and Mulberry. Sanitation hasn't picked up since the eighth. Whatever's been chewing through the bags has friends now.",
   "briefing": "The garbage is stacked to the second-floor windows. Something inside it has been reproducing. You meet your first roach — not the kitchen kind; the kind you can hear from twenty feet. Bring the long gun. Keep moving.",
-  "epigraph": "\"A matchbook from the Hotel Carter, half-burnt. You don't open it.\""
+  "epigraph": "\"A matchbook from the Hotel Carter, half-burnt. You don't open it.\"",
+  "debrief": {
+    "win": "Sanitation will do a special pickup at four. They bring two trucks. Tell nobody what was in the bags. Tell yourself even less. The Hotel Carter matchbook stays in the desk drawer.",
+    "loss": "I sent Vinny down with a broom and a shopping bag. He brought back what he could find of you. Eat. Sleep. The alley will still be there tomorrow, and so will what's in it.",
+    "sGrade": "Sanitation says they'll never speak of it. They will. Once. To their wives. That's how stories like this get to be stories."
+  }
 }

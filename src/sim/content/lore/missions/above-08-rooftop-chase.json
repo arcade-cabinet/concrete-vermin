@@ -3,5 +3,10 @@
   "title": "ROOFTOP CHASE",
   "blurb": "West Side water tanks. Geese have organized; gulls run cover. Don't look up at noon. Tesla rifle.",
   "briefing": "Tar-paper rooftops, late September. The geese have organized. The seagulls run protection. Someone painted a sigil on a wooden tank in roofing tar. Underneath, in pencil: 'don't look up at noon.' You don't.",
-  "epigraph": "\"Painted in roofing tar by someone who knew the symbol but not the spelling.\""
+  "epigraph": "\"Painted in roofing tar by someone who knew the symbol but not the spelling.\"",
+  "debrief": {
+    "win": "Geese flew east at dusk. Wrong direction for the season. They won't be back to that block. The Tesla rifle goes back in the case under the floor. Don't tell anyone you held it. They wouldn't believe you anyway.",
+    "loss": "The roof is the city's problem now. The water tank still has the sigil. I'll send a man with a pressure washer and a long story. The pencil note will not survive the wash.",
+    "sGrade": "The sigil came off with the geese. Some symbols only hold while what they're holding is alive. Now you know one. Don't go looking for the others."
+  }
 }

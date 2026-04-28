@@ -111,6 +111,47 @@ describe("MissionResult (won)", () => {
     expect(screen.getByRole("button", { name: /next mission/i })).toBeTruthy();
     unmount();
   });
+
+  it("renders the per-mission Pawnbroker debrief blockquote on win", () => {
+    useGameStore.setState({
+      phase: "won",
+      missionId: "streets-01-bodega",
+      score: { total: 500, multiplier: 1 }, // B-grade → win variant, not sGrade
+      killCount: 8,
+    });
+    const { unmount } = render(<MissionResult />);
+    const debrief = screen.getByTestId("pawnbroker-debrief");
+    expect(debrief).toBeTruthy();
+    expect(debrief.textContent).toMatch(/halpern/i);
+    unmount();
+  });
+
+  it("renders the sGrade variant when score is in S band", () => {
+    useGameStore.setState({
+      phase: "won",
+      missionId: "streets-01-bodega",
+      score: { total: 4000, multiplier: 1 }, // S band (3000..5000)
+      killCount: 14,
+    });
+    const { unmount } = render(<MissionResult />);
+    const debrief = screen.getByTestId("pawnbroker-debrief");
+    expect(debrief.textContent).toMatch(/Court Street/);
+    unmount();
+  });
+});
+
+describe("MissionResult (lost)", () => {
+  it("renders the loss debrief variant", () => {
+    useGameStore.setState({
+      phase: "lost",
+      missionId: "streets-01-bodega",
+      killCount: 0,
+    });
+    const { unmount } = render(<MissionResult />);
+    const debrief = screen.getByTestId("pawnbroker-debrief");
+    expect(debrief.textContent).toMatch(/Tuesday/);
+    unmount();
+  });
 });
 
 describe("Credits", () => {

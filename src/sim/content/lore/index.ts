@@ -84,6 +84,14 @@ const frameSchema = z
   })
   .strict();
 
+const missionDebriefSchema = z
+  .object({
+    win: z.string().min(20),
+    loss: z.string().min(20),
+    sGrade: z.string().min(20),
+  })
+  .strict();
+
 const missionLoreSchema = z
   .object({
     id: z.string().min(1),
@@ -91,6 +99,7 @@ const missionLoreSchema = z
     blurb: z.string().min(20),
     briefing: z.string().min(40),
     epigraph: z.string().min(2),
+    debrief: missionDebriefSchema,
   })
   .strict();
 
@@ -192,4 +201,10 @@ export function deathLineFor(archetypeOrCause: string): string {
     (deathLines as Readonly<Record<string, string>>).wipe ??
     "He'll find another kid."
   );
+}
+
+export type DebriefOutcome = "win" | "loss" | "sGrade";
+
+export function pawnbrokerDebriefFor(missionId: string, outcome: DebriefOutcome): string {
+  return getMissionLore(missionId).debrief[outcome];
 }

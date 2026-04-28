@@ -3,5 +3,10 @@
   "title": "BODEGA",
   "blurb": "Mr. Halpern's storeroom. Six rats, maybe ten. He won't open in the morning if it isn't clean. Be quick, be quiet, no holes in the freezer.",
   "briefing": "First job. The Pawnbroker is testing you. Mr. Halpern has been a customer since '52 and the bodega cannot smell like rat in the morning. Use the shotgun he gave you. Don't break the freezer. Come back when it's clean.",
-  "epigraph": "\"A child's job, and you do it clean.\""
+  "epigraph": "\"A child's job, and you do it clean.\"",
+  "debrief": {
+    "win": "Halpern called at six. He says the storeroom smells like rat and gunpowder and bleach, in that order, which is the order he wanted it. Bag is on the counter. Don't spend it on a leather jacket.",
+    "loss": "Halpern is closed for the day. He didn't ask why. He didn't ask after you. That's the worst part. Sit down. Drink the coffee. We'll go again Tuesday.",
+    "sGrade": "Halpern called twice. Once to thank me, once to ask if you could do his cousin's bakery on Court Street. I told him you don't do bakeries. Yet."
+  }
 }

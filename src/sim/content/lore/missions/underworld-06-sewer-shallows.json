@@ -3,5 +3,10 @@
   "title": "SEWER SHALLOWS",
   "blurb": "Bleecker access tunnel. Knee-deep, warm. The fish in there shouldn't be fish anymore. Bring the sawed-off. Don't slip.",
   "briefing": "The water is warm. It shouldn't be warm. Things underneath choose the surface. Sawed-off, full bandolier, do not ration. The pipefitter's tag you'll find belonged to a man who has been dead twenty-one years. Put it in your pocket anyway.",
-  "epigraph": "\"DiSalvo Plumbing & Iron, est. 1938. Date of last inspection scratched out. Replaced with a question mark.\""
+  "epigraph": "\"DiSalvo Plumbing & Iron, est. 1938. Date of last inspection scratched out. Replaced with a question mark.\"",
+  "debrief": {
+    "win": "Give me the pipefitter's tag. I'll see Mrs. DiSalvo gets it back. She'll know what it means. She always knew what it meant. Hang the waders by the boiler. They'll dry by morning.",
+    "loss": "Bleecker is closed for utility work, says the city. They mean it this time. The water down there will cool again, eventually. It always does. So does everything down there.",
+    "sGrade": "The water's gone cold tonight. Mrs. DiSalvo called and didn't say anything for a full minute, then said thank you, and hung up. That's the closest thing to a medal we hand out around here."
+  }
 }
