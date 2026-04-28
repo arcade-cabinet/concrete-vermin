@@ -68,14 +68,9 @@ describe("lore registry", () => {
       expect(lore.debrief.win.length).toBeGreaterThan(20);
       expect(lore.debrief.loss.length).toBeGreaterThan(20);
       expect(lore.debrief.sGrade.length).toBeGreaterThan(20);
-      // Three outcomes within a single mission must differ from each
-      // other — otherwise the bespoke copy collapses back to generic.
       expect(lore.debrief.win).not.toBe(lore.debrief.loss);
       expect(lore.debrief.win).not.toBe(lore.debrief.sGrade);
       expect(lore.debrief.loss).not.toBe(lore.debrief.sGrade);
-      // Across all missions: every line must be globally unique. Catches
-      // copy-paste regressions where one mission's blurb leaked into
-      // another's.
       for (const line of [lore.debrief.win, lore.debrief.loss, lore.debrief.sGrade]) {
         expect(seen.has(line)).toBe(false);
         seen.add(line);
@@ -84,8 +79,7 @@ describe("lore registry", () => {
   });
 
   it("pawnbrokerDebriefFor selects the right outcome", () => {
-    const m = MISSIONS[0];
-    if (!m) throw new Error("MISSIONS must have at least one entry");
+    const m = MISSIONS[0]!;
     const lore = getMissionLore(m.id);
     expect(pawnbrokerDebriefFor(m.id, "win")).toBe(lore.debrief.win);
     expect(pawnbrokerDebriefFor(m.id, "loss")).toBe(lore.debrief.loss);

@@ -41,18 +41,8 @@ export function MissionResult() {
   const grade = won ? gradeFromScore(score.total) : "F";
   const cashEarned = won ? killCount * CASH_PER_KILL : 0;
   const callouts = won ? winCallouts(grade, killCount) : lossCallouts(killCount);
-  // Per-mission Pawnbroker debrief blurb. Only renders when we know the
-  // mission id; unknown id (shouldn't happen in practice) falls back to
-  // the generic callouts only.
-  const debrief = (() => {
-    if (!missionId) return null;
-    try {
-      const outcome = won ? (grade === "S" || grade === "S+" ? "sGrade" : "win") : "loss";
-      return pawnbrokerDebriefFor(missionId, outcome);
-    } catch {
-      return null;
-    }
-  })();
+  const outcome = won ? (grade === "S" || grade === "S+" ? "sGrade" : "win") : "loss";
+  const debrief = missionId ? pawnbrokerDebriefFor(missionId, outcome) : null;
 
   return (
     <div
