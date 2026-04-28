@@ -21,19 +21,17 @@ const PARAGRAPHS: ReadonlyArray<string> = [
  * regardless of which screen would have rendered behind it.
  */
 export function OpeningInterstitial() {
-  const [open, setOpen] = useState(false);
-  const skipRef = useRef<HTMLButtonElement>(null);
-
-  useEffect(() => {
-    if (typeof window === "undefined") return;
+  // Initialize from localStorage synchronously so returning players don't
+  // see a one-frame flash of the MainMenu before the overlay snaps in.
+  const [open, setOpen] = useState(() => {
+    if (typeof window === "undefined") return false;
     try {
-      if (window.localStorage.getItem(SHOWN_KEY) === "1") return;
+      return window.localStorage.getItem(SHOWN_KEY) !== "1";
     } catch {
-      // localStorage disabled (Safari private mode etc.) — show every boot
-      // rather than dismiss permanently. Returning fans can still skip.
+      return true;
     }
-    setOpen(true);
-  }, []);
+  });
+  const skipRef = useRef<HTMLButtonElement>(null);
 
   const dismiss = useCallback(() => {
     try {
@@ -63,10 +61,15 @@ export function OpeningInterstitial() {
     <div
       data-testid="opening-interstitial"
       role="dialog"
+      aria-modal="true"
       aria-label="Opening cutscene"
       onClick={dismiss}
+      // The window-level keydown listener above handles dismissal for
+      // real keyboard users; this onKeyDown exists only to satisfy the
+      // a11y/onClick-paired-with-keyhandler lint rule on the focusable
+      // backdrop and is functionally redundant.
       onKeyDown={(e) => {
-        if (e.key === "Enter" || e.key === " " || e.key === "Escape") dismiss();
+        if (e.key === "Enter" || e.key === " ") dismiss();
       }}
       style={{
         position: "fixed",

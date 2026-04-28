@@ -2,7 +2,7 @@ import { type ReactNode, useEffect } from "react";
 import { type ModifierFlashSnapshot, useGameStore } from "../runtime/store";
 import { COLOR, MOTION, TYPE } from "../theme/tokens";
 import { useTickedNumber } from "./hooks/useTickedNumber";
-import { useIsNarrow, usePrefersReducedMotion } from "./hooks/useViewport";
+import { useIsNarrow } from "./hooks/useViewport";
 import { getMission } from "../sim/content/missions";
 
 const FLASH_TTL_S = 1.0;
@@ -109,7 +109,6 @@ export function ArcadeFrame({ children }: { children: ReactNode }) {
       </div>
       <Ticker />
       <MuteButton />
-      <ScoreNarration />
       <StreakChipsLive />
     </div>
   );
@@ -557,9 +556,10 @@ function missionTitle(id: string): string {
 }
 
 function useReducedMotion(): boolean {
-  const fromOs = usePrefersReducedMotion();
-  const fromSettings = useGameStore((s) => s.settings.reducedMotion);
-  return fromSettings || fromOs;
+  // Trust the store value — App.tsx seeds it from prefers-reduced-motion
+  // and keeps it in sync via matchMedia, so OR-ing the OS pref again here
+  // would prevent users from overriding the OS preference via Settings.
+  return useGameStore((s) => s.settings.reducedMotion);
 }
 
 /* ============================================================== */
@@ -570,7 +570,9 @@ function ModifierFlashes() {
   const flashes = useGameStore((s) => s.modifierFlashes);
   const now = useGameStore((s) => s.now);
   const reduced = useReducedMotion();
-  const visible = [...flashes].reverse().slice(0, 4);
+  // slice(-4) first, then reverse — avoids reversing the entire array
+  // every render when we only need the last four entries on screen.
+  const visible = flashes.slice(-4).reverse();
   return (
     <div
       style={{
@@ -643,25 +645,6 @@ function MuteButton() {
     >
       {muted ? "♪ MUTED" : "♪ ON"}
     </button>
-  );
-}
-
-function ScoreNarration() {
-  const score = useGameStore((s) => s.score);
-  const player = useGameStore((s) => s.player);
-  const killCount = useGameStore((s) => s.killCount);
-  const killsRequired = useGameStore((s) => s.killsRequired);
-  const reduced = useReducedMotion();
-  const displayedTotal = useTickedNumber(score.total, { instant: reduced });
-  return (
-    <div
-      aria-live="polite"
-      aria-atomic="true"
-      style={visuallyHidden}
-    >
-      Score {displayedTotal}, vermin {killCount} of {killsRequired}, shells {player.ammoCurrent}{" "}
-      of {player.ammoMax}, lives {player.livesRemaining}.
-    </div>
   );
 }
 

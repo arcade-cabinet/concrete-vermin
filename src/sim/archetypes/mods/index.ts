@@ -1,5 +1,8 @@
 import { z } from "zod";
 import type { WeaponArchetype, WeaponId } from "../weapons";
+import { RETICLE_SHAPES, type ReticleShape } from "../weapons/_types";
+
+export { RETICLE_SHAPES, type ReticleShape };
 
 /**
  * Weapon mod registry. Mods are passive multipliers/additives applied
@@ -25,15 +28,6 @@ export const MOD_SLOTS = [
   "reticle",
 ] as const;
 export type ModSlot = (typeof MOD_SLOTS)[number];
-
-/**
- * Reticle shape — drives both the visual on screen and the hit-box used
- * for tap-to-fire. "cross" is the default per-weapon look; mods can
- * upgrade the player to "ring" / "double" / "wide" for bigger forgiveness
- * windows or two simultaneous aim points (e.g. dual-wield laser sights).
- */
-export const RETICLE_SHAPES = ["cross", "ring", "double", "wide", "diamond"] as const;
-export type ReticleShape = (typeof RETICLE_SHAPES)[number];
 
 export const weaponModSchema = z
   .object({
@@ -245,9 +239,11 @@ const MOD_DATA: ReadonlyArray<z.input<typeof weaponModSchema>> = [
     critChanceAdd: 0.05,
   },
   // — Reticle mods —
-  // The hit-box for tap-to-fire is the reticle. These mods either
-  // grow it (forgiveness), change shape (visual + slight gameplay
-  // shift), or add a second aim point (double-up shots).
+  // Adjust the hit-box radius (multiplicative) and/or override the visual
+  // reticle shape. Today the shape is render-only — gameplay difference
+  // comes from radius alone. The "double" and "diamond" variants give the
+  // shape its own readable look; future revisions may make double fire two
+  // pellets.
   {
     id: "wide-sights",
     slot: "reticle",

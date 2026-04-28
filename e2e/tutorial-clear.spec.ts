@@ -24,12 +24,10 @@ test.describe("tutorial clear", () => {
       "tutorial-clear runs on the desktop project only",
     );
 
-    await page.goto("/");
-
-    // Opening interstitial fires on first launch (clean localStorage).
-    // Suppress it deterministically by setting the persisted-shown flag
-    // before any UI renders, so the rest of the test runs the same
-    // path returning players see.
+    // Suppress the opening interstitial deterministically. Register the
+    // init script BEFORE the first navigation so the flag is set before
+    // any UI renders — eliminates the goto/reload double-render and any
+    // first-paint flicker.
     await page.addInitScript(() => {
       try {
         window.localStorage.setItem("cv:opening-shown", "1");
@@ -37,7 +35,7 @@ test.describe("tutorial clear", () => {
         // ignore
       }
     });
-    await page.reload();
+    await page.goto("/");
 
     // Main menu → Press Start (sends to Briefing for fresh runs)
     const start = page.getByTestId("main-menu-start");

@@ -243,6 +243,11 @@ export function GameStage() {
   // the magazine drains. The reticle is the hit-box; weapon archetype
   // controls reticle radius via the `reticleShape` snapshot.
   function onPointerDown(e: React.PointerEvent<HTMLDivElement>) {
+    // Mouse: only fire on primary (left) button. Right-click should fall
+    // through to the browser context menu, middle-click is reserved.
+    // Touch and pen events report button === 0 by default, so this
+    // doesn't break either.
+    if (e.pointerType === "mouse" && e.button !== 0) return;
     const p = clientToStage(e, e.currentTarget);
     setReticle(p.x, p.y);
     fireWithAssist(p.x, p.y);
@@ -271,12 +276,15 @@ export function GameStage() {
     >
       <div
         style={{
-          // Inside ArcadeFrame's canvas-well: fill the well, retain 16:9
-          // via aspectRatio, and let the well's flex/overflow rules pick
-          // the larger of (width-fit) or (height-fit). The "min(width,
-          // height * 16/9)" trick keeps the canvas centered at any
-          // aspect.
-          width: "min(100%, calc(100% * 16 / 9))",
+          // Inside ArcadeFrame's canvas-well, fill whichever axis is the
+          // tighter constraint: when the well is wider than 16:9, height
+          // bottoms out at 100% and width follows the aspect ratio; when
+          // it's taller, width bottoms out at 100% and height follows.
+          // Browsers honor aspect-ratio with one explicit dimension as
+          // long as the other is auto.
+          height: "100%",
+          width: "auto",
+          maxWidth: "100%",
           maxHeight: "100%",
           aspectRatio: `${STAGE_W} / ${STAGE_H}`,
           position: "relative",
