@@ -40,10 +40,22 @@ export default defineConfig({
     launchOptions: { args: GAME_ARGS },
   },
   projects: [
-    { name: "mobile-portrait", use: { ...devices["Pixel 7"], viewport: { width: 390, height: 844 } } },
-    { name: "mobile-landscape", use: { ...devices["Pixel 7"], viewport: { width: 844, height: 390 } } },
-    { name: "tablet-portrait", use: { ...devices["iPad (gen 7)"], viewport: { width: 834, height: 1194 } } },
-    { name: "desktop", use: { ...devices["Desktop Chrome"], viewport: { width: 1280, height: 720 } } },
+    {
+      name: "mobile-portrait",
+      use: { ...devices["Pixel 7"], viewport: { width: 390, height: 844 } },
+    },
+    {
+      name: "mobile-landscape",
+      use: { ...devices["Pixel 7"], viewport: { width: 844, height: 390 } },
+    },
+    {
+      name: "tablet-portrait",
+      use: { ...devices["iPad (gen 7)"], viewport: { width: 834, height: 1194 } },
+    },
+    {
+      name: "desktop",
+      use: { ...devices["Desktop Chrome"], viewport: { width: 1280, height: 720 } },
+    },
   ],
   webServer: {
     command: "pnpm exec vite preview --host 127.0.0.1 --port 41739",

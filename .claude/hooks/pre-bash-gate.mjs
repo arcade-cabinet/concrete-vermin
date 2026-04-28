@@ -4,8 +4,17 @@
 import { readFileSync } from "node:fs";
 
 let input = "";
-try { input = readFileSync(0, "utf-8"); } catch { process.exit(0); }
-let event; try { event = JSON.parse(input); } catch { process.exit(0); }
+try {
+  input = readFileSync(0, "utf-8");
+} catch {
+  process.exit(0);
+}
+let event;
+try {
+  event = JSON.parse(input);
+} catch {
+  process.exit(0);
+}
 
 const cmd = event?.tool_input?.command ?? "";
 if (!cmd) process.exit(0);
@@ -16,10 +25,7 @@ const reject = (msg) => {
 };
 
 if (/\b(npm|yarn)\s+(install|add|i\b|ci\b)/.test(cmd) && !/\bpnpm\b/.test(cmd)) {
-  reject(
-    `pnpm-only: rejected '${cmd.slice(0, 80)}…'. ` +
-    `Use pnpm. STANDARDS.md §11.`
-  );
+  reject(`pnpm-only: rejected '${cmd.slice(0, 80)}…'. ` + `Use pnpm. STANDARDS.md §11.`);
 }
 
 if (/git\s+commit\s+.*--no-verify/.test(cmd)) {
