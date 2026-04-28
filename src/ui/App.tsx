@@ -1,5 +1,11 @@
 import { useEffect } from "react";
-import { setMasterVolumeDb, setMute } from "../audio/setup";
+import {
+  setMasterVolumeDb,
+  setMusicVolumeDb,
+  setSfxVolumeDb,
+  setUiVolumeDb,
+  setMute,
+} from "../audio/setup";
 import { setHapticsEnabled } from "../platform/haptics";
 import { useGameStore } from "../runtime/store";
 import { Briefing } from "./Briefing";
@@ -22,10 +28,16 @@ export function App() {
   const setPhase = useGameStore((s) => s.setPhase);
   const startMission = useGameStore((s) => s.startMission);
   const masterVolumeDb = useGameStore((s) => s.settings.masterVolumeDb);
+  const musicVolumeDb = useGameStore((s) => s.settings.musicVolumeDb);
+  const sfxVolumeDb = useGameStore((s) => s.settings.sfxVolumeDb);
+  const uiVolumeDb = useGameStore((s) => s.settings.uiVolumeDb);
   const muted = useGameStore((s) => s.settings.muted);
   const haptics = useGameStore((s) => s.settings.haptics);
 
   useEffect(() => setMasterVolumeDb(masterVolumeDb), [masterVolumeDb]);
+  useEffect(() => setMusicVolumeDb(musicVolumeDb), [musicVolumeDb]);
+  useEffect(() => setSfxVolumeDb(sfxVolumeDb), [sfxVolumeDb]);
+  useEffect(() => setUiVolumeDb(uiVolumeDb), [uiVolumeDb]);
   useEffect(() => setMute(muted), [muted]);
   useEffect(() => setHapticsEnabled(haptics), [haptics]);
 

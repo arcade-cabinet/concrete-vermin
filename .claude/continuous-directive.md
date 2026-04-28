@@ -69,14 +69,14 @@ Each `[ ]` is one commit. Group small ones into one PR; large surfaces get their
 - [x] src/audio/sfx.ts: per-weapon reload cue (shotgun pump, revolver cylinder, smg mag, sawed-off break, flame purge, tesla cap charge)
 - [x] src/audio/sfx.ts: per-archetype death cue (rat squeal, roach crunch, pigeon flutter-thud, sewer-fish wet flop, dumpster-bear groan, river-mutant gurgle, goose honk-snap, seagull cry, pigeon-king bell-toll)
 - [x] src/audio/sfx.ts: per-archetype hit cue (lighter than death)
-- [ ] src/audio/music.ts: per-act ambient bed switcher — Streets (horn + steam + traffic), Underworld (drips + low rumble), Above (wind + bird-ambience)
-- [ ] src/audio/music.ts: stings — mission-start chime, win sting, loss sting, S-grade fanfare
-- [ ] src/audio/music.ts: boss leitmotif (4-beat 90 BPM ostinato) — fires when boss spawned
-- [ ] src/audio/setup.ts: ducking matrix — boss leitmotif ducks ambient -10dB; player fire ducks music -4dB; boss death drops music to -20dB silence-as-sting for 1.2s
-- [ ] src/audio/setup.ts: per-bus volumes (sfx/music/ui) wired to Settings store
-- [ ] src/runtime/runner.ts: emit AudioEvent for every fire/reload/hit/kill/spawn/missionStart/missionEnd/bossSpawn/bossDeath
-- [ ] tests: src/audio/__tests__/sfx.test.ts — every emit type produces a Tone node (mocked AudioContext)
-- [ ] tests: src/audio/__tests__/ducking.test.ts — ducking matrix engages correctly
+- [x] src/audio/music.ts: per-act ambient bed switcher — Streets (horn + steam + traffic), Underworld (drips + low rumble), Above (wind + bird-ambience)
+- [x] src/audio/music.ts: stings — mission-start chime, win sting, loss sting, S-grade fanfare
+- [x] src/audio/music.ts: boss leitmotif (4-beat 90 BPM ostinato) — fires when boss spawned
+- [x] src/audio/setup.ts: ducking matrix — boss leitmotif ducks ambient -10dB; player fire ducks music -4dB; boss death drops music to -20dB silence-as-sting for 1.2s
+- [x] src/audio/setup.ts: per-bus volumes (sfx/music/ui) wired to Settings store
+- [x] src/runtime/runner.ts: emit AudioEvent for every fire/reload/hit/kill/spawn/missionStart/missionEnd/bossSpawn/bossDeath
+- [x] tests: src/audio/__tests__/sfx.test.ts — every emit type produces a Tone node (mocked AudioContext)
+- [x] tests: src/audio/__tests__/ducking.test.ts — ducking matrix engages correctly
 
 ### v1.0-RENDER-POLISH — every visual beat hits
 

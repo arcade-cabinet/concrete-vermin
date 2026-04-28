@@ -6,6 +6,17 @@ import {
   playVerminHit,
   playVerminSpawn,
 } from "../audio/sfx";
+import {
+  bossDeathSilenceSting,
+  playLossSting,
+  playMissionStartSting,
+  playSGradeFanfare,
+  playWinSting,
+  setActAmbience,
+  startBossLeitmotif,
+  stopBossLeitmotif,
+} from "../audio/music";
+import { duckBus } from "../audio/setup";
 import { bossDamageHaptic, hitHaptic, killHaptic } from "../platform/haptics";
 import { fireWeapon } from "../ecs/actions";
 import {
@@ -82,6 +93,7 @@ export class GameRunner {
   private playerHp: number;
   private readonly maxHpPerLife = 100;
   private ended = false;
+  private bossLeitmotifActive = false;
 
   constructor(mission: Readonly<Mission>, modIds: ReadonlyArray<string> = [], seed?: number) {
     this.mission = mission;
@@ -97,6 +109,8 @@ export class GameRunner {
     this.mag = this.tunedWeapon.magSize;
     this.livesRemaining = mission.livesAllowance;
     this.playerHp = this.maxHpPerLife;
+    setActAmbience(mission.act);
+    playMissionStartSting();
     this.startEncounter(0);
   }
 
@@ -185,6 +199,15 @@ export class GameRunner {
     );
     const spawnedAfter = this.pendingSpawns.filter((p) => p.spawned).length;
     for (let i = 0; i < spawnedAfter - spawnedBefore; i++) playVerminSpawn();
+    // Boss spawn detection: scan freshly-spawned vermin for a boss
+    // archetype id, fire the leitmotif once.
+    if (!this.bossLeitmotifActive && spawnedAfter > spawnedBefore) {
+      const bossInWorld = this.bossAlive();
+      if (bossInWorld) {
+        startBossLeitmotif();
+        this.bossLeitmotifActive = true;
+      }
+    }
 
     // 2. AI replans/drives velocity.
     aiSystem(this.gw.world, this.gw.rng.fork(`ai:${this.now.toFixed(3)}`), this.now, this.zone);
@@ -223,6 +246,8 @@ export class GameRunner {
         this.mag--;
         shotFired = true;
         playWeaponFire(tuned.base.id);
+        // Per-shot music duck so weapon fire punches through the bed.
+        duckBus("music", 4, 0.18, 0.25);
         if (this.mag === 0 && this.reloadStartedAt === null) {
           this.reloadStartedAt = this.now;
           playWeaponReload(this.tunedWeapon.base.id);
@@ -253,6 +278,12 @@ export class GameRunner {
         playVerminDeath(e.archetypeId);
         if (e.archetypeId.startsWith("boss-")) {
           void bossDamageHaptic();
+          // Silence-as-sting + stop the leitmotif on boss death.
+          if (this.bossLeitmotifActive) {
+            stopBossLeitmotif();
+            this.bossLeitmotifActive = false;
+            bossDeathSilenceSting();
+          }
         } else {
           void killHaptic();
         }
@@ -303,13 +334,41 @@ export class GameRunner {
       } else if (!this.ended) {
         this.ended = true;
         useGameStore.getState().endMission(true);
-        useGameStore.getState().awardCash(this.mission.cashAward ?? defaultCashFor(this.mission.act));
+        useGameStore
+          .getState()
+          .awardCash(this.mission.cashAward ?? defaultCashFor(this.mission.act));
+        // S-grade fanfare on a flawless run (no lives lost), otherwise
+        // the standard win sting.
+        if (this.livesRemaining === this.mission.livesAllowance && this.playerHp === this.maxHpPerLife) {
+          playSGradeFanfare();
+        } else {
+          playWinSting();
+        }
+        if (this.bossLeitmotifActive) {
+          stopBossLeitmotif();
+          this.bossLeitmotifActive = false;
+        }
       }
     }
     if (this.livesRemaining <= 0 && !this.ended) {
       this.ended = true;
       useGameStore.getState().endMission(false);
+      playLossSting();
+      if (this.bossLeitmotifActive) {
+        stopBossLeitmotif();
+        this.bossLeitmotifActive = false;
+      }
     }
+  }
+
+  private bossAlive(): boolean {
+    for (const e of this.gw.world.query(Vermin, Lifecycle)) {
+      const l = e.get(Lifecycle);
+      const v = e.get(Vermin);
+      if (!l || !v || l.deadAt > 0) continue;
+      if (v.archetypeId.startsWith("boss-")) return true;
+    }
+    return false;
   }
 
   private countAliveVermin(): number {

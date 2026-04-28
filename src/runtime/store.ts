@@ -65,6 +65,10 @@ export interface Settings {
   crtOverlay: boolean;
   /** Master volume in dB. -60 = mute, 0 = unity. Default -6. */
   masterVolumeDb: number;
+  /** Per-bus volume sliders in dB. Defaults match the bus baselines in audio/setup. */
+  musicVolumeDb: number;
+  sfxVolumeDb: number;
+  uiVolumeDb: number;
   muted: boolean;
   /**
    * Honor the OS-level "reduce motion" preference. When true, score
@@ -85,6 +89,9 @@ export interface GameState {
   settings: Settings;
   setCrtOverlay: (on: boolean) => void;
   setMasterVolumeDb: (db: number) => void;
+  setMusicVolumeDb: (db: number) => void;
+  setSfxVolumeDb: (db: number) => void;
+  setUiVolumeDb: (db: number) => void;
   setMuted: (m: boolean) => void;
   setReducedMotion: (on: boolean) => void;
   setHighContrast: (on: boolean) => void;
@@ -146,6 +153,9 @@ export const useGameStore = create<GameState>((set) => ({
   settings: {
     crtOverlay: false,
     masterVolumeDb: -6,
+    musicVolumeDb: -12,
+    sfxVolumeDb: -4,
+    uiVolumeDb: -8,
     muted: false,
     reducedMotion: false,
     highContrast: false,
@@ -153,6 +163,9 @@ export const useGameStore = create<GameState>((set) => ({
   },
   setCrtOverlay: (on) => set((s) => ({ settings: { ...s.settings, crtOverlay: on } })),
   setMasterVolumeDb: (db) => set((s) => ({ settings: { ...s.settings, masterVolumeDb: db } })),
+  setMusicVolumeDb: (db) => set((s) => ({ settings: { ...s.settings, musicVolumeDb: db } })),
+  setSfxVolumeDb: (db) => set((s) => ({ settings: { ...s.settings, sfxVolumeDb: db } })),
+  setUiVolumeDb: (db) => set((s) => ({ settings: { ...s.settings, uiVolumeDb: db } })),
   setMuted: (muted) => set((s) => ({ settings: { ...s.settings, muted } })),
   setReducedMotion: (on) => set((s) => ({ settings: { ...s.settings, reducedMotion: on } })),
   setHighContrast: (on) => set((s) => ({ settings: { ...s.settings, highContrast: on } })),
