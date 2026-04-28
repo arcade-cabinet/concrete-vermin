@@ -1,16 +1,5 @@
 import type { Rng } from "../rng";
 
-/**
- * Eight named spawn patterns from design Section 4. Pure functions —
- * `(count, rng) -> SpawnTimingRecord[]`. Patterns describe WHERE and
- * WHEN spawns appear within the encounter window; not what species
- * (that's resolved one level up at composeEncounter time).
- *
- * Position values are stage-relative [0..1] in both axes so renderers
- * can map onto any encounter zone size. Velocity is a unit hint for
- * the AI brain — magnitude is decided by the brain.
- */
-
 export const SPAWN_PATTERNS = [
   "left-flood",
   "right-flood",
@@ -24,13 +13,9 @@ export const SPAWN_PATTERNS = [
 export type SpawnPattern = (typeof SPAWN_PATTERNS)[number];
 
 export interface SpawnTimingRecord {
-  /** Seconds from encounter ARMING -> ACTIVE transition. */
   delayS: number;
-  /** Stage-relative spawn position [0..1] horizontally and vertically. */
   position: { x: number; y: number };
-  /** Initial velocity hint for the AI brain. */
   velocity: { x: number; y: number };
-  /** Spawn id within the encounter for stable ordering. */
   index: number;
 }
 

@@ -1,13 +1,5 @@
 import { GOAL_STATUS, Goal, type GoalContext, type GoalStatus } from "./Goal";
 
-/**
- * A CompositeGoal owns a stack of subgoals executed front-to-back.
- * The active subgoal is always at index 0; when it completes, it's
- * removed and the next one steps up. Failure of any subgoal fails
- * the composite (callers can override to retry/replan).
- *
- * Yuka's CompositeGoal pattern; reduced to the operations we need.
- */
 export class CompositeGoal<Owner = unknown> extends Goal<Owner> {
   readonly subgoals: Goal<Owner>[] = [];
 

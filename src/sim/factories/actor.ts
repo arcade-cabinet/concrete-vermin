@@ -11,14 +11,7 @@ import {
   type VerminTraitSet,
 } from "../traits";
 
-/**
- * Plain-data record produced by the factory. The ECS bridge lifts this into
- * Koota traits; the renderer reads sprite/atlas/locomotion to pick draw
- * paths; the audio layer reads the sfxIds. Sim never spawns vermin any
- * other way — see STANDARDS.md §6 (factory pyramid).
- */
 export interface VerminSpawnRecord {
-  /** Stable per-spawn id derived from the rng seed + counter. */
   spawnId: number;
   archetypeId: ArchetypeId;
   brain: AIBrain;

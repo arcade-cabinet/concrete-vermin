@@ -1,17 +1,10 @@
 import type { Rng } from "../rng";
 
-/**
- * Sample helpers built on top of the Rng interface. Keep all stochastic
- * "do this 80% of the time" logic in one place so balance changes can be
- * audited and tuned.
- */
-
 export interface Range {
   readonly min: number;
   readonly max: number;
 }
 
-/** Uniform sample on the half-open range [min, max); falls back to min if max <= min. */
 export const sampleRange = (rng: Rng, range: Range): number => {
   if (range.max <= range.min) return range.min;
   return rng.range(range.min, range.max);
@@ -28,8 +21,6 @@ export const sampleGaussian = (
   return raw < min ? min : raw > max ? max : raw;
 };
 
-/** Sample with fallback: try `attempts` times to get a value satisfying `predicate`,
- *  returning the last sample if none qualify. */
 export const sampleWithFallback = <T>(
   rng: Rng,
   generate: (rng: Rng) => T,
@@ -44,7 +35,6 @@ export const sampleWithFallback = <T>(
   return last;
 };
 
-/** Variance bands (used by analysis to flag outliers). */
 export interface SampleStats {
   readonly mean: number;
   readonly stddev: number;

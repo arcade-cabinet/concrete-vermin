@@ -1,33 +1,11 @@
-/**
- * Encounter FSM. Pure transition function — no side effects, no rng.
- *
- *   WAITING_FOR_CAMERA  →  ARMING        (camera arrives at marker)
- *   ARMING              →  ACTIVE        (arming countdown elapses)
- *   ACTIVE              →  CLEARED       (last vermin in encounter dies)
- *   ACTIVE              →  FAILED        (timer expires OR fail event fires)
- *
- * Once an encounter reaches CLEARED or FAILED it's terminal. Further
- * events are ignored (returned state === input state, no events emitted).
- *
- * The mission ticker calls `step(fsm, event, now)` once per frame for
- * each live encounter. Every event is timestamped (`now` seconds since
- * mission start) so the FSM can drive arming countdowns and timeouts
- * without holding a clock reference itself.
- */
-
 export type EncounterPhase = "WAITING_FOR_CAMERA" | "ARMING" | "ACTIVE" | "CLEARED" | "FAILED";
 
 export interface EncounterFsm {
   phase: EncounterPhase;
-  /** Vermin still alive in this encounter. */
   remaining: number;
-  /** When ARMING began (sim seconds). 0 before arming. */
   armingStartedAt: number;
-  /** When ACTIVE phase began. Used to compute timeout. */
   activeStartedAt: number;
-  /** Seconds the player has to clear once ACTIVE. 0 = no timeout. */
   timeLimitS: number;
-  /** Seconds the ARMING phase lasts before flipping to ACTIVE. */
   armingDurationS: number;
 }
 

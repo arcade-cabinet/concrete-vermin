@@ -1,5 +1,3 @@
-/** 2D vector ops + scalar helpers. All pure, all branch-light. */
-
 export interface Vec2 {
   readonly x: number;
   readonly y: number;
@@ -45,7 +43,6 @@ export const sign = (value: number): -1 | 0 | 1 => (value > 0 ? 1 : value < 0 ? 
 
 export const approxEqual = (a: number, b: number, eps = 1e-6): boolean => Math.abs(a - b) < eps;
 
-/** Smooth-damp a value toward a target, frame-rate independent. */
 export const smoothDamp = (
   current: number,
   target: number,

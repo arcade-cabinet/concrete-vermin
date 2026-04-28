@@ -1,22 +1,3 @@
-/**
- * GOAP A* planner. Given a current world state, a goal state, and a
- * set of actions (each with preconditions, effects, and cost), returns
- * the cheapest action sequence that reaches the goal.
- *
- * State is a flat record of string → primitive (boolean | number |
- * string). Preconditions and effects are partial records: only the
- * keys mentioned must match (precond) or get overwritten (effect).
- *
- * This is the "classical" GOAP planner, not Yuka's evaluator-driven
- * Think — vermin brains use Think for reactive arbitration, but boss
- * scripts and the meta-encounter director use Planner for sequenced
- * behavior trees ("approach → arm → fire → flee").
- *
- * Determinism: actions are tried in the order supplied. Heuristic is
- * the count of unsatisfied goal keys. Tie-breaking is FIFO within the
- * frontier so the same input always returns the same plan.
- */
-
 export type Primitive = string | number | boolean;
 export type WorldState = Readonly<Record<string, Primitive>>;
 
@@ -28,7 +9,6 @@ export interface GoapAction {
 }
 
 export interface PlanResult {
-  /** Action sequence from start to goal, in execution order. */
   actions: ReadonlyArray<GoapAction>;
   cost: number;
 }
@@ -80,7 +60,6 @@ interface Node {
   action: GoapAction | null;
   g: number; // cost so far
   f: number; // g + h
-  /** Insertion order for stable tiebreak. */
   seq: number;
 }
 
@@ -94,10 +73,6 @@ const reconstruct = (node: Node): GoapAction[] => {
   return path;
 };
 
-/**
- * A* planner. Returns null if no plan exists within `maxNodes`
- * expansions (prevents pathological infinite searches).
- */
 export function plan(
   start: WorldState,
   goal: WorldState,

@@ -1,10 +1,5 @@
 import type { Brain, BrainStep } from "./_types";
 
-/**
- * Goose: alternates between flying and ground charges.
- * Plan: pick mode by aggression — air-flank then dive, OR ground-charge
- * with honking pause.
- */
 export const mixedThreatBrain: Brain = (self, world, rng) => {
   const speed = 100 + 40 * self.aggression;
   const useAir = rng.next() < self.aggression;

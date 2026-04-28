@@ -1,9 +1,5 @@
 import type { Brain, BrainStep } from "./_types";
 
-/**
- * Roaches/raccoons popping out of vents: emerge from offscreen,
- * brief exposure, then retreat (or commit if aggressive).
- */
 export const popUpBrain: Brain = (self, world, rng) => {
   const exposure = 0.6 + 0.6 * (1 - self.aggression);
   const popY = world.zone.maxY - 12;

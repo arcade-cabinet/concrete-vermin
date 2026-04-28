@@ -7,11 +7,6 @@ import {
   type SpawnTimingRecord,
 } from "./patterns";
 
-/**
- * Encounter factory. Composes spawn-timing records (from patterns.ts)
- * with variant data into an immutable encounter spec.
- */
-
 export { planSpawnPattern, SPAWN_PATTERNS, type SpawnPattern, type SpawnTimingRecord };
 
 export const spawnSpecSchema = z
@@ -32,15 +27,11 @@ export const encounterSpecSchema = z
   .strict();
 
 export type SpawnSpec = z.infer<typeof spawnSpecSchema>;
-/** Input form — fields with defaults are optional from the caller's POV. */
 export type EncounterSpec = z.input<typeof encounterSpecSchema>;
 
 export interface EncounterSpawnSchedule {
-  /** Variant id resolved at composition time. */
   variant: string;
-  /** Pattern that produced this entry. */
   pattern: SpawnPattern;
-  /** Per-spawn timing + position + velocity. */
   schedule: ReadonlyArray<Readonly<SpawnTimingRecord>>;
 }
 

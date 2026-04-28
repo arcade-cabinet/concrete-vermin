@@ -1,9 +1,5 @@
 import type { Brain, BrainStep } from "./_types";
 
-/**
- * Feral cat: lurks behind cover, then bursts. Long initial wait,
- * single explosive lunge.
- */
 export const ambusherBrain: Brain = (self, world, _rng) => {
   const speed = 100 + 40 * self.aggression;
 

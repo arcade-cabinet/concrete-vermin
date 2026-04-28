@@ -1,15 +1,3 @@
-/**
- * Atomic GOAP goal. Pure-TS port of Yuka's `Goal` primitive minus the
- * Entity/Vehicle dependency. A Goal owns its lifecycle (`activate` →
- * `execute` repeatedly → `terminate`) and tracks status so the parent
- * (CompositeGoal or Think) can decide whether to advance, replan, or
- * stay the course.
- *
- * Goals are NOT pure functions — they carry status — but the *brain*
- * code that builds them is pure: brain `(self, world, rng) => Goal`.
- * The sim ticker re-evaluates goals each tick.
- */
-
 export const GOAL_STATUS = {
   INACTIVE: "inactive",
   ACTIVE: "active",
@@ -20,9 +8,7 @@ export const GOAL_STATUS = {
 export type GoalStatus = (typeof GOAL_STATUS)[keyof typeof GOAL_STATUS];
 
 export interface GoalContext {
-  /** Sim seconds since mission start. */
   now: number;
-  /** Fixed timestep this tick. */
   dt: number;
 }
 

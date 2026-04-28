@@ -1,7 +1,3 @@
-/**
- * Mission grade thresholds (raw composite score 0..1.5).
- * Frozen so analysis sweeps don't mutate them in-process.
- */
 export const GRADE_THRESHOLDS = Object.freeze({
   F: 0,
   D: 0.3,

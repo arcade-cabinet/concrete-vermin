@@ -1,30 +1,8 @@
 import type { ArchetypeId } from "../archetypes/vermin";
 import type { MissionStats } from "./scoring";
 
-/**
- * Run-stats accumulator. Pure event-fold. Every gameplay event the
- * sim emits gets folded into a snapshot the grading layer can chew on.
- *
- * `accumulate(stats, event)` returns a NEW snapshot — no mutation.
- * `summarize(stats)` produces the immutable input the grading function
- * (`computeMissionGrade`) expects, plus side-data the post-mission UI
- * needs (max multiplier seen, hot moments).
- *
- * "Hot moment" = a window where the player got 5+ kills in 4 seconds.
- * The accumulator detects them by checking the rolling kill timestamps
- * on every kill event; emitted hot moments are deduplicated per window.
- */
-
 const HOT_MOMENT_KILLS = 5;
 const HOT_MOMENT_WINDOW_S = 4;
-/**
- * Cooldown after a hot moment ends before a new one can start. Without
- * this, a continuous kill stream emits a fresh moment per kill once the
- * sliding window contains ≥ HOT_MOMENT_KILLS — overlapping records
- * with sliding startAt. Cooldown is "absolute time since the last
- * moment's endAt", not "since startAt", so a long fight produces a
- * series of distinct moments, not one giant one or N tiny ones.
- */
 const HOT_MOMENT_COOLDOWN_S = 4;
 
 export interface HotMoment {
@@ -44,7 +22,6 @@ export interface RunStats {
   artifactsAvailable: number;
   maxMultiplier: number;
   hotMoments: ReadonlyArray<HotMoment>;
-  /** Last-window of kill timestamps for hot-moment detection. */
   recentKillTimes: ReadonlyArray<number>;
 }
 
@@ -134,7 +111,6 @@ export function accumulate(stats: RunStats, event: RunEvent): RunStats {
 }
 
 export interface MissionResult {
-  /** Trimmed to what `computeMissionGrade` needs. */
   stats: MissionStats;
   maxMultiplier: number;
   hotMoments: ReadonlyArray<HotMoment>;

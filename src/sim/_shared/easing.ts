@@ -1,5 +1,3 @@
-/** Easing curves, all defined on [0, 1] -> [0, 1]. Pure, no allocs. */
-
 export const linear = (t: number): number => t;
 
 export const easeInCubic = (t: number): number => t * t * t;
@@ -22,5 +20,4 @@ export const easeOutBack = (t: number): number => {
   return 1 + c3 * (t - 1) ** 3 + c1 * (t - 1) ** 2;
 };
 
-/** Critically-damped spring approximation for snappy UI motion. */
 export const easeOutExpo = (t: number): number => (t === 1 ? 1 : 1 - 2 ** (-10 * t));

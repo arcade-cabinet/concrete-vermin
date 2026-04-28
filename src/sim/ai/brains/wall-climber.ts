@@ -1,9 +1,5 @@
 import type { Brain, BrainStep } from "./_types";
 
-/**
- * Roaches: climb the wall, scuttle along it, drop on the player.
- * Plan: climb-to wall edge → scuttle horizontally → drop straight down.
- */
 export const wallClimberBrain: Brain = (self, world, _rng) => {
   const speed = 60 + 40 * self.aggression;
   const wallTop = world.zone.minY + 6;

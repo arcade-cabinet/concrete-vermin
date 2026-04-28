@@ -1,16 +1,6 @@
 import { z } from "zod";
 import { encounterSpecSchema } from "./encounter";
 
-/**
- * Mission factory. Validates the mission spec at construction time so
- * malformed missions throw at module load instead of at first play.
- *
- * Cutscene model:
- *  - `interstitial`: short skippable text shown before the mission
- *  - `collectibles`: in-world artifacts the player can SHOOT to consume,
- *    each pausing the sim and surfacing a paragraph of prose
- */
-
 export const ACT_IDS = ["streets", "underworld", "above"] as const;
 export type ActId = (typeof ACT_IDS)[number];
 

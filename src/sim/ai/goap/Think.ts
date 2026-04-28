@@ -2,16 +2,6 @@ import { CompositeGoal } from "./CompositeGoal";
 import { GOAL_STATUS, type GoalContext, type GoalStatus } from "./Goal";
 import type { GoalEvaluator } from "./GoalEvaluator";
 
-/**
- * Top-level brain goal. Holds the evaluator pool, picks the highest-
- * desirability evaluator on `arbitrate()`, and replaces its current
- * subgoal with the winner's goal.
- *
- * Yuka's `Think` minus the entity coupling. The `arbitrationCadenceS`
- * controls how often the evaluator pool is re-polled — too aggressive
- * and the brain flips constantly; too lazy and it commits to bad
- * plans for too long. 0.25s is a reasonable default for vermin.
- */
 export class Think<Owner, World> extends CompositeGoal<Owner> {
   readonly evaluators: GoalEvaluator<Owner, World>[] = [];
   arbitrationCadenceS = 0.25;

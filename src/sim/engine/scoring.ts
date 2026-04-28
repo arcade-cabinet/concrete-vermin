@@ -1,14 +1,5 @@
 import type { ArchetypeId } from "../archetypes/vermin";
 
-/**
- * Pure-function scoring engine. Every call returns a NEW state — no
- * mutation. The render and UI layers diff successive states to drive
- * combo flashes and HUD numbers.
- *
- * Design Section 4 governs all formulas; balance constants below have
- * named exports so the analysis layer can sweep them.
- */
-
 // ─── Tunables ──────────────────────────────────────────────────────────────
 
 export const MULTIPLIER_BASE = 1;
@@ -53,11 +44,9 @@ export interface ScoreState {
 export interface KillEvent {
   archetypeId: ArchetypeId;
   baseBounty: number;
-  /** Multiplier from the variant's healthMod / size scaling. */
   healthScale: number;
   isHeadshot: boolean;
   isMidAir: boolean;
-  /** True when this kill came from the same shot as another kill. */
   isTwoForOne: boolean;
 }
 
@@ -80,9 +69,7 @@ export interface MissionStats {
 }
 
 export interface MissionPar {
-  /** Reference score; 1.0 grade weight when player matches it. */
   parScore: number;
-  /** Lower bound on accuracy to score full marks. */
   parAccuracy: number;
 }
 

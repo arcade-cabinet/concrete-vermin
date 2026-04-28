@@ -1,9 +1,5 @@
 import type { Brain, BrainStep } from "./_types";
 
-/**
- * Sewer fish: stalk in shallow water, then a long horizontal lunge.
- * Plan: idle drift → wait → lunge horizontally toward player.
- */
 export const lungerBrain: Brain = (self, world, rng) => {
   const speed = 70 + 50 * self.aggression;
   const drift = (rng.next() - 0.5) * 24 * self.jitter;

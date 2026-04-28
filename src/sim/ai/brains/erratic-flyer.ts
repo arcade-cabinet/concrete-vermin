@@ -1,9 +1,5 @@
 import type { Brain, BrainStep } from "./_types";
 
-/**
- * Pigeons: erratic mid-air orbit, jitter heavy, dive at random.
- * Plan: 2-3 wobbly waypoints + a chance to dive on aggression roll.
- */
 export const erraticFlyerBrain: Brain = (self, world, rng) => {
   const speed = 90 + 30 * self.aggression;
   const cruiseY = world.zone.minY + 30;

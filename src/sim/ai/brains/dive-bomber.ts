@@ -1,9 +1,5 @@
 import type { Brain, BrainStep } from "./_types";
 
-/**
- * Seagulls: line up high, then commit to a single steep dive.
- * Plan: climb-to perch above player → wait → dive-at player.
- */
 export const diveBomberBrain: Brain = (self, world, _rng) => {
   const speed = 110 + 30 * self.aggression;
   const perchY = world.zone.minY + 12;
