@@ -15,8 +15,8 @@ describe("queryVermin", () => {
     const { world } = createGameWorld(1);
     const v1 = world.spawn(Vermin, Position({ x: 10, y: 0 }));
     const v2 = world.spawn(Vermin, Position({ x: 20, y: 0 }));
-    world.spawn(Position({ x: 30, y: 0 })); // no Vermin
-    world.spawn(Vermin); // no Position
+    world.spawn(Position({ x: 30, y: 0 }));
+    world.spawn(Vermin);
 
     const r = queryVermin(world);
     expect(r.length).toBe(2);
@@ -28,7 +28,7 @@ describe("queryProjectiles", () => {
   it("returns Projectile + Position entities", () => {
     const { world } = createGameWorld(1);
     world.spawn(Projectile, Position);
-    world.spawn(Projectile); // no Position
+    world.spawn(Projectile);
     expect(queryProjectiles(world).length).toBe(1);
   });
 });
@@ -69,7 +69,7 @@ describe("queryNearReticle", () => {
 
   it("respects radius boundary (squared distance compare)", () => {
     const { world } = createGameWorld(1);
-    world.spawn(Vermin, Position({ x: 3, y: 4 })); // distance 5
+    world.spawn(Vermin, Position({ x: 3, y: 4 }));
     expect(queryNearReticle(world, { x: 0, y: 0 }, 5).length).toBe(1);
     expect(queryNearReticle(world, { x: 0, y: 0 }, 4.999).length).toBe(0);
   });

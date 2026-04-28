@@ -142,7 +142,6 @@ export const Player = trait({
   damageTaken: 0,
 });
 
-/** Tag traits: zero-data markers. */
 export const Vermin = trait({
   archetypeId: "rat" as ArchetypeId,
   isBoss: false,
