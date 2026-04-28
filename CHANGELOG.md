@@ -6,6 +6,13 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 Releases are managed by [release-please](https://github.com/googleapis/release-please).
 
+## [1.9.0](https://github.com/arcade-cabinet/concrete-vermin/compare/v1.8.0...v1.9.0) (2026-04-28)
+
+
+### Features
+
+* **content:** 9 missions across 3 acts + mission-select + pawn-shop + player-progress + localStorage persistence ([#24](https://github.com/arcade-cabinet/concrete-vermin/issues/24)) ([10e2c5b](https://github.com/arcade-cabinet/concrete-vermin/commit/10e2c5bf6b95effc2649c25304a37c4a878938f6))
+
 ## [1.8.0](https://github.com/arcade-cabinet/concrete-vermin/compare/v1.7.0...v1.8.0) (2026-04-28)
 
 
