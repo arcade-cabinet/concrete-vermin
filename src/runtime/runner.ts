@@ -27,6 +27,7 @@ import {
   cullOffscreenSystem,
   lifecycleSystem,
   motionSystem,
+  napalmSystem,
   type PendingSpawn,
   projectileSystem,
   scoreSystem,
@@ -37,6 +38,7 @@ import {
   Health,
   Hitbox,
   Lifecycle,
+  NapalmPool,
   Position,
   Projectile,
   Score,
@@ -55,6 +57,7 @@ import { useGameStore } from "./store";
 import type {
   DamageEvent,
   EventBarkSnapshot,
+  NapalmPoolSnapshot,
   ProjectileSnapshot,
   SplashSnapshot,
   VerminSnapshot,
@@ -93,6 +96,15 @@ export class GameRunner {
   private pendingReload = false;
   private chargeStartedAt: number | null = null;
   private chargePending = false;
+  private pendingBurstQueue: {
+    x: number;
+    y: number;
+    remaining: number;
+    intervalMs: number;
+    nextAt: number;
+    burstIndex: number;
+    isCone: boolean;
+  } | null = null;
   private readonly muzzleFlashPool: ObjectPool<import("./store").MuzzleFlash> =
     createObjectPool(MUZZLE_FLASH_POOL, () => ({
       x: 0,
@@ -328,6 +340,55 @@ export class GameRunner {
       }
       this.pendingShot = null;
     }
+
+    // Burst drain — fires queued burst shots on their scheduled intervals.
+    if (this.pendingBurstQueue !== null) {
+      const nowMs = this.now * 1000;
+      while (
+        this.pendingBurstQueue !== null &&
+        nowMs >= this.pendingBurstQueue.nextAt &&
+        this.pendingBurstQueue.remaining > 0
+      ) {
+        const bq = this.pendingBurstQueue;
+        if (this.mag <= 0) {
+          // Ran out of ammo mid-burst — abort.
+          this.pendingBurstQueue = null;
+          break;
+        }
+        const tuned = this.tunedWeapon;
+        const playerPos = { x: this.zone.maxX / 2, y: this.zone.maxY - 24 };
+        const target = { x: bq.x, y: bq.y };
+        const fireOpts = { origin: playerPos, target, now: this.now, ownerEntity: this.gw.playerEntity };
+
+        if (bq.isCone) {
+          // Widen spread per shot for the cone effect.
+          const wideSpread = Math.min(Math.PI / 3, tuned.base.spread + bq.burstIndex * 0.04);
+          const spreadRng = this.gw.rng.fork(`burst:cone:${bq.burstIndex}:${this.now.toFixed(3)}`);
+          const spreads = Array.from(
+            { length: tuned.base.pellets },
+            () => (spreadRng.next() * 2 - 1) * wideSpread,
+          );
+          fireWeapon(this.gw.world, tuned, fireOpts, spreads);
+        } else {
+          const spreadRng = this.gw.rng.fork(`burst:auto:${bq.burstIndex}:${this.now.toFixed(3)}`);
+          const spreads = Array.from(
+            { length: tuned.base.pellets },
+            () => (spreadRng.next() * 2 - 1) * tuned.spread,
+          );
+          fireWeapon(this.gw.world, tuned, fireOpts, spreads);
+        }
+
+        this.mag = Math.max(0, this.mag - 1);
+        bq.remaining--;
+        bq.burstIndex++;
+        bq.nextAt += bq.intervalMs;
+
+        if (bq.remaining === 0) {
+          this.pendingBurstQueue = null;
+        }
+      }
+    }
+
     this.muzzleFlashPool.retainWhere((m) => this.now - m.firedAt < m.ttlS);
 
     // 4. Integrate motion; advance projectiles.
@@ -404,6 +465,10 @@ export class GameRunner {
       this.applyContactDamage(c.contactDamage);
     }
     lifecycleSystem(this.gw.world, this.now);
+
+    // 7.25 Napalm pool DoT — applies damage to vermin inside active pools,
+    // then expires pools whose TTL has elapsed.
+    napalmSystem(this.gw.world, this.now * 1000);
 
     // 7.5 Mid-mission dynamic event triggers.
     this.dispatchMissionEvents();
@@ -618,27 +683,55 @@ export class GameRunner {
         }
         break;
       }
-      case "auto-burst":
+      case "auto-burst": {
+        // 5-shot burst, one shell per shot, 120 ms between shots.
+        // shellsConsumed shells were already deducted above; cap remaining
+        // burst to actual mag count so we never fire into an empty mag.
+        const burstSize = Math.min(5, this.mag + profile.shellsConsumed);
+        this.pendingBurstQueue = {
+          x: aimX,
+          y: aimY,
+          remaining: burstSize,
+          intervalMs: 120,
+          nextAt: this.now * 1000,
+          burstIndex: 0,
+          isCone: false,
+        };
+        // Restore the shellsConsumed deduction — burst drain handles per-shot
+        // mag tracking itself.
+        this.mag = Math.min(this.tunedWeapon.magSize, this.mag + profile.shellsConsumed);
+        break;
+      }
       case "mag-dump-cone": {
-        // Phase 2.3 — burst-loop queue not yet implemented.
-        // Fall back to a single shot so the action isn't silent.
-        console.warn(`[charge-shot] effect "${profile.effect}" deferred to Phase 2.3 — firing single shot`);
-        const spreads = Array.from(
-          { length: tuned.base.pellets },
-          () => (this.gw.rng.fork(`charge:fb:${this.now.toFixed(3)}`).next() * 2 - 1) * tuned.spread,
-        );
-        fireWeapon(this.gw.world, tuned, fireOpts, spreads);
+        // Dump up to 8 shells in a widening cone, 50 ms between shots.
+        const dumpSize = Math.min(this.mag + profile.shellsConsumed, 8);
+        this.pendingBurstQueue = {
+          x: aimX,
+          y: aimY,
+          remaining: dumpSize,
+          intervalMs: 50,
+          nextAt: this.now * 1000,
+          burstIndex: 0,
+          isCone: true,
+        };
+        // Restore the shellsConsumed deduction — burst drain handles per-shot
+        // mag tracking itself.
+        this.mag = Math.min(this.tunedWeapon.magSize, this.mag + profile.shellsConsumed);
         break;
       }
       case "napalm-pool": {
-        // Phase 2.4 — napalm pool DoT not yet implemented.
-        // Fall back to a single shot.
-        console.warn(`[charge-shot] effect "napalm-pool" deferred to Phase 2.4 — firing single shot`);
-        const spreads = Array.from(
-          { length: tuned.base.pellets },
-          () => (this.gw.rng.fork(`charge:np:${this.now.toFixed(3)}`).next() * 2 - 1) * tuned.spread,
-        );
-        fireWeapon(this.gw.world, tuned, fireOpts, spreads);
+        // Spawn a burning puddle. Radius and DPS scale with charge progress.
+        const ttlMs = 1000 + chargeProgress * 3000; // 1–4 s
+        const radius = 24 + chargeProgress * 16;    // 24–40 px
+        const dps = 15 + chargeProgress * 25;       // 15–40 dps
+        this.gw.world.spawn(NapalmPool({
+          x: aimX,
+          y: aimY,
+          radius,
+          dps,
+          ttlMs,
+          expiresAt: this.now * 1000 + ttlMs,
+        }));
         break;
       }
     }
@@ -707,6 +800,22 @@ export class GameRunner {
       });
     }
 
+    const napalmPools: NapalmPoolSnapshot[] = [];
+    for (const e of w.query(NapalmPool)) {
+      const pool = e.get(NapalmPool);
+      if (!pool) continue;
+      const nowMs = this.now * 1000;
+      const ageFrac = Math.min(1, Math.max(0, 1 - (pool.expiresAt - nowMs) / pool.ttlMs));
+      napalmPools.push({
+        id: e.id(),
+        x: pool.x,
+        y: pool.y,
+        radius: pool.radius,
+        dps: pool.dps,
+        ageFrac,
+      });
+    }
+
     let total = 0;
     let multiplier = 1;
     for (const e of w.query(Score)) {
@@ -735,6 +844,7 @@ export class GameRunner {
       vermin,
       projectiles,
       splashes,
+      napalmPools,
       muzzleFlashes: this.muzzleFlashPool.liveSnapshot(),
       modifierFlashes: this.modifierFlashes.slice(),
       eventBarks: this.eventBarks.slice(),

@@ -17,6 +17,14 @@ export interface GovernorProfile {
   reticleMaxSpeed: number; // sim-units/sec; reticle snaps, knob only
   shotCooldownMs: number; // gap between consecutive queueShot calls
   hitToleranceUnits: number; // slack on lead-vs-current overshoot gate
+  /**
+   * When true, the governor uses queueChargeStart / queueChargeRelease for
+   * weapons with a chargeProfile when a high-threat target is in range.
+   * Charge builds until progress >= 0.8, then releases. Tap shots are used
+   * for all other targets. `PLAYTHROUGH` keeps this false (beginner-safe);
+   * `STRESS` enables it to stress-test the charge-shot mechanic end-to-end.
+   */
+  useChargeShot?: boolean;
 }
 
 export const PLAYTHROUGH: GovernorProfile = {
@@ -24,15 +32,28 @@ export const PLAYTHROUGH: GovernorProfile = {
   reticleMaxSpeed: 600,
   shotCooldownMs: 80,
   hitToleranceUnits: 12,
+  useChargeShot: false,
+};
+
+/**
+ * STRESS profile — mirrors PLAYTHROUGH but enables charge-shot usage.
+ * Used by stress-test harnesses to exercise the full charge pipeline
+ * through the governor in an end-to-end playthrough.
+ */
+export const STRESS: GovernorProfile = {
+  ...PLAYTHROUGH,
+  useChargeShot: true,
 };
 
 export interface GovernorState {
   lastShotAtMs: number;
   reloadQueued: boolean;
+  /** Sim ms when the current charge started; null if not charging. */
+  chargeStartedAtMs: number | null;
 }
 
 export function makeGovernorState(): GovernorState {
-  return { lastShotAtMs: -Infinity, reloadQueued: false };
+  return { lastShotAtMs: -Infinity, reloadQueued: false, chargeStartedAtMs: null };
 }
 
 export interface GovernorTickInput {
@@ -110,6 +131,27 @@ export function governorTick(input: GovernorTickInput): void {
   const aim = applyOffset(leadOnly, headOffset);
 
   if (leadOvershoot <= tolerance) {
+    // Charge-shot path: when the profile enables it and the weapon has a
+    // chargeProfile, build a charge until 80% then release onto the target.
+    if (profile.useChargeShot && weapon.chargeProfile) {
+      const chargeProgress = snap.chargeProgress;
+      if (chargeProgress === null && state.chargeStartedAtMs === null) {
+        // Start a new charge.
+        runner.queueChargeStart();
+        state.chargeStartedAtMs = nowMs;
+        return;
+      }
+      if (chargeProgress !== null && chargeProgress >= 0.8) {
+        // Release: charge is full enough — fire the charge effect.
+        runner.queueChargeRelease(aim.x, aim.y);
+        state.chargeStartedAtMs = null;
+        state.lastShotAtMs = nowMs;
+        return;
+      }
+      // Still building charge — wait.
+      return;
+    }
+
     runner.queueShot(aim.x, aim.y);
     state.lastShotAtMs = nowMs;
     return;
@@ -119,6 +161,12 @@ export function governorTick(input: GovernorTickInput): void {
   // Fires when the target is moving fast enough that the velocity lead
   // overshoots — we take the certain body-center shot rather than skipping.
   const fallback = applyOffset({ x: target.x, y: target.y }, headOffset);
+  // Charge-shot fallback: continue building if charge is in progress.
+  if (profile.useChargeShot && weapon.chargeProfile && state.chargeStartedAtMs !== null) {
+    // Don't interrupt a charge in progress just because overshoot check
+    // flipped — wait for release condition on the next in-tolerance tick.
+    return;
+  }
   runner.queueShot(fallback.x, fallback.y);
   state.lastShotAtMs = nowMs;
 }

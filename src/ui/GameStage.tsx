@@ -4,6 +4,7 @@ import "../render/extend";
 import { CRTOverlay } from "../render/CRTOverlay";
 import { HudOverlay } from "../render/HudOverlay";
 import { MuzzleFlashLayer } from "../render/MuzzleFlashLayer";
+import { NapalmPoolLayer } from "../render/NapalmPoolLayer";
 import { ProjectileLayer } from "../render/ProjectileLayer";
 import { ReticleLayer } from "../render/ReticleLayer";
 import { SplashLayer } from "../render/SplashLayer";
@@ -328,6 +329,7 @@ export function GameStage() {
           <VerminLayer />
           <ProjectileLayer />
           <MuzzleFlashLayer />
+          <NapalmPoolLayer />
           <SplashLayer />
           <HudOverlay />
           <ReticleLayer />

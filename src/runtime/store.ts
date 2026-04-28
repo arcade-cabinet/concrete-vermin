@@ -53,6 +53,16 @@ export interface SplashSnapshot {
   archetypeId: string;
 }
 
+export interface NapalmPoolSnapshot {
+  id: number;
+  x: number;
+  y: number;
+  radius: number;
+  dps: number;
+  /** Fraction of TTL elapsed (0 = fresh, 1 = expired). */
+  ageFrac: number;
+}
+
 export interface ModifierFlashSnapshot {
   kind: "headshot" | "two-for-one" | "mid-air" | "variety" | "no-reload";
   bonusPct: number;
@@ -153,6 +163,7 @@ export interface GameState {
   vermin: ReadonlyArray<VerminSnapshot>;
   projectiles: ReadonlyArray<ProjectileSnapshot>;
   splashes: ReadonlyArray<SplashSnapshot>;
+  napalmPools: ReadonlyArray<NapalmPoolSnapshot>;
   muzzleFlashes: ReadonlyArray<MuzzleFlash>;
   modifierFlashes: ReadonlyArray<ModifierFlashSnapshot>;
   /**
@@ -199,6 +210,7 @@ export interface GameState {
         | "vermin"
         | "projectiles"
         | "splashes"
+        | "napalmPools"
         | "muzzleFlashes"
         | "modifierFlashes"
         | "eventBarks"
@@ -242,6 +254,7 @@ export const INITIAL_SNAPSHOT: Pick<
   | "vermin"
   | "projectiles"
   | "splashes"
+  | "napalmPools"
   | "muzzleFlashes"
   | "modifierFlashes"
   | "eventBarks"
@@ -265,6 +278,7 @@ export const INITIAL_SNAPSHOT: Pick<
   vermin: [],
   projectiles: [],
   splashes: [],
+  napalmPools: [],
   muzzleFlashes: [],
   modifierFlashes: [],
   eventBarks: [],
