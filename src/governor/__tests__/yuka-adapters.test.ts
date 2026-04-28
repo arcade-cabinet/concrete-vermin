@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { distanceToPlayerLine, leadPoint } from "../yuka-adapters";
+import { leadPoint } from "../yuka-adapters";
 
 describe("leadPoint", () => {
   it("returns the target's current position when target is stationary", () => {
@@ -78,16 +78,16 @@ describe("leadPoint", () => {
     expect(aim.x).toBe(50);
     expect(aim.y).toBe(50);
   });
-});
 
-describe("distanceToPlayerLine", () => {
-  it("returns absolute vertical gap regardless of x", () => {
-    expect(distanceToPlayerLine({ x: 0, y: 100 }, 200)).toBe(100);
-    expect(distanceToPlayerLine({ x: 9999, y: 100 }, 200)).toBe(100);
-    expect(distanceToPlayerLine({ x: 0, y: 300 }, 200)).toBe(100);
-  });
-
-  it("returns 0 when point is on the line", () => {
-    expect(distanceToPlayerLine({ x: 50, y: 200 }, 200)).toBe(0);
+  it("does not produce NaN when reticleMaxSpeed=0 against a stationary target", () => {
+    const aim = leadPoint(
+      { x: 0, y: 0 },
+      { x: 100, y: 50, vx: 0, vy: 0 },
+      { reticleMaxSpeed: 0 },
+    );
+    expect(Number.isFinite(aim.x)).toBe(true);
+    expect(Number.isFinite(aim.y)).toBe(true);
+    expect(aim.x).toBeCloseTo(100);
+    expect(aim.y).toBeCloseTo(50);
   });
 });

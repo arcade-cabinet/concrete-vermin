@@ -71,8 +71,15 @@ describe("scoreThreat", () => {
   it("gives proximity 100 to a vermin sitting on the player line", () => {
     const onLine = v({ y: 270, health: 1, maxHealth: 1 });
     const score = scoreThreat(onLine, 3, { playerLineY: 270 });
-    // proximity = 1 → 100; damageWeight = 1; killShots = 1 → -5; near-dead penalty: -1.5 * 1 = -1.5
-    expect(score).toBeCloseTo(100 + 1 - 5 - 1.5);
+    // proximity = 1 → 100; damageWeight = 1; killShots = 1 → -5; near-dead penalty: -1.5 * weaponDamage(3) = -4.5
+    expect(score).toBeCloseTo(100 + 1 - 5 - 4.5);
+  });
+
+  it("does not deprioritize a near-dead boss below a rat at the same position", () => {
+    const nearDeadBoss = v({ id: 1, y: 200, health: 1, maxHealth: 200 });
+    const rat = v({ id: 2, y: 200, health: 5, maxHealth: 5 });
+    const pick = selectHighestThreat([nearDeadBoss, rat], 8, { playerLineY: 270 });
+    expect(pick?.id).toBe(1);
   });
 
   it("gives proximity ~0 to a vermin at the top of the screen", () => {
