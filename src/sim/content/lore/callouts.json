@@ -1,0 +1,28 @@
+{
+  "killStreak": {
+    "5": "ON THE BOARD",
+    "10": "ROLLING",
+    "15": "ON FIRE",
+    "20": "DON'T STOP",
+    "30": "BLOCK PARTY",
+    "50": "WHOLE BOROUGH"
+  },
+  "headshotStreak": {
+    "3": "EYE FOR IT",
+    "5": "SURGEON",
+    "10": "PAWNBROKER WOULD APPROVE"
+  },
+  "noReloadStreak": {
+    "8": "RHYTHM",
+    "16": "NEVER MISS A BEAT",
+    "32": "MACHINE"
+  },
+  "twoForOne": "TWO-FOR-ONE",
+  "midAir": "OUT OF THE SKY",
+  "variety": "MIXED MENU",
+  "perfectMission": "NOT A SCRATCH",
+  "lastShellKill": "ONE LEFT IN THE TUBE",
+  "comeback": "BACK FROM THE BRINK",
+  "bossOpen": "HE SAW YOU COMING",
+  "bossDown": "DOWN. STAY DOWN."
+}

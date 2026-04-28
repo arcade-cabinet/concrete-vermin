@@ -108,9 +108,9 @@ Each `[ ]` is one commit. Group small ones into one PR; large ones get their own
 - [x] src/ui/copy/briefings.ts: per-mission briefing copy (objective, threat, flavor)
 - [x] src/ui/copy/results.ts: per-grade victory + defeat lines (S+, S, A, B, C, D, F + wipe)
 - [x] src/ui/copy/pawnbroker.ts: 20+ rotating Pawnbroker barks during shop visits
-- [ ] src/ui/copy/loading.ts: 30 loading-tip lines in the Pawnbroker's voice (mix of practical hints + lore)
-- [ ] src/ui/copy/death.ts: per-archetype "killed by" flavor lines (e.g. "the rats got you", "outdove by a goose")
-- [ ] src/ui/copy/encounter-callouts.ts: dynamic in-mission callouts (10+ kill streak, no-reload milestone, headshot streak)
+- [x] src/ui/copy/loading.ts: 30 loading-tip lines in the Pawnbroker's voice (mix of practical hints + lore)
+- [x] src/ui/copy/death.ts: per-archetype "killed by" flavor lines (e.g. "the rats got you", "outdove by a goose")
+- [x] src/ui/copy/encounter-callouts.ts: dynamic in-mission callouts (10+ kill streak, no-reload milestone, headshot streak)
 - [ ] docs/BESTIARY.md: per-archetype entry — common name, taxonomic flavor name, range stats, behavior tells, kill bounty band, splash color, lore blurb (12 entries)
 - [ ] docs/WEAPONS.md: per-weapon (6) — Pawnbroker pitch, mechanical stats, loadout tips, visual signature
 - [ ] docs/MODS.md: per-mod (20) — Pawnbroker pitch, mechanical effect, who it suits, lore footnote
