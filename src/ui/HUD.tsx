@@ -1,8 +1,6 @@
 import { type ModifierFlashSnapshot, useGameStore } from "../runtime/store";
+import { COLOR, TYPE } from "../theme/tokens";
 
-const SODIUM = "#d4943a";
-const PARCHMENT = "#e8dcc4";
-const BRICK = "#7a2818";
 const FLASH_TTL_S = 1.0;
 
 const FLASH_LABELS: Record<ModifierFlashSnapshot["kind"], string> = {
@@ -14,11 +12,11 @@ const FLASH_LABELS: Record<ModifierFlashSnapshot["kind"], string> = {
 };
 
 const FLASH_COLORS: Record<ModifierFlashSnapshot["kind"], string> = {
-  headshot: SODIUM,
-  "two-for-one": "#ffd07a",
-  "mid-air": "#a8d04a",
-  variety: PARCHMENT,
-  "no-reload": BRICK,
+  headshot: COLOR.sodium,
+  "two-for-one": COLOR.flashSodiumLight,
+  "mid-air": COLOR.flashGreen,
+  variety: COLOR.cream,
+  "no-reload": COLOR.brick,
 };
 
 function ModifierFlashes() {
@@ -38,7 +36,7 @@ function ModifierFlashes() {
         alignItems: "center",
         gap: 4,
         pointerEvents: "none",
-        fontFamily: "'Big Shoulders Display', sans-serif",
+        fontFamily: TYPE.faceDisplay,
         textAlign: "center",
       }}
     >
@@ -83,10 +81,10 @@ function MuteButton() {
         bottom: "calc(12px + env(safe-area-inset-bottom))",
         right: "calc(12px + env(safe-area-inset-right))",
         background: "transparent",
-        border: `1px solid ${SODIUM}`,
-        color: SODIUM,
+        border: `1px solid ${COLOR.sodium}`,
+        color: COLOR.sodium,
         padding: "4px 10px",
-        fontFamily: "'Special Elite', monospace",
+        fontFamily: TYPE.faceMono,
         fontSize: 12,
         cursor: "pointer",
         pointerEvents: "auto",
@@ -116,24 +114,25 @@ export function HUD() {
           padding:
             "0 calc(16px + env(safe-area-inset-right)) 0 calc(16px + env(safe-area-inset-left))",
           pointerEvents: "none",
-          fontFamily: "'Special Elite', monospace",
-          color: PARCHMENT,
+          fontFamily: TYPE.faceMono,
+          color: COLOR.cream,
           textShadow: "0 1px 0 #000",
           fontSize: 14,
         }}
       >
         <div>
-          <span style={{ color: SODIUM }}>SCORE</span> {score.total.toString().padStart(6, "0")}
+          <span style={{ color: COLOR.sodium }}>SCORE</span>{" "}
+          {score.total.toString().padStart(6, "0")}
           {"  "}
-          <span style={{ color: SODIUM }}>×{score.multiplier.toFixed(1)}</span>
+          <span style={{ color: COLOR.sodium }}>×{score.multiplier.toFixed(1)}</span>
         </div>
         <div data-testid="hud-kills">
-          <span style={{ color: SODIUM }}>VERMIN</span> {killCount} / {killsRequired}
+          <span style={{ color: COLOR.sodium }}>VERMIN</span> {killCount} / {killsRequired}
         </div>
         <div>
-          <span style={{ color: SODIUM }}>SHELLS</span> {player.ammoCurrent}/{player.ammoMax}
+          <span style={{ color: COLOR.sodium }}>SHELLS</span> {player.ammoCurrent}/{player.ammoMax}
           {"  "}
-          <span style={{ color: SODIUM }}>LIVES</span> {player.livesRemaining}
+          <span style={{ color: COLOR.sodium }}>LIVES</span> {player.livesRemaining}
         </div>
       </div>
       <ModifierFlashes />

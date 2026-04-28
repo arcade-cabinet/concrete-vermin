@@ -1,9 +1,7 @@
 import { startStreetsAmbience } from "../audio/music";
 import { ensureAudio } from "../audio/setup";
 import { useGameStore } from "../runtime/store";
-
-const SODIUM = "#d4943a";
-const PARCHMENT = "#e8dcc4";
+import { COLOR, TYPE } from "../theme/tokens";
 
 /**
  * Briefing splash. The player's first 15 seconds — explain the goal in
@@ -23,15 +21,20 @@ export function Briefing() {
         alignItems: "center",
         justifyContent: "center",
         gap: 24,
-        background: "#0d0c0a",
-        color: PARCHMENT,
-        fontFamily: "'Big Shoulders Display', sans-serif",
+        background: COLOR.bgAsphalt,
+        color: COLOR.cream,
+        fontFamily: TYPE.faceDisplay,
         textAlign: "center",
         padding: 32,
       }}
     >
       <h1
-        style={{ color: SODIUM, fontSize: "clamp(2rem, 6vw, 4rem)", margin: 0, letterSpacing: 2 }}
+        style={{
+          color: COLOR.sodium,
+          fontSize: TYPE.display.size,
+          margin: 0,
+          letterSpacing: 2,
+        }}
       >
         CONCRETE VERMIN
       </h1>
@@ -46,8 +49,8 @@ export function Briefing() {
           setPhase("mission-select");
         }}
         style={{
-          background: SODIUM,
-          color: "#0d0c0a",
+          background: COLOR.sodium,
+          color: COLOR.bgAsphalt,
           border: "none",
           padding: "12px 28px",
           fontFamily: "inherit",

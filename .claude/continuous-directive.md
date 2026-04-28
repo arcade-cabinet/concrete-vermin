@@ -129,9 +129,9 @@ Each `[ ]` is one commit. Group small ones into one PR; large ones get their own
 
 ### CV-UX — UI/UX/HUD polish + responsive scaling (PR #8e — UX)
 - [x] Lock down theme tokens: src/ui/theme/{colors,typography,spacing,motion}.ts — single source of truth
-- [ ] Replace every hard-coded hex in src/ui/* and src/render/* with theme token references
-- [ ] Replace every hard-coded font-family with theme.typography refs
-- [ ] Type scale: define h1/h2/h3/body/hud-mono/hud-display sizes; apply via theme
+- [x] Replace every hard-coded hex in src/ui/* and src/render/* with theme token references
+- [x] Replace every hard-coded font-family with theme.typography refs
+- [x] Type scale: define h1/h2/h3/body/hud-mono/hud-display sizes; apply via theme
 - [ ] Responsive stage scaling: GameStage already uses aspect-ratio container; add CSS clamp() for type sizes; verify on 320px portrait, 480p, 720p, 1080p, 4K, ultrawide
 - [ ] Responsive HUD: stack columns on narrow viewports (<480px); reposition score/ammo/lives so they don't overlap on portrait phone
 - [ ] Safe-area insets: padding-top/bottom respect env(safe-area-inset-*) for iPhone notch + Android gesture bar

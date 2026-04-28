@@ -1,15 +1,21 @@
 import type { Graphics as PixiGraphics } from "pixi.js";
 import { useCallback } from "react";
 import { useGameStore } from "../runtime/store";
+import { COLOR, pixi } from "../theme/colors";
 
-const ASPHALT = 0x1a1714;
+const ASPHALT = pixi(COLOR.bgConcreteDark);
+const BRICK = pixi(COLOR.brick);
+const BRICK_HIGHLIGHT = pixi(COLOR.brickHighlight);
+const SODIUM = pixi(COLOR.sodium);
+const SHADOW = pixi(COLOR.bgAsphalt);
+
+// Stage-only deeper shades — derived from the brand band, kept local
+// because they're a renderer-internal painting concern (mortar gaps,
+// brick shadows). Not surfaced as brand tokens.
 const ASPHALT_LIGHT = 0x252018;
-const BRICK = 0x7a2818;
 const BRICK_DARK = 0x4a1810;
 const BRICK_MORTAR = 0x2a1208;
-const BRICK_HIGHLIGHT = 0x9a3820;
-const SODIUM = 0xd4943a;
-const SHADOW = 0x0d0c0a;
+const SIDEWALK_SHADOW = 0x141008;
 
 const BRICK_W = 24;
 const BRICK_H = 8;
@@ -45,7 +51,7 @@ export function Stage() {
       }
       // Sidewalk lip
       g.rect(0, wallH - 1, stageW, 1).fill(SHADOW);
-      g.rect(0, wallH, stageW, 2).fill(0x141008);
+      g.rect(0, wallH, stageW, 2).fill(SIDEWALK_SHADOW);
       // Streetlight pool — concentric rings with falloff
       const lightX = stageW / 2;
       const lightY = wallH * 0.25;

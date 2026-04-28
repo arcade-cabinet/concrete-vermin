@@ -2,11 +2,7 @@ import { useMemo } from "react";
 import { MAX_LOADOUT_SLOTS, MOD_REGISTRY } from "../sim/archetypes/mods";
 import { getMission } from "../sim/content/missions";
 import { usePlayerProgress } from "./PlayerProgress";
-
-const SODIUM = "#d4943a";
-const PARCHMENT = "#e8dcc4";
-const BRICK = "#7a2818";
-const ASPHALT = "#1a1715";
+import { COLOR, TYPE } from "../theme/tokens";
 
 export function PawnShop({ onContinue, onBack }: { onContinue: () => void; onBack: () => void }) {
   const missionId = usePlayerProgress((s) => s.selectedMissionId);
@@ -36,27 +32,27 @@ export function PawnShop({ onContinue, onBack }: { onContinue: () => void; onBac
       style={{
         position: "fixed",
         inset: 0,
-        background: "#0d0c0a",
-        color: PARCHMENT,
+        background: COLOR.bgAsphalt,
+        color: COLOR.cream,
         overflowY: "auto",
         padding: "calc(24px + env(safe-area-inset-top)) 24px 24px",
-        fontFamily: "'Big Shoulders Display', sans-serif",
+        fontFamily: TYPE.faceDisplay,
       }}
     >
       <header style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline" }}>
-        <h2 style={{ color: SODIUM, margin: 0, letterSpacing: 2 }}>PAWN SHOP</h2>
-        <div style={{ fontFamily: "'Special Elite', monospace", fontSize: 14 }}>
-          <span style={{ color: SODIUM }}>CASH</span> ${cash.toLocaleString()}
+        <h2 style={{ color: COLOR.sodium, margin: 0, letterSpacing: 2 }}>PAWN SHOP</h2>
+        <div style={{ fontFamily: TYPE.faceMono, fontSize: 14 }}>
+          <span style={{ color: COLOR.sodium }}>CASH</span> ${cash.toLocaleString()}
           {"  "}
-          <span style={{ color: SODIUM }}>SLOTS</span> {activeMods.length}/{MAX_LOADOUT_SLOTS}
+          <span style={{ color: COLOR.sodium }}>SLOTS</span> {activeMods.length}/{MAX_LOADOUT_SLOTS}
         </div>
       </header>
 
       {mission ? (
-        <p style={{ color: "#a89887", fontFamily: "'Special Elite', monospace", fontSize: 13 }}>
-          For: <span style={{ color: PARCHMENT }}>{mission.id}</span>
+        <p style={{ color: COLOR.creamDim, fontFamily: TYPE.faceMono, fontSize: 13 }}>
+          For: <span style={{ color: COLOR.cream }}>{mission.id}</span>
           {"  ·  "}
-          Weapon: <span style={{ color: PARCHMENT }}>{mission.weapon}</span>
+          Weapon: <span style={{ color: COLOR.cream }}>{mission.weapon}</span>
         </p>
       ) : null}
 
@@ -79,18 +75,23 @@ export function PawnShop({ onContinue, onBack }: { onContinue: () => void; onBac
                   display: "flex",
                   justifyContent: "space-between",
                   alignItems: "center",
-                  background: equipped ? SODIUM : "transparent",
-                  color: equipped ? ASPHALT : slotsFull ? "#5a544c" : PARCHMENT,
-                  border: `1px solid ${equipped ? SODIUM : "#3a342c"}`,
+                  background: equipped ? COLOR.sodium : "transparent",
+                  color: equipped ? COLOR.bgConcreteDark : slotsFull ? COLOR.mute : COLOR.cream,
+                  border: `1px solid ${equipped ? COLOR.sodium : COLOR.borderMute}`,
                   padding: "8px 12px",
-                  fontFamily: "'Special Elite', monospace",
+                  fontFamily: TYPE.faceMono,
                   fontSize: 13,
                   cursor: slotsFull ? "not-allowed" : "pointer",
                   textAlign: "left",
                 }}
               >
                 <span>
-                  <strong style={{ color: equipped ? ASPHALT : SODIUM, letterSpacing: 1 }}>
+                  <strong
+                    style={{
+                      color: equipped ? COLOR.bgConcreteDark : COLOR.sodium,
+                      letterSpacing: 1,
+                    }}
+                  >
                     [{mod.slot}]
                   </strong>{" "}
                   {mod.name}
@@ -108,8 +109,8 @@ export function PawnShop({ onContinue, onBack }: { onContinue: () => void; onBac
           onClick={onBack}
           style={{
             background: "transparent",
-            color: SODIUM,
-            border: `1px solid ${SODIUM}`,
+            color: COLOR.sodium,
+            border: `1px solid ${COLOR.sodium}`,
             padding: "10px 18px",
             fontFamily: "inherit",
             letterSpacing: 1,
@@ -122,8 +123,8 @@ export function PawnShop({ onContinue, onBack }: { onContinue: () => void; onBac
           type="button"
           onClick={onContinue}
           style={{
-            background: BRICK,
-            color: PARCHMENT,
+            background: COLOR.brick,
+            color: COLOR.cream,
             border: "none",
             padding: "10px 22px",
             fontFamily: "inherit",

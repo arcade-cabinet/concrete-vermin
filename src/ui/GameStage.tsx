@@ -10,6 +10,7 @@ import { Stage } from "../render/Stage";
 import { VerminLayer } from "../render/VerminLayer";
 import { GameRunner } from "../runtime/runner";
 import { useGameStore } from "../runtime/store";
+import { COLOR } from "../theme/tokens";
 
 const STAGE_W = 480;
 const STAGE_H = 270;
@@ -208,7 +209,7 @@ export function GameStage() {
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
-        background: "#0d0c0a",
+        background: COLOR.bgAsphalt,
         touchAction: "none",
         userSelect: "none",
         WebkitTouchCallout: "none",
