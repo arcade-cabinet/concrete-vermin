@@ -6,6 +6,13 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 Releases are managed by [release-please](https://github.com/googleapis/release-please).
 
+## [1.14.0](https://github.com/arcade-cabinet/concrete-vermin/compare/v1.13.0...v1.14.0) (2026-04-28)
+
+
+### Features
+
+* **hud:** score tick-up + ammo-empty pulse + critical-life pulse + reduced-motion plumbing ([#38](https://github.com/arcade-cabinet/concrete-vermin/issues/38)) ([684a926](https://github.com/arcade-cabinet/concrete-vermin/commit/684a926e35f800e7a1ef7af4e4a2b5eb29922522))
+
 ## [1.13.0](https://github.com/arcade-cabinet/concrete-vermin/compare/v1.12.1...v1.13.0) (2026-04-28)
 
 
