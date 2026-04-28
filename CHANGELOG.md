@@ -6,6 +6,13 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 Releases are managed by [release-please](https://github.com/googleapis/release-please).
 
+## [1.12.1](https://github.com/arcade-cabinet/concrete-vermin/compare/v1.12.0...v1.12.1) (2026-04-28)
+
+
+### Refactors
+
+* **theme:** replace hex/font literals with token refs + move theme to neutral src/theme/ ([#34](https://github.com/arcade-cabinet/concrete-vermin/issues/34)) ([15c1dc7](https://github.com/arcade-cabinet/concrete-vermin/commit/15c1dc70f05a77361b55377f33a37790ad5ff241))
+
 ## [1.12.0](https://github.com/arcade-cabinet/concrete-vermin/compare/v1.11.1...v1.12.0) (2026-04-28)
 
 
