@@ -21,19 +21,27 @@ const FORBIDDEN_NEON_HEX = [
   /#ffd700/i, // POC neon gold — replaced by sodium #d4943a
 ];
 
+// Match the BARE module specifier inside a real import/require statement,
+// not the literal string anywhere in the file. Otherwise a JSON key like
+// `"tone": "pulpy"` or a comment mentioning React triggers a false reject.
+//
+// Two forms covered: `from "mod"` / `from 'mod'` and `require("mod")`.
+// Pattern arg is a regex source fragment (escape regex meta yourself).
+const importRe = (modSrc) => new RegExp(`(?:from\\s*|require\\s*\\(\\s*)["']${modSrc}["']`);
+
 const FORBIDDEN_SIM_IMPORTS = [
-  /["']react["']/,
-  /["']react-dom["']/,
-  /["']@pixi\/react["']/,
-  /["']pixi-react["']/,
-  /["']pixi\.js["']/,
-  /["']@pixi\//,
-  /["']tone["']/,
-  /["']@capacitor\//,
-  /["']@capacitor-community\//,
-  /["']framer-motion["']/,
-  /["']@radix-ui\//,
-  /["']matter-js["']/,
+  importRe("react"),
+  importRe("react-dom"),
+  importRe("@pixi/react"),
+  importRe("pixi-react"),
+  importRe("pixi\\.js"),
+  importRe("@pixi/[^\"']+"),
+  importRe("tone"),
+  importRe("@capacitor/[^\"']+"),
+  importRe("@capacitor-community/[^\"']+"),
+  importRe("framer-motion"),
+  importRe("@radix-ui/[^\"']+"),
+  importRe("matter-js"),
 ];
 
 let input = "";
@@ -69,8 +77,13 @@ const isInRender = /(^|\/)src\/render\//.test(normalizedPath);
 const isInUi = /(^|\/)src\/ui\//.test(normalizedPath);
 const isCrtFile = normalizedPath.endsWith("src/render/effects/crt.ts");
 
+// Source-code-only check: skip data files (json/md/txt/csv/svg/png/etc).
+// Sim-purity is about TS source — JSON content, fixtures, and prose
+// can legitimately contain the word "tone" or "react" without being imports.
+const isSourceFile = /\.(?:ts|tsx|js|jsx|mjs|cjs|mts|cts)$/.test(normalizedPath);
+
 // 1. Sim-purity
-if (isInSim && !isPurityTest) {
+if (isInSim && isSourceFile && !isPurityTest) {
   // Strip line/block comments before checking — comments may legitimately
   // reference Math.random / forbidden libraries.
   const stripped = content.replace(/\/\*[\s\S]*?\*\//g, "").replace(/\/\/[^\n]*/g, "");

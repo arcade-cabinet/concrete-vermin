@@ -14,8 +14,6 @@
     "tsBuildInfoFile": "./tsconfig.node.tsbuildinfo"
   },
   "include": [
-    "scripts/**/*.ts",
-    "scripts/**/*.mjs",
     "vite.config.ts",
     "vitest.config.ts",
     "vitest.dom.config.ts",

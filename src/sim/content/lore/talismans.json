@@ -1,0 +1,26 @@
+{
+  "rabbits-foot": {
+    "displayName": "Rabbit's Foot",
+    "story": "A 1958 white-rabbit foot in good condition, dyed cobalt blue and worn nearly bald on the bunch end where it has been gripped. The Pawnbroker says it belonged to a card sharp in Far Rockaway who is no longer alive in the conventional sense. He hands it over without ceremony."
+  },
+  "st-anthony-medal": {
+    "displayName": "St. Anthony Medal",
+    "story": "Tarnished silver, oval, worn through on the back. St. Anthony of Padua finds lost things — including, evidently, you. The leather thong is new; the medal is older than the shop."
+  },
+  "lucky-shell": {
+    "displayName": "Lucky Shell",
+    "story": "A single 12-gauge brass shell, never fired, with a small cross filed into the rim. The Pawnbroker says you load it last and you never load it."
+  },
+  "subway-token": {
+    "displayName": "Subway Token",
+    "story": "A brass MTA token from before the Y-cut redesign, with a small drilled hole through it. The Pawnbroker says the man who carried it died with it in his mouth, which is supposed to mean something, though he does not say what."
+  },
+  "switchblade-charm": {
+    "displayName": "Switchblade Charm",
+    "story": "A brass miniature of a Brooklyn paratrooper-style switchblade, no longer than your thumb. Off a charm bracelet sold to a longshoreman by a fortune-teller on Coney Island in 1953. Smells faintly of saltwater no matter how long it sits in the case."
+  },
+  "concrete-saint": {
+    "displayName": "Concrete Saint",
+    "story": "A chip of unmarked grey concrete that fits in your palm. The Pawnbroker says it is from the foundation of a tenement at 47 Cherry that was knocked down in 1947. He will not say more. It is heavier than it should be."
+  }
+}

@@ -97,17 +97,17 @@ Each `[ ]` is one commit. Group small ones into one PR; large ones get their own
 - [x] Save/load via @capacitor-community/sqlite (web fallback to localStorage)
 
 ### CV-LORE — story bible, in-world copy, character voices (PR #8b — creative writing)
-- [ ] docs/LORE.md: full Three Acts narrative — 1979 NYC, the Pawnbroker quest-giver, why vermin are mutating, what's underground, what's "Above"; 2000+ words
-- [ ] docs/LORE.md: Pawnbroker character bio — name, accent, history, why he sells you guns
-- [ ] docs/LORE.md: each act intro: 1-paragraph noir-pulp scene-set
-- [ ] docs/LORE.md: each mission's flavor blurb (9 short blurbs, 1-2 sentences each, in-world voice)
-- [ ] docs/LORE.md: bad-end + good-end vignettes for game-over screens
-- [ ] docs/LORE.md: 6-8 "talisman" backstories (the in-game mod items: rabbit's foot, st-anthony, lucky-shell, etc.) — each 1 paragraph
-- [ ] docs/LORE.md: rumor-mill table (10 entries) — overheard gossip you might see on briefing screens
-- [ ] docs/LORE.md: the cabinet's frame-narrative (the player as "the kid" some old-timer is telling this story to in 2026)
-- [ ] src/ui/copy/briefings.ts: per-mission briefing copy (objective, threat, flavor)
-- [ ] src/ui/copy/results.ts: per-grade victory + defeat lines (S+, S, A, B, C, D, F + wipe)
-- [ ] src/ui/copy/pawnbroker.ts: 20+ rotating Pawnbroker barks during shop visits
+- [x] docs/LORE.md: full Three Acts narrative — 1979 NYC, the Pawnbroker quest-giver, why vermin are mutating, what's underground, what's "Above"; 2000+ words
+- [x] docs/LORE.md: Pawnbroker character bio — name, accent, history, why he sells you guns
+- [x] docs/LORE.md: each act intro: 1-paragraph noir-pulp scene-set
+- [x] docs/LORE.md: each mission's flavor blurb (9 short blurbs, 1-2 sentences each, in-world voice)
+- [x] docs/LORE.md: bad-end + good-end vignettes for game-over screens
+- [x] docs/LORE.md: 6-8 "talisman" backstories (the in-game mod items: rabbit's foot, st-anthony, lucky-shell, etc.) — each 1 paragraph
+- [x] docs/LORE.md: rumor-mill table (10 entries) — overheard gossip you might see on briefing screens
+- [x] docs/LORE.md: the cabinet's frame-narrative (the player as "the kid" some old-timer is telling this story to in 2026)
+- [x] src/ui/copy/briefings.ts: per-mission briefing copy (objective, threat, flavor)
+- [x] src/ui/copy/results.ts: per-grade victory + defeat lines (S+, S, A, B, C, D, F + wipe)
+- [x] src/ui/copy/pawnbroker.ts: 20+ rotating Pawnbroker barks during shop visits
 - [ ] src/ui/copy/loading.ts: 30 loading-tip lines in the Pawnbroker's voice (mix of practical hints + lore)
 - [ ] src/ui/copy/death.ts: per-archetype "killed by" flavor lines (e.g. "the rats got you", "outdove by a goose")
 - [ ] src/ui/copy/encounter-callouts.ts: dynamic in-mission callouts (10+ kill streak, no-reload milestone, headshot streak)

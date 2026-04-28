@@ -1,0 +1,24 @@
+{
+  "goodEnd": {
+    "title": "CLEARED",
+    "vignette": "You walk back across the Brooklyn Bridge at first light. The crown is in the sack across your back, heavier than it ought to be. The Pawnbroker is at the counter when you arrive, grey, smaller than you remembered. He sees what you brought and he sits down. He says: I'll bury it under the shop with the others. He says: when's the last time you ate? The cup of coffee he pours you tastes like nothing has tasted in months. Outside, sanitation begins its rounds. You sleep that night, all the way through."
+  },
+  "badEnd": {
+    "title": "WIPED OUT",
+    "vignette": "You wake in the alley. The shotgun is across your chest. The Pawnbroker's shop has a CLOSED sign hand-lettered in the door, and the lock has been wax-sealed shut from the inside. There is a brass tag in your pocket you do not remember collecting. The pigeons have started again, two roofs over. You have not finished the job. Someone else's grandkid will be in the shop one day, and the shop will be open for them."
+  },
+  "victoryByGrade": {
+    "S+": "Surgical. The Pawnbroker pours you the second cup before you ask.",
+    "S": "Clean as it gets, kid. Take fifty and a sandwich.",
+    "A": "Solid. We can call it a night.",
+    "B": "Job's done. That's what counts.",
+    "C": "You're walking out, that's two of us happy.",
+    "D": "Rougher than it needed to be. Rest up.",
+    "F": "We'll call this one a draw and not talk about it."
+  },
+  "defeatByCause": {
+    "wipe": "He'll find another kid. He always does.",
+    "ammo": "Out of shells, out of luck. The Pawnbroker will sell you more next time.",
+    "panic": "It's all right, kid. Walk it off."
+  }
+}

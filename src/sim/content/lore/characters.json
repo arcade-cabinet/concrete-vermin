@@ -1,0 +1,16 @@
+{
+  "pawnbroker": {
+    "fullName": "Salvatore \"Sal\" Pellegrino",
+    "born": "Bensonhurst, 1924",
+    "background": "Son of an iron-finisher and a seamstress. Limp from Anzio. Married twice, neither still in the picture, no children he claims. Owns the shop at 142 Mott between a numbers parlor and a place that says it does upholstery and doesn't.",
+    "voice": "Dry, fatherly, never warm. Calls you 'kid' even though you are not a kid. Quotes scripture like he half-remembers it and half-disapproves of it. Does not apologize. Will not lie to you about a price; will lie to you about everything else.",
+    "motive": "He inherited the route from your grandfather. He's too old to walk it himself. He has been waiting twelve years for a kid with the right kind of stillness to come into his shop, and he is not certain you are it but he is certain there is no one else.",
+    "firstActReveal": "The first time he mentions your grandfather is in Act III. He has been carrying it the whole game."
+  },
+  "player": {
+    "name": "(unnamed; the Pawnbroker calls you 'kid')",
+    "age": "mid-twenties",
+    "background": "Ex-something — Vietnam if the player wants it, prison if they want, neither if they want neither. Came to New York for a reason you've stopped explaining. Took the job because rent was due, and because something in the shop — the smell, maybe — reminded you of a kitchen you had not been in for a long time.",
+    "frame": "In 2026 an old-timer is telling this story to 'the kid' at the arcade cabinet. You are also that kid. The cabinet is the inheritance."
+  }
+}
