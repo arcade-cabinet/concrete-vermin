@@ -56,6 +56,18 @@ export interface ModifierFlashSnapshot {
   at: number;
 }
 
+/**
+ * Eviction is owned by the runner (drops entries past EVENT_BARK_TTL_S
+ * before publishing), so the HUD can render the snapshot as-is.
+ */
+export interface EventBarkSnapshot {
+  id: string;
+  kind: "boss" | "hazard" | "wave";
+  text: string;
+  detail?: string;
+  at: number;
+}
+
 export interface DamageEvent {
   /** Sim seconds when the hit landed — used for ttl + rise interpolation. */
   at: number;
@@ -140,6 +152,12 @@ export interface GameState {
   splashes: ReadonlyArray<SplashSnapshot>;
   muzzleFlashes: ReadonlyArray<MuzzleFlash>;
   modifierFlashes: ReadonlyArray<ModifierFlashSnapshot>;
+  /**
+   * Mid-mission dynamic event barks (boss-bark, environmental-hazard,
+   * surprise-wave). Append-only ring; the runner evicts entries older
+   * than 5 sim seconds before publishing.
+   */
+  eventBarks: ReadonlyArray<EventBarkSnapshot>;
   /** Sim seconds since mission start — published every frame for time-based fades. */
   now: number;
   /**
@@ -175,6 +193,7 @@ export interface GameState {
         | "splashes"
         | "muzzleFlashes"
         | "modifierFlashes"
+        | "eventBarks"
         | "score"
         | "player"
         | "killCount"
@@ -236,6 +255,7 @@ export const useGameStore = create<GameState>((set) => ({
   splashes: [],
   muzzleFlashes: [],
   modifierFlashes: [],
+  eventBarks: [],
   now: 0,
   reloadProgress: null,
   reloadDurationMs: 1400,
@@ -267,6 +287,7 @@ export const useGameStore = create<GameState>((set) => ({
       splashes: [],
       muzzleFlashes: [],
       modifierFlashes: [],
+      eventBarks: [],
       damageEvents: [],
       now: 0,
     }),

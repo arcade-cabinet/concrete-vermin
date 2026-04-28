@@ -39,6 +39,41 @@ export const mission05: Mission = defineMission({
       ],
     },
   ],
+  events: [
+    {
+      id: "third-rail-arc",
+      trigger: { kind: "at-time", seconds: 6 },
+      effect: {
+        kind: "environmental-hazard",
+        label: "THIRD RAIL ARCS",
+        detail: "Sparks light the platform. Rats panic.",
+      },
+    },
+    {
+      id: "pawn-mac10-warning",
+      trigger: { kind: "at-time", seconds: 2 },
+      effect: { kind: "boss-bark", text: "Pawnbroker: \"Mac-10 dumps the mag fast. Pace it.\"" },
+    },
+    {
+      id: "tunnel-cats",
+      trigger: { kind: "at-encounter-start", index: 1 },
+      effect: { kind: "boss-bark", text: "Cats from both tunnel mouths. Watch your six." },
+    },
+    {
+      id: "lights-flicker",
+      trigger: { kind: "at-kill-count", threshold: 12 },
+      effect: {
+        kind: "environmental-hazard",
+        label: "PLATFORM LIGHTS DIE",
+        detail: "Sodium-only for the next ten seconds.",
+      },
+    },
+    {
+      id: "tunnel-roach-extra",
+      trigger: { kind: "at-kill-count", threshold: 18 },
+      effect: { kind: "surprise-wave", variant: "roach-massive", count: 3, pattern: "pop-from-vent" },
+    },
+  ],
   seed: 1979_02_05,
   cashAward: 250,
 });

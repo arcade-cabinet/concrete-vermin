@@ -1,5 +1,5 @@
 import { type ReactNode, useEffect } from "react";
-import { type ModifierFlashSnapshot, useGameStore } from "../runtime/store";
+import { type EventBarkSnapshot, type ModifierFlashSnapshot, useGameStore } from "../runtime/store";
 import { COLOR, MOTION, TYPE } from "../theme/tokens";
 import { useTickedNumber } from "./hooks/useTickedNumber";
 import { useIsNarrow } from "./hooks/useViewport";
@@ -104,6 +104,7 @@ export function ArcadeFrame({ children }: { children: ReactNode }) {
         <CanvasWell>
           {children}
           <ModifierFlashes />
+          <EventBarks />
         </CanvasWell>
         {!narrow ? <SideRailRight /> : null}
       </div>
@@ -565,6 +566,113 @@ function useReducedMotion(): boolean {
 /* ============================================================== */
 /* HUD overlays — modifier flashes, mute, sr-only narrations      */
 /* ============================================================== */
+
+/**
+ * Renders mid-mission dynamic event barks (boss-bark, environmental-
+ * hazard, surprise-wave) as a stack along the bottom edge of the
+ * canvas well. Distinct from ModifierFlashes (which sit at the top
+ * and live ~1.2 s) — these are higher-priority, longer-lived (5 s),
+ * and keyed off the runner's eventBarks ring.
+ */
+const EVENT_BARK_TTL_S = 5;
+const EVENT_BARK_COLORS: Record<EventBarkSnapshot["kind"], { fg: string; bar: string }> = {
+  boss: { fg: COLOR.brick, bar: COLOR.brick },
+  hazard: { fg: COLOR.sodium, bar: COLOR.sodium },
+  wave: { fg: COLOR.cream, bar: COLOR.brick },
+};
+const EVENT_BARK_PREFIX: Record<EventBarkSnapshot["kind"], string> = {
+  boss: "▸",
+  hazard: "◬",
+  wave: "✦",
+};
+
+function EventBarks() {
+  const barks = useGameStore((s) => s.eventBarks);
+  const now = useGameStore((s) => s.now);
+  const reduced = useReducedMotion();
+  const visible = barks.slice(-3).reverse();
+  // Mirror the freshest visible bark into a hidden polite live region.
+  // The runner already calls announceForScreenReader for every event,
+  // but exposing the bark content alongside the visual stack means
+  // assistive tech that doesn't reach SrLiveRegion still picks up the
+  // message in context.
+  const latest = visible[0] ?? null;
+  const liveText = latest
+    ? `${latest.text}${latest.detail ? ` — ${latest.detail}` : ""}`
+    : "";
+  return (
+    <div
+      data-testid="hud-event-barks"
+      style={{
+        position: "absolute",
+        bottom: 12,
+        left: "50%",
+        transform: "translateX(-50%)",
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
+        gap: 4,
+        pointerEvents: "none",
+        fontFamily: TYPE.faceMono,
+        textAlign: "center",
+        zIndex: 11,
+        maxWidth: "90%",
+      }}
+    >
+      {visible.map((b) => {
+        const age = now - b.at;
+        if (age >= EVENT_BARK_TTL_S) return null;
+        const t = age / EVENT_BARK_TTL_S;
+        const alpha = t > 0.85 ? (1 - t) / 0.15 : 1;
+        const lift = reduced ? 0 : Math.max(-12, -t * 12);
+        const colors = EVENT_BARK_COLORS[b.kind];
+        return (
+          <div
+            key={b.id}
+            style={{
+              opacity: alpha,
+              transform: `translateY(${lift}px)`,
+              background: "rgba(13, 12, 10, 0.82)",
+              borderLeft: `3px solid ${colors.bar}`,
+              padding: "6px 12px",
+              color: colors.fg,
+              fontSize: 12,
+              letterSpacing: 1.5,
+              textShadow: "0 1px 0 #000",
+              fontWeight: 700,
+            }}
+          >
+            <span aria-hidden="true" style={{ marginRight: 6 }}>
+              {EVENT_BARK_PREFIX[b.kind]}
+            </span>
+            {b.text}
+            {b.detail ? (
+              <div
+                style={{
+                  fontSize: 10,
+                  letterSpacing: 1,
+                  fontWeight: 400,
+                  color: COLOR.creamDim,
+                  marginTop: 2,
+                }}
+              >
+                {b.detail}
+              </div>
+            ) : null}
+          </div>
+        );
+      })}
+      <div
+        data-testid="hud-event-barks-live"
+        aria-live="polite"
+        aria-atomic="true"
+        style={visuallyHidden}
+      >
+        {liveText}
+      </div>
+    </div>
+  );
+}
 
 function ModifierFlashes() {
   const flashes = useGameStore((s) => s.modifierFlashes);

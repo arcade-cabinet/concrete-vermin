@@ -99,7 +99,10 @@ describe("GameRunner livesAllowance", () => {
 describe("GameRunner kill dedupe", () => {
   it("kill count never exceeds the spawned vermin count", () => {
     const r = new GameRunner(mission01, [], 1234);
-    for (let i = 0; i < 800; i++) {
+    // Loop budget bumped from 800 → 1500 frames to absorb event-
+    // injected surprise waves (mission01 fires a runt-ambush at
+    // killCount=10 that adds 3 extra spawns).
+    for (let i = 0; i < 1500; i++) {
       if (i % 6 === 0) r.queueShot(120 + (i % 5) * 40, 240);
       r.step(FRAME);
       if (useGameStore.getState().phase === "won") break;
@@ -108,11 +111,15 @@ describe("GameRunner kill dedupe", () => {
     expect(["won", "lost"], `runner did not reach a terminal phase (saw ${phase})`).toContain(
       phase,
     );
-    const totalSpawnedFromSpec = mission01.encounters.reduce(
+    const encounterSpawns = mission01.encounters.reduce(
       (sum, enc) => sum + enc.spawns.reduce((acc, s) => acc + s.count, 0),
       0,
     );
-    expect(useGameStore.getState().killCount).toBeLessThanOrEqual(totalSpawnedFromSpec);
+    const eventSpawns = mission01.events.reduce(
+      (sum, ev) => sum + (ev.effect.kind === "surprise-wave" ? ev.effect.count : 0),
+      0,
+    );
+    expect(useGameStore.getState().killCount).toBeLessThanOrEqual(encounterSpawns + eventSpawns);
   });
 });
 
@@ -151,5 +158,42 @@ describe("GameRunner pause / resume", () => {
     expect(r.isPaused()).toBe(false);
     step(r, 0.5);
     expect(useGameStore.getState().now).toBeGreaterThan(t2);
+  });
+});
+
+describe("GameRunner mission events", () => {
+  it("at-time triggers fire and publish a bark to the store", () => {
+    // mission01 has a halpern-call-1 boss-bark at t=4s.
+    const r = new GameRunner(mission01, [], 1234);
+    step(r, 4.5);
+    const barks = useGameStore.getState().eventBarks;
+    const halpern = barks.find((b) => b.id === "halpern-call-1");
+    expect(halpern, "halpern-call-1 should have fired by t=4.5s").toBeDefined();
+    expect(halpern?.kind).toBe("boss");
+    expect(halpern?.text).toMatch(/Halpern/);
+  });
+
+  it("each event fires at most once per mission run", () => {
+    const r = new GameRunner(mission01, [], 1234);
+    // Run 6 seconds — well past the 4 s at-time trigger; the
+    // dispatcher loop should NOT re-fire it because firedEventIds
+    // tracks it. We verify by counting matching ids in eventBarks.
+    step(r, 6);
+    const barks = useGameStore.getState().eventBarks;
+    const occurrences = barks.filter((b) => b.id === "halpern-call-1");
+    expect(occurrences.length).toBeLessThanOrEqual(1);
+  });
+
+  it("event barks evict from the snapshot after their TTL", () => {
+    const r = new GameRunner(mission01, [], 1234);
+    step(r, 4.5);
+    expect(
+      useGameStore.getState().eventBarks.find((b) => b.id === "halpern-call-1"),
+    ).toBeDefined();
+    // EVENT_BARK_TTL_S is 5 s; advance another 6 s of sim time.
+    step(r, 6);
+    expect(
+      useGameStore.getState().eventBarks.find((b) => b.id === "halpern-call-1"),
+    ).toBeUndefined();
   });
 });

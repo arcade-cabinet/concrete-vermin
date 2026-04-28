@@ -39,6 +39,41 @@ export const mission08: Mission = defineMission({
       ],
     },
   ],
+  events: [
+    {
+      id: "tesla-warning",
+      trigger: { kind: "at-time", seconds: 3 },
+      effect: { kind: "boss-bark", text: "Pawnbroker: \"The rifle bites both ways. Don't ground yourself.\"" },
+    },
+    {
+      id: "tar-soft",
+      trigger: { kind: "at-time", seconds: 16 },
+      effect: {
+        kind: "environmental-hazard",
+        label: "TAR PAPER GIVES",
+        detail: "Footing soft. Reload window slows.",
+      },
+    },
+    {
+      id: "gull-cover-bark",
+      trigger: { kind: "at-encounter-start", index: 1 },
+      effect: { kind: "boss-bark", text: "Gulls overhead. Geese are bait." },
+    },
+    {
+      id: "goose-extra-charge",
+      trigger: { kind: "at-kill-count", threshold: 9 },
+      effect: { kind: "surprise-wave", variant: "goose-pied", count: 3, pattern: "ceiling-drop" },
+    },
+    {
+      id: "noon-bell",
+      trigger: { kind: "at-kill-count", threshold: 14 },
+      effect: {
+        kind: "environmental-hazard",
+        label: "NOON BELL",
+        detail: "Don't look up. The sigil knows.",
+      },
+    },
+  ],
   seed: 1979_03_08,
   cashAward: 400,
 });

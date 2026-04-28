@@ -42,6 +42,41 @@ export const mission09: Mission = defineMission({
       spawns: [{ variant: "boss-pigeon-king", count: 1, pattern: "boss-scripted" }],
     },
   ],
+  events: [
+    {
+      id: "grandfather-line",
+      trigger: { kind: "at-time", seconds: 4 },
+      effect: { kind: "boss-bark", text: "Pawnbroker: \"He's been waiting longer than you've been alive.\"" },
+    },
+    {
+      id: "court-parts",
+      trigger: { kind: "at-time", seconds: 14 },
+      effect: {
+        kind: "environmental-hazard",
+        label: "COURT OF PIGEONS PARTS",
+        detail: "The crown is in your line of fire.",
+      },
+    },
+    {
+      id: "rabid-extra",
+      trigger: { kind: "at-kill-count", threshold: 8 },
+      effect: { kind: "surprise-wave", variant: "pigeon-rabid", count: 4, pattern: "dive-from-sky" },
+    },
+    {
+      id: "king-rises",
+      trigger: { kind: "at-encounter-start", index: 1 },
+      effect: { kind: "boss-bark", text: "PIGEON KING: takes the crown off himself. Open." },
+    },
+    {
+      id: "spire-shadow",
+      trigger: { kind: "at-kill-count", threshold: 14 },
+      effect: {
+        kind: "environmental-hazard",
+        label: "SPIRE SHADOW LENGTHENS",
+        detail: "His phase pattern shifts — bait the swoop.",
+      },
+    },
+  ],
   seed: 1979_03_09,
   livesAllowance: 5,
   cashAward: 1000,
