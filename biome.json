@@ -1,0 +1,82 @@
+{
+  "$schema": "https://biomejs.dev/schemas/2.4.11/schema.json",
+  "vcs": { "enabled": true, "clientKind": "git", "useIgnoreFile": true },
+  "files": {
+    "includes": ["**/*.ts", "**/*.tsx", "**/*.mjs", "**/*.js", "**/*.json", "**/*.jsonc"],
+    "experimentalScannerIgnores": ["node_modules", "dist", "build", "android", "ios", "sim/reports", "playwright-report", "test-results", "coverage"]
+  },
+  "formatter": {
+    "enabled": true,
+    "indentStyle": "space",
+    "indentWidth": 2,
+    "lineEnding": "lf",
+    "lineWidth": 100
+  },
+  "linter": {
+    "enabled": true,
+    "rules": {
+      "recommended": true,
+      "complexity": {
+        "noUselessSwitchCase": "warn"
+      },
+      "style": {
+        "useImportType": "error",
+        "noNonNullAssertion": "warn"
+      },
+      "suspicious": {
+        "noConsole": { "level": "warn", "options": { "allow": ["warn", "error", "info"] } }
+      }
+    }
+  },
+  "javascript": {
+    "formatter": { "quoteStyle": "double", "trailingCommas": "all", "semicolons": "always" }
+  },
+  "overrides": [
+    {
+      "includes": ["src/sim/**/*.ts"],
+      "linter": {
+        "rules": {
+          "correctness": {
+            "noRestrictedImports": {
+              "level": "error",
+              "options": {
+                "paths": {
+                  "react": "Sim is pure TS — no React. STANDARDS.md §2.",
+                  "react-dom": "Sim is pure TS — no React. STANDARDS.md §2.",
+                  "pixi-react": "Sim is pure TS — no Pixi. STANDARDS.md §2.",
+                  "pixi.js": "Sim is pure TS — no Pixi. STANDARDS.md §2.",
+                  "tone": "Sim is pure TS — no Tone. STANDARDS.md §2.",
+                  "framer-motion": "Sim is pure TS. STANDARDS.md §2.",
+                  "matter-js": "Sim is pure TS. STANDARDS.md §2."
+                }
+              }
+            }
+          },
+          "suspicious": {
+            "noGlobalAssign": "error"
+          },
+          "nursery": {
+            "noRestrictedImports": "off"
+          }
+        }
+      }
+    },
+    {
+      "includes": ["src/render/**/*.ts", "src/render/**/*.tsx"],
+      "linter": {
+        "rules": {
+          "correctness": {
+            "noRestrictedImports": {
+              "level": "error",
+              "options": {
+                "paths": {
+                  "@/ui": "Render layer cannot import UI. STANDARDS.md §6."
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  ]
+}

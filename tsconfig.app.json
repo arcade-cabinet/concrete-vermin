@@ -1,0 +1,40 @@
+{
+  "compilerOptions": {
+    "composite": true,
+    "target": "ES2022",
+    "module": "ESNext",
+    "moduleResolution": "Bundler",
+    "lib": ["ES2022", "DOM", "DOM.Iterable", "WebWorker"],
+    "jsx": "react-jsx",
+    "strict": true,
+    "noUncheckedIndexedAccess": true,
+    "noImplicitOverride": true,
+    "exactOptionalPropertyTypes": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "noFallthroughCasesInSwitch": true,
+    "verbatimModuleSyntax": true,
+    "skipLibCheck": true,
+    "isolatedModules": true,
+    "esModuleInterop": true,
+    "resolveJsonModule": true,
+    "outDir": "./dist/types/app",
+    "tsBuildInfoFile": "./tsconfig.app.tsbuildinfo",
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["src/*"],
+      "@/sim/*": ["src/sim/*"],
+      "@/ecs/*": ["src/ecs/*"],
+      "@/render/*": ["src/render/*"],
+      "@/ui/*": ["src/ui/*"],
+      "@/audio/*": ["src/audio/*"],
+      "@/platform/*": ["src/platform/*"],
+      "@/lib/*": ["src/lib/*"]
+    }
+  },
+  "include": ["src/**/*.ts", "src/**/*.tsx"],
+  "exclude": ["src/sim/**/*", "node_modules", "dist", "build", "**/__tests__/**"],
+  "references": [
+    { "path": "./tsconfig.sim.json" }
+  ]
+}

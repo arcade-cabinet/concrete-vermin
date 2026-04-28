@@ -1,0 +1,641 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Concrete Vermin: Tactical Reforged</title>
+    <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.js"></script>
+    
+    <style>
+        :root {
+            --bg-color: #0a0a0f;
+            --neon-red: #ff2a2a;
+            --neon-blue: #00f0ff;
+            --neon-gold: #ffd700;
+            --neon-green: #39ff14;
+            --text-main: #e0e0e0;
+        }
+
+        * {
+            box-sizing: border-box; margin: 0; padding: 0;
+            user-select: none; -webkit-user-select: none; touch-action: none;
+        }
+
+        body, html {
+            width: 100%; height: 100%; background-color: #000;
+            overflow: hidden; font-family: 'Share Tech Mono', monospace;
+            color: var(--text-main); cursor: crosshair; 
+        }
+
+        #game-container {
+            position: relative; width: 100vw; height: 100vh;
+            background: linear-gradient(to bottom, #0f0f1a 0%, #1a1a24 40%, #050508 100%);
+        }
+
+        canvas {
+            display: block; width: 100%; height: 100%;
+            filter: contrast(1.1) brightness(0.95);
+        }
+
+        #crt-overlay {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            pointer-events: none; z-index: 6;
+            background: 
+                linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), 
+                linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06));
+            background-size: 100% 4px, 3px 100%;
+            box-shadow: inset 0 0 100px rgba(0,0,0,0.9); opacity: 0.8;
+        }
+
+        #ui-layer {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            pointer-events: none; display: flex; flex-direction: column;
+            justify-content: space-between; padding: 20px; z-index: 5;
+        }
+
+        .hud-top {
+            display: flex; justify-content: space-between; align-items: flex-start;
+            font-size: clamp(1.2rem, 4vw, 2rem); text-shadow: 0 0 5px var(--neon-blue);
+        }
+
+        .hud-right-group { display: flex; flex-direction: column; align-items: flex-end; }
+
+        #comboDisplay {
+            color: var(--neon-gold); font-size: clamp(1rem, 3vw, 1.5rem);
+            text-shadow: 0 0 10px var(--neon-gold); margin-top: 5px; opacity: 0;
+            transition: opacity 0.2s, transform 0.1s; transform: scale(1);
+        }
+        #comboDisplay.active { opacity: 1; }
+        #comboDisplay.pop { transform: scale(1.3); }
+
+        .hud-bottom { display: flex; justify-content: space-between; align-items: flex-end; }
+
+        #ammoDisplay {
+            display: flex; gap: 5px; height: 30px; pointer-events: auto; 
+            cursor: pointer; padding: 10px; margin: -10px; 
+        }
+        .bullet {
+            width: 12px; height: 100%; background-color: var(--neon-gold);
+            border-radius: 2px 2px 0 0; box-shadow: 0 0 8px var(--neon-gold); transition: opacity 0.1s;
+        }
+        .bullet.empty { opacity: 0.2; box-shadow: none; background-color: #555; }
+
+        #reloadWarning {
+            position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+            font-family: 'Bebas Neue', cursive; font-size: clamp(2rem, 8vw, 4rem);
+            color: var(--neon-red); text-shadow: 0 0 15px var(--neon-red);
+            letter-spacing: 5px; opacity: 0; pointer-events: none; transition: opacity 0.1s;
+        }
+
+        #livesContainer { display: flex; gap: 10px; }
+        .life-indicator {
+            width: 18px; height: 18px; background-color: var(--neon-red); border-radius: 50%;
+            box-shadow: 0 0 10px var(--neon-red); transition: opacity 0.3s;
+        }
+        .life-lost { opacity: 0.2; box-shadow: none; background-color: #444; }
+
+        .screen {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(10, 10, 15, 0.85); backdrop-filter: blur(5px);
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            pointer-events: auto; z-index: 10; transition: opacity 0.3s;
+        }
+        .hidden { opacity: 0; pointer-events: none; }
+
+        h1 {
+            font-family: 'Bebas Neue', cursive; font-size: clamp(3rem, 10vw, 6rem);
+            color: var(--neon-red); text-shadow: 2px 2px 0px #000, 0 0 20px var(--neon-red);
+            letter-spacing: 2px; margin-bottom: 10px; text-align: center;
+        }
+        p.subtitle {
+            font-size: clamp(1rem, 3vw, 1.5rem); margin-bottom: 40px;
+            color: #aaa; text-align: center; max-width: 80%; line-height: 1.5;
+        }
+        button {
+            background: transparent; color: var(--neon-blue);
+            font-family: 'Share Tech Mono', monospace; font-size: clamp(1.2rem, 4vw, 2rem);
+            border: 2px solid var(--neon-blue); padding: 15px 40px; text-transform: uppercase;
+            cursor: pointer; box-shadow: 0 0 10px rgba(0, 240, 255, 0.2), inset 0 0 10px rgba(0, 240, 255, 0.1);
+            transition: all 0.2s;
+        }
+        button:active, button:hover {
+            background: var(--neon-blue); color: #000;
+            box-shadow: 0 0 20px var(--neon-blue), inset 0 0 20px var(--neon-blue);
+        }
+
+        #flash {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background: radial-gradient(circle at 50% 50%, rgba(255,255,255,0.8) 0%, rgba(255,255,255,0) 70%);
+            opacity: 0; pointer-events: none; transition: opacity 0.05s; z-index: 4; mix-blend-mode: overlay;
+        }
+
+        #damage-vignette {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            box-shadow: inset 0 0 150px rgba(255, 42, 42, 0);
+            pointer-events: none; z-index: 3; transition: box-shadow 0.3s;
+        }
+    </style>
+</head>
+<body>
+
+<div id="game-container">
+    <canvas id="gameCanvas"></canvas>
+    <div id="damage-vignette"></div>
+    <div id="flash"></div>
+    <div id="crt-overlay"></div>
+    <div id="reloadWarning">RELOADING...</div>
+
+    <div id="ui-layer">
+        <div class="hud-top">
+            <div id="scoreDisplay">SCORE: 000000</div>
+            <div class="hud-right-group">
+                <div id="waveDisplay">WAVE: 1</div>
+                <div id="comboDisplay">2x COMBO</div>
+            </div>
+        </div>
+        <div class="hud-bottom">
+            <div id="ammoDisplay" title="Tap to Reload">
+                <div class="bullet"></div><div class="bullet"></div><div class="bullet"></div>
+                <div class="bullet"></div><div class="bullet"></div><div class="bullet"></div>
+            </div>
+            <div id="livesContainer">
+                <div class="life-indicator"></div><div class="life-indicator"></div><div class="life-indicator"></div>
+            </div>
+        </div>
+    </div>
+
+    <div id="startScreen" class="screen">
+        <h1>CONCRETE VERMIN</h1>
+        <p class="subtitle">TACTICAL REFORGED<br>Tap to Shoot. Hitboxes mapped correctly. Enemies localized to Z-Planes.</p>
+        <button id="startBtn">INITIALIZE</button>
+    </div>
+
+    <div id="gameOverScreen" class="screen hidden">
+        <h1>CITY OVERRUN</h1>
+        <p class="subtitle" id="finalScoreText">FINAL SCORE: 0</p>
+        <button id="restartBtn">REDEPLOY</button>
+    </div>
+</div>
+
+<script>
+    class AudioControl {
+        constructor() { this.initialized = false; }
+        async init() {
+            if (this.initialized) return;
+            await Tone.start();
+            this.gunshot = new Tone.NoiseSynth({ noise: { type: 'white' }, envelope: { attack: 0.001, decay: 0.2, sustain: 0, release: 0.1 } }).toDestination();
+            this.gunshot.volume.value = -3;
+            this.hitSound = new Tone.FMSynth({ harmonicity: 8, modulationIndex: 10, oscillator: { type: "sine" }, envelope: { attack: 0.001, decay: 0.2, sustain: 0, release: 0 } }).toDestination();
+            this.hitSound.volume.value = -8;
+            this.emptyClick = new Tone.MembraneSynth({ pitchDecay: 0.01, octaves: 1, oscillator: { type: "square" }, envelope: { attack: 0.001, decay: 0.05, sustain: 0, release: 0.01 } }).toDestination();
+            this.emptyClick.volume.value = -10;
+            this.reloadSound = new Tone.NoiseSynth({ noise: { type: 'pink' }, envelope: { attack: 0.01, decay: 0.15, sustain: 0, release: 0 } }).toDestination();
+            this.reloadSound.volume.value = -5;
+            this.bell = new Tone.MetalSynth({ harmonicity: 12, resonance: 800, modulationIndex: 20, envelope: { attack: 0.001, decay: 0.4, release: 0.01 } }).toDestination();
+            this.bell.volume.value = -15;
+            this.missSound = new Tone.MembraneSynth({ pitchDecay: 0.05, octaves: 2, oscillator: { type: "sine" }, envelope: { attack: 0.001, decay: 0.4, sustain: 0.01, release: 0.1 } }).toDestination();
+            this.missSound.volume.value = -2;
+            this.healthUp = new Tone.Synth({ oscillator: { type: "triangle" }, envelope: { attack: 0.05, decay: 0.1, sustain: 0.2, release: 1 } }).toDestination();
+            this.healthUp.volume.value = -10;
+            this.drone = new Tone.Noise("brown").start();
+            this.droneFilter = new Tone.AutoFilter({ frequency: "8n", baseFrequency: 80, octaves: 2, type: "sine" }).toDestination().start();
+            this.drone.connect(this.droneFilter);
+            this.drone.volume.value = -25;
+            Tone.Transport.start();
+            this.initialized = true;
+        }
+        playShot() { if (this.initialized) this.gunshot.triggerAttackRelease("16n"); }
+        playHit() { if (this.initialized) this.hitSound.triggerAttackRelease("C5", "16n"); }
+        playEmpty() { if (this.initialized) this.emptyClick.triggerAttackRelease("G2", "32n"); }
+        playReload() { if (this.initialized) this.reloadSound.triggerAttackRelease("16n"); }
+        playMiss() { if (this.initialized) this.missSound.triggerAttackRelease("C2", "8n"); }
+        playBell(pitch) { if (this.initialized) this.bell.triggerAttackRelease(pitch || "8n"); }
+        playHealthUp() { if (this.initialized) { this.healthUp.triggerAttackRelease("C4", "16n"); this.healthUp.triggerAttackRelease("E4", "16n", Tone.now() + 0.1); this.healthUp.triggerAttackRelease("G4", "8n", Tone.now() + 0.2); } }
+        stopDrone() { if (this.initialized) this.drone.stop(); }
+        startDrone() { if (this.initialized && this.drone.state !== "started") this.drone.start(); }
+    }
+    const audio = new AudioControl();
+
+    const PATHS = {
+        rat: new Path2D("M-35,15 C-25,0 15,-10 35,10 C45,20 -35,25 -35,15 Z M35,10 C45,5 55,20 65,15 C60,25 45,20 35,20 Z"),
+        cat: new Path2D("M-30,20 L-25,-10 L-15,-5 L-5,-15 L5,-5 C20,-20 35,0 35,20 L40,25 L-35,25 Z M-25,-10 L-30,-20 L-15,-15 Z"),
+        ebike: new Path2D("M-30,20 A10,10 0 1,0 -30,21 Z M30,20 A10,10 0 1,0 30,21 Z M-30,20 L-10,-5 L20,-5 L30,20 M-10,-5 L-20,-25 L-5,-25 M10,-5 L0,-35 C10,-45 20,-25 20,-25"),
+        drone: new Path2D("M-30,-5 L-15,5 L15,5 L30,-5 L35,0 L15,10 L-15,10 L-35,0 Z M-25,-15 C-20,-15 -20,-5 -25,-5 C-30,-5 -30,-15 -25,-15 Z M25,-15 C30,-15 30,-5 25,-5 C20,-5 20,-15 25,-15 Z M-5,10 L5,10 L5,20 L-5,20 Z")
+    };
+
+    class Entity {
+        constructor(canvasInfo) {
+            this.active = true; this.markedForDeletion = false;
+            this.baseScale = canvasInfo.minDim / 800; 
+            this.splatColor = "#ff2a2a";
+        }
+        update(dt) {} draw(ctx) {}
+    }
+
+    class Rat extends Entity {
+        constructor(canvasInfo) {
+            super(canvasInfo);
+            this.type = 'rat'; this.path = PATHS.rat; this.scale = this.baseScale * 0.8;
+            // Z-Plane: The Gutter (Very bottom edge)
+            this.y = canvasInfo.height * 0.9 + (Math.random() * canvasInfo.height * 0.05);
+            this.speed = (canvasInfo.width * 0.35) * (Math.random() > 0.5 ? 1 : -1);
+            this.x = this.speed > 0 ? -50 : canvasInfo.width + 50;
+            this.points = 100;
+        }
+        update(dt) { this.x += this.speed * dt; if (Math.random() < 0.03) this.x -= this.speed * dt * 2.0; }
+        draw(ctx) { ctx.fillStyle = "#000"; ctx.fill(this.path); }
+    }
+
+    class EBike extends Entity {
+        constructor(canvasInfo) {
+            super(canvasInfo);
+            this.type = 'ebike'; this.path = PATHS.ebike; this.scale = this.baseScale * 1.5;
+            // Z-Plane: The Street (Mid-lower)
+            this.y = canvasInfo.height * 0.72 + (Math.random() * canvasInfo.height * 0.06); 
+            this.speed = (canvasInfo.width * 1.1) * (Math.random() > 0.5 ? 1 : -1); 
+            this.x = this.speed > 0 ? -100 : canvasInfo.width + 100;
+            this.points = 500; this.time = 0; this.splatColor = "#00f0ff";
+        }
+        update(dt) { this.x += this.speed * dt; this.time += dt; }
+        draw(ctx) {
+            ctx.fillStyle = "#000"; ctx.fill(this.path);
+            ctx.fillStyle = Math.sin(this.time * 30) > 0 ? "#fff" : "#ff0"; 
+            ctx.shadowColor = "#fff"; ctx.shadowBlur = 20;
+            ctx.beginPath();
+            const lightOffset = this.speed > 0 ? 30 : -30;
+            ctx.arc(lightOffset, -20, 5, 0, Math.PI * 2);
+            ctx.fill(); ctx.shadowBlur = 0;
+        }
+    }
+
+    class FeralCat extends Entity {
+        constructor(canvasInfo) {
+            super(canvasInfo);
+            this.type = 'cat'; this.path = PATHS.cat; this.scale = this.baseScale * 1.2;
+            this.speedX = (canvasInfo.width * 0.28) * (Math.random() > 0.5 ? 1 : -1);
+            this.x = this.speedX > 0 ? -50 : canvasInfo.width + 50;
+            // Z-Plane: The Wall (Mid-ground) - Arcs along the top of the brick wall
+            this.startY = canvasInfo.height * 0.55;
+            this.y = this.startY;
+            this.velocityY = -(canvasInfo.height * 0.6); 
+            this.gravity = canvasInfo.height * 1.5;
+            this.points = 250;
+        }
+        update(dt) {
+            this.x += this.speedX * dt; this.y += this.velocityY * dt; this.velocityY += this.gravity * dt;
+            if (this.y > this.startY && this.velocityY > 0) {
+                this.y = this.startY; this.velocityY = -(this.gravity * 0.6); 
+            }
+        }
+        draw(ctx) {
+            ctx.fillStyle = "#050"; ctx.shadowColor = "#0f0"; ctx.shadowBlur = 8;
+            ctx.fill(this.path); ctx.shadowBlur = 0;
+        }
+    }
+
+    class LootDrone extends Entity {
+        constructor(canvasInfo) {
+            super(canvasInfo);
+            this.type = 'drone'; this.path = PATHS.drone; this.scale = this.baseScale * 1.3;
+            // Z-Plane: The Sky
+            this.baseY = canvasInfo.height * 0.15; 
+            this.speed = (canvasInfo.width * 0.6) * (Math.random() > 0.5 ? 1 : -1); 
+            this.x = this.speed > 0 ? -100 : canvasInfo.width + 100;
+            this.points = 1000; this.time = 0; this.splatColor = "#39ff14";
+        }
+        update(dt) { 
+            this.x += this.speed * dt; this.time += dt;
+            this.y = this.baseY + Math.sin(this.time * 5) * 40;
+        }
+        draw(ctx) {
+            ctx.fillStyle = "#222"; ctx.fill(this.path);
+            ctx.fillStyle = Math.sin(this.time * 50) > 0 ? "#fff" : "#555";
+            ctx.fillRect(-35, -20, 20, 3); ctx.fillRect(15, -20, 20, 3);
+            ctx.fillStyle = "#39ff14"; ctx.shadowColor = "#39ff14"; ctx.shadowBlur = 15;
+            ctx.fillRect(-2, 12, 4, 6); ctx.fillRect(-3, 14, 6, 2); ctx.shadowBlur = 0;
+        }
+    }
+
+    class Game {
+        constructor() {
+            this.canvas = document.getElementById('gameCanvas');
+            this.ctx = this.canvas.getContext('2d');
+            
+            this.flashEl = document.getElementById('flash');
+            this.vignetteEl = document.getElementById('damage-vignette');
+            this.reloadWarnEl = document.getElementById('reloadWarning');
+            this.scoreEl = document.getElementById('scoreDisplay');
+            this.waveEl = document.getElementById('waveDisplay');
+            this.comboEl = document.getElementById('comboDisplay');
+            this.ammoContainer = document.getElementById('ammoDisplay');
+            this.livesContainer = document.getElementById('livesContainer');
+            this.startScreen = document.getElementById('startScreen');
+            this.gameOverScreen = document.getElementById('gameOverScreen');
+
+            this.state = 'menu'; this.lastTime = 0;
+            this.entities = []; this.particles = []; this.floatingTexts = [];
+            this.score = 0; this.lives = 3; this.wave = 1;
+            this.maxAmmo = 6; this.ammo = 6; this.isReloading = false; this.reloadTimer = 0;
+            this.combo = 1; this.comboTimer = 0; this.comboDuration = 3.0; 
+            this.screenShake = 0; this.spawnTimer = 0; this.spawnInterval = 2.0; this.waveBannerTimer = 0;
+
+            this.bgCanvas = document.createElement('canvas');
+
+            this.resize();
+            window.addEventListener('resize', () => this.resize());
+            
+            const handleInput = (e) => {
+                if (this.state !== 'playing' || e.target.closest('#ui-layer')) return; 
+                e.preventDefault();
+                let clientX = e.touches ? e.touches[0].clientX : e.clientX;
+                let clientY = e.touches ? e.touches[0].clientY : e.clientY;
+                this.attemptShoot(clientX, clientY);
+            };
+
+            this.canvas.addEventListener('mousedown', handleInput);
+            this.canvas.addEventListener('touchstart', handleInput, {passive: false});
+            this.canvas.addEventListener('contextmenu', (e) => { e.preventDefault(); if (this.state === 'playing') this.forceReload(); });
+            this.ammoContainer.addEventListener('mousedown', (e) => { e.stopPropagation(); this.forceReload(); });
+            this.ammoContainer.addEventListener('touchstart', (e) => { e.stopPropagation(); e.preventDefault(); this.forceReload(); }, {passive: false});
+
+            document.getElementById('startBtn').addEventListener('click', async () => { await audio.init(); this.startGame(); });
+            document.getElementById('restartBtn').addEventListener('click', () => { this.startGame(); });
+
+            requestAnimationFrame((t) => this.loop(t));
+        }
+
+        resize() {
+            const dpr = window.devicePixelRatio || 1;
+            this.canvas.width = window.innerWidth * dpr;
+            this.canvas.height = window.innerHeight * dpr;
+            this.ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+            
+            this.canvasInfo = { width: window.innerWidth, height: window.innerHeight, minDim: Math.min(window.innerWidth, window.innerHeight) };
+
+            this.bgCanvas.width = this.canvas.width;
+            this.bgCanvas.height = this.canvas.height;
+            const bgCtx = this.bgCanvas.getContext('2d');
+            bgCtx.scale(dpr, dpr);
+            this.generateEnvironment(bgCtx);
+        }
+
+        // Procedural Environment Generation with distinct Z-Planes
+        generateEnvironment(bgCtx) {
+            const w = this.canvasInfo.width; const h = this.canvasInfo.height;
+
+            // 1. Sky/Cityscape (Background)
+            bgCtx.fillStyle = "#0c0c14";
+            const numBuildings = 15; const buildingW = w / numBuildings;
+            for(let i=0; i<numBuildings; i++) {
+                const bHeight = h * 0.4 + Math.random() * (h * 0.3);
+                bgCtx.fillRect(i * buildingW, h - bHeight, buildingW + 1, bHeight);
+                bgCtx.fillStyle = Math.random() > 0.8 ? "#ff0055" : "#00f0ff";
+                if(Math.random() > 0.5) {
+                    bgCtx.globalAlpha = 0.2;
+                    bgCtx.fillRect(i * buildingW + (buildingW*0.2), h - bHeight + 20, 5, 5);
+                    bgCtx.fillRect(i * buildingW + (buildingW*0.6), h - bHeight + 40, 5, 5);
+                    bgCtx.globalAlpha = 1.0;
+                }
+                bgCtx.fillStyle = "#0c0c14";
+            }
+
+            // 2. The Wall (Mid-ground) - Where cats run
+            bgCtx.fillStyle = "#11111a";
+            bgCtx.fillRect(0, h * 0.55, w, h * 0.45);
+            bgCtx.fillStyle = "#05050a";
+            bgCtx.fillRect(0, h * 0.55, w, 6); // Top ledge
+
+            // 3. The Street (Foreground) - Where E-bikes run
+            bgCtx.fillStyle = "#1a1a24";
+            bgCtx.fillRect(0, h * 0.7, w, h * 0.3);
+            
+            // Street details
+            bgCtx.fillStyle = "#ffaa00"; bgCtx.globalAlpha = 0.15;
+            for(let i=0; i<w; i+=80) bgCtx.fillRect(i, h * 0.8, 40, 4);
+            bgCtx.globalAlpha = 1.0;
+
+            // 4. The Gutter/Curb (Bottom edge) - Where Rats run
+            bgCtx.fillStyle = "#050508";
+            bgCtx.fillRect(0, h * 0.88, w, h * 0.12);
+        }
+
+        startGame() {
+            this.state = 'playing'; this.score = 0; this.lives = 3; this.wave = 1;
+            this.ammo = this.maxAmmo; this.isReloading = false; this.combo = 1; this.comboTimer = 0;
+            this.spawnTimer = 0; this.spawnInterval = 2.0; this.waveBannerTimer = 2.0;
+            this.entities = []; this.particles = []; this.floatingTexts = [];
+            this.resize(); this.updateHUD();
+            this.startScreen.classList.add('hidden'); this.gameOverScreen.classList.add('hidden');
+            this.vignetteEl.style.boxShadow = 'inset 0 0 150px rgba(255, 42, 42, 0)';
+            audio.startDrone(); this.lastTime = performance.now();
+        }
+
+        loseLife() {
+            this.lives--; audio.playMiss(); this.screenShake = 25; this.resetCombo(); this.updateHUD();
+            this.flashEl.style.background = 'var(--neon-red)'; this.flashEl.style.opacity = '0.6';
+            setTimeout(() => { this.flashEl.style.opacity = '0'; }, 150);
+            if (this.lives === 1) this.vignetteEl.style.boxShadow = 'inset 0 0 150px rgba(255, 42, 42, 0.4)';
+            if (this.lives <= 0) this.endGame();
+        }
+
+        gainLife() {
+            if (this.lives < 3) {
+                this.lives++; audio.playHealthUp(); this.updateHUD();
+                if (this.lives > 1) this.vignetteEl.style.boxShadow = 'inset 0 0 150px rgba(255, 42, 42, 0)';
+            } else {
+                this.score += 2000; this.addFloatingText(this.canvasInfo.width/2, 100, "+2000 OVERHEAL", "#39ff14");
+            }
+        }
+
+        endGame() {
+            this.state = 'gameover'; audio.stopDrone();
+            document.getElementById('finalScoreText').innerText = `FINAL SCORE: ${this.score}`;
+            this.gameOverScreen.classList.remove('hidden');
+        }
+
+        updateHUD() {
+            this.scoreEl.innerText = `SCORE: ${this.score.toString().padStart(6, '0')}`;
+            this.waveEl.innerText = `WAVE: ${this.wave}`;
+            const bullets = this.ammoContainer.children;
+            for(let i=0; i<this.maxAmmo; i++) i < this.ammo ? bullets[i].classList.remove('empty') : bullets[i].classList.add('empty');
+            const indicators = this.livesContainer.children;
+            for(let i=0; i<3; i++) i < this.lives ? indicators[i].classList.remove('life-lost') : indicators[i].classList.add('life-lost');
+            if (this.combo > 1) {
+                this.comboEl.innerText = `${this.combo}x COMBO`; this.comboEl.classList.add('active');
+                this.comboEl.classList.remove('pop'); void this.comboEl.offsetWidth; this.comboEl.classList.add('pop');
+            } else this.comboEl.classList.remove('active');
+        }
+
+        resetCombo() { this.combo = 1; this.comboTimer = 0; this.updateHUD(); }
+
+        spawnEntity() {
+            const rand = Math.random(); const ebikeProb = Math.min(0.05 + (this.wave * 0.02), 0.3);
+            const catProb = Math.min(0.3 + (this.wave * 0.05), 0.6); const droneProb = 0.03; 
+            let ent = (rand < droneProb) ? new LootDrone(this.canvasInfo) :
+                      (rand < droneProb + ebikeProb) ? new EBike(this.canvasInfo) :
+                      (rand < droneProb + ebikeProb + catProb) ? new FeralCat(this.canvasInfo) : new Rat(this.canvasInfo);
+            this.entities.push(ent);
+        }
+
+        createSplatter(x, y, color) {
+            for(let i=0; i<20; i++) this.particles.push({ x: x, y: y, vx: (Math.random() - 0.5) * 800, vy: (Math.random() - 0.5) * 800, life: 1.0, color: color });
+        }
+
+        drawPermanentSplat(x, y, color, scale) {
+            const bgCtx = this.bgCanvas.getContext('2d'); const dpr = window.devicePixelRatio || 1;
+            bgCtx.save(); bgCtx.scale(dpr, dpr); bgCtx.translate(x, y); bgCtx.fillStyle = color; bgCtx.globalAlpha = 0.4;
+            bgCtx.beginPath();
+            for(let i=0; i<6; i++) {
+                const angle = (i/6) * Math.PI * 2; const r = (10 + Math.random() * 20) * scale;
+                const px = Math.cos(angle) * r; const py = Math.sin(angle) * r;
+                i===0 ? bgCtx.moveTo(px, py) : bgCtx.lineTo(px, py);
+            }
+            bgCtx.fill(); bgCtx.restore();
+        }
+
+        addFloatingText(x, y, text, color) { this.floatingTexts.push({ x: x, y: y, text: text, color: color, life: 1.0, dy: -60 }); }
+
+        forceReload() { if (!this.isReloading && this.ammo < this.maxAmmo) this.startReload(); }
+
+        attemptShoot(clientX, clientY) {
+            if (this.isReloading) { audio.playEmpty(); return; }
+            if (this.ammo <= 0) { this.startReload(); return; }
+
+            // FIX: Map CSS pixels to Physical Canvas Pixels for Hit Detection
+            const rect = this.canvas.getBoundingClientRect();
+            const dpr = window.devicePixelRatio || 1;
+            const targetX = (clientX - rect.left) * dpr;
+            const targetY = (clientY - rect.top) * dpr;
+
+            this.ammo--; this.updateHUD(); audio.playShot(); this.screenShake = 6; 
+            this.flashEl.style.opacity = '0.5'; setTimeout(() => { this.flashEl.style.opacity = '0'; }, 30);
+
+            let hit = false;
+            for (let i = this.entities.length - 1; i >= 0; i--) {
+                const e = this.entities[i];
+                
+                // Broad-phase check (Forgiving Mobile Hitbox radius based on scale)
+                const dx = clientX - e.x; const dy = clientY - e.y;
+                const distance = Math.sqrt(dx*dx + dy*dy);
+                const forgivingRadius = 45 * e.scale;
+
+                this.ctx.save();
+                this.ctx.translate(e.x, e.y);
+                const flip = ((e.speed && e.speed > 0) || (e.speedX && e.speedX > 0)) ? -1 : 1;
+                this.ctx.scale(e.scale * flip, e.scale);
+
+                // Check exact path OR if they tapped close enough to the center
+                if (this.ctx.isPointInPath(e.path, targetX, targetY) || distance < forgivingRadius) {
+                    hit = true; e.markedForDeletion = true;
+                    
+                    if (e.type === 'drone') {
+                        this.gainLife(); this.addFloatingText(e.x, e.y - 60, "HEALTH UP!", "#39ff14");
+                    } else {
+                        const pts = e.points * this.combo; this.score += pts;
+                        this.combo++; this.comboTimer = this.comboDuration;
+                        this.addFloatingText(e.x, e.y - 40, `+${pts}`, e.type === 'ebike' ? "#00f0ff" : "#ffd700");
+                    }
+                    
+                    this.createSplatter(e.x, e.y, e.splatColor);
+                    this.drawPermanentSplat(e.x, e.y, e.splatColor, e.scale);
+                    
+                    audio.playHit();
+                    if (this.combo % 5 === 0 && e.type !== 'drone') audio.playBell(); 
+                    
+                    if (this.score > this.wave * 2500) {
+                        this.wave++; audio.playBell("8n"); this.spawnInterval = Math.max(0.4, this.spawnInterval * 0.85);
+                        this.waveBannerTimer = 2.5; 
+                        if (this.lives === 1 && Math.random() > 0.5) this.gainLife();
+                    }
+                    this.updateHUD(); this.ctx.restore(); break; 
+                }
+                this.ctx.restore();
+            }
+
+            if (!hit) this.resetCombo();
+            if (this.ammo <= 0) this.startReload();
+        }
+
+        startReload() { this.isReloading = true; this.reloadTimer = this.reloadDuration; audio.playEmpty(); this.reloadWarnEl.style.opacity = '1'; this.resetCombo(); }
+
+        update(dt) {
+            if (this.screenShake > 0) { this.screenShake *= 0.8; if (this.screenShake < 0.5) this.screenShake = 0; }
+            if (this.isReloading) {
+                this.reloadTimer -= dt;
+                if (this.reloadTimer <= 0) { this.ammo = this.maxAmmo; this.isReloading = false; this.reloadWarnEl.style.opacity = '0'; audio.playReload(); this.updateHUD(); }
+            }
+            if (this.combo > 1) { this.comboTimer -= dt; if (this.comboTimer <= 0) this.resetCombo(); }
+            this.spawnTimer += dt; if (this.spawnTimer >= this.spawnInterval) { this.spawnTimer = 0; this.spawnEntity(); }
+            if (this.waveBannerTimer > 0) this.waveBannerTimer -= dt;
+
+            for (let i = this.entities.length - 1; i >= 0; i--) {
+                const e = this.entities[i]; e.update(dt);
+                if (e.x < -300 || e.x > this.canvasInfo.width + 300 || e.y > this.canvasInfo.height + 200) {
+                    e.markedForDeletion = true; if (e.type !== 'drone') this.loseLife(); 
+                }
+                if (e.markedForDeletion) this.entities.splice(i, 1);
+            }
+
+            for (let i = this.particles.length - 1; i >= 0; i--) {
+                let p = this.particles[i]; p.x += p.vx * dt; p.y += p.vy * dt; p.vy += 1500 * dt; p.life -= dt * 2.5;
+                if (p.life <= 0) this.particles.splice(i, 1);
+            }
+
+            for (let i = this.floatingTexts.length - 1; i >= 0; i--) {
+                let ft = this.floatingTexts[i]; ft.y += ft.dy * dt; ft.life -= dt * 1.5;
+                if (ft.life <= 0) this.floatingTexts.splice(i, 1);
+            }
+        }
+
+        draw() {
+            this.ctx.save();
+            if (this.screenShake > 0) {
+                const dx = (Math.random() - 0.5) * this.screenShake; const dy = (Math.random() - 0.5) * this.screenShake;
+                this.ctx.translate(dx, dy);
+            }
+
+            this.ctx.clearRect(0, 0, this.canvasInfo.width, this.canvasInfo.height);
+            this.ctx.drawImage(this.bgCanvas, 0, 0, this.canvasInfo.width, this.canvasInfo.height);
+
+            for (const e of this.entities) {
+                this.ctx.save(); this.ctx.translate(e.x, e.y);
+                const flip = ((e.speed && e.speed > 0) || (e.speedX && e.speedX > 0)) ? -1 : 1;
+                this.ctx.scale(e.scale * flip, e.scale); e.draw(this.ctx); this.ctx.restore();
+            }
+
+            for (const p of this.particles) {
+                this.ctx.globalAlpha = p.life; this.ctx.beginPath(); this.ctx.moveTo(p.x, p.y);
+                this.ctx.lineTo(p.x - p.vx*0.03, p.y - p.vy*0.03); this.ctx.lineWidth = 4;
+                this.ctx.strokeStyle = p.color; this.ctx.stroke();
+            }
+            this.ctx.globalAlpha = 1.0;
+
+            this.ctx.textAlign = "center"; this.ctx.font = "bold 24px 'Share Tech Mono'";
+            for (const ft of this.floatingTexts) {
+                this.ctx.globalAlpha = ft.life; this.ctx.fillStyle = ft.color; this.ctx.shadowColor = ft.color;
+                this.ctx.shadowBlur = 15; this.ctx.fillText(ft.text, ft.x, ft.y);
+            }
+            this.ctx.shadowBlur = 0; this.ctx.globalAlpha = 1.0;
+
+            if (this.waveBannerTimer > 0) {
+                const alpha = Math.min(1, this.waveBannerTimer); this.ctx.globalAlpha = alpha;
+                this.ctx.fillStyle = "rgba(0, 0, 0, 0.6)"; this.ctx.fillRect(0, this.canvasInfo.height/2 - 60, this.canvasInfo.width, 120);
+                this.ctx.fillStyle = "#00f0ff"; this.ctx.font = "clamp(3rem, 8vw, 5rem) 'Bebas Neue'";
+                this.ctx.textBaseline = "middle"; this.ctx.shadowColor = "#00f0ff"; this.ctx.shadowBlur = 20;
+                this.ctx.fillText(`WAVE ${this.wave}`, this.canvasInfo.width/2, this.canvasInfo.height/2);
+                this.ctx.globalAlpha = 1.0; this.ctx.shadowBlur = 0; this.ctx.textBaseline = "alphabetic";
+            }
+            this.ctx.restore();
+        }
+
+        loop(timestamp) {
+            const dt = (timestamp - this.lastTime) / 1000; this.lastTime = timestamp;
+            if (dt < 0.1 && this.state === 'playing') { this.update(dt); this.draw(); }
+            requestAnimationFrame((t) => this.loop(t));
+        }
+    }
+    window.onload = () => { new Game(); };
+</script>
+</body>
+</html>

@@ -1,0 +1,26 @@
+{
+  "compilerOptions": {
+    "composite": true,
+    "target": "ES2022",
+    "module": "ESNext",
+    "moduleResolution": "Bundler",
+    "lib": ["ES2022"],
+    "types": ["node"],
+    "strict": true,
+    "skipLibCheck": true,
+    "esModuleInterop": true,
+    "resolveJsonModule": true,
+    "outDir": "./dist/types/node",
+    "tsBuildInfoFile": "./tsconfig.node.tsbuildinfo"
+  },
+  "include": [
+    "scripts/**/*.ts",
+    "scripts/**/*.mjs",
+    "vite.config.ts",
+    "vitest.config.ts",
+    "vitest.dom.config.ts",
+    "vitest.browser.config.ts",
+    "playwright.config.ts",
+    "capacitor.config.ts"
+  ]
+}
