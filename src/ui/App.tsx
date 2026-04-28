@@ -29,9 +29,6 @@ import { installAchievementsTracker } from "../runtime/achievementsTracker";
 // dynamic-import returns a tiny wrapper around the named export.
 const Credits = lazy(() => import("./Credits").then((m) => ({ default: m.Credits })));
 const PauseMenu = lazy(() => import("./PauseMenu").then((m) => ({ default: m.PauseMenu })));
-const FirstLaunchOverlay = lazy(() =>
-  import("./FirstLaunchOverlay").then((m) => ({ default: m.FirstLaunchOverlay })),
-);
 const PawnShop = lazy(() => import("./PawnShop").then((m) => ({ default: m.PawnShop })));
 import { getMission } from "../sim/content/missions";
 
@@ -160,9 +157,6 @@ export function App() {
           </ArcadeFrame>
           <Suspense fallback={null}>
             <PauseMenu onRestart={restart} />
-          </Suspense>
-          <Suspense fallback={null}>
-            <FirstLaunchOverlay />
           </Suspense>
         </>
       ) : null}
