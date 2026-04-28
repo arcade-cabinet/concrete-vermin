@@ -40,7 +40,10 @@ export interface TickOptions<W extends SimWorld> {
 export function runTick<W extends SimWorld>(world: W, opts: TickOptions<W>): W {
   let next = world;
   for (const sys of opts.systems) {
-    const sysRng = opts.rng.fork(sys.id);
+    // Fork label includes tickIndex so each tick gets a fresh per-system
+    // stream. Without this, the same system would draw the same number
+    // every tick — AI/jitter would never evolve.
+    const sysRng = opts.rng.fork(`${sys.id}:${world.tickIndex}`);
     next = sys.step(next, opts.dt, sysRng);
   }
   // Advance time AFTER systems so mid-tick reads see the start-of-tick clock.

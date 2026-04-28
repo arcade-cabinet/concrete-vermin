@@ -36,16 +36,17 @@ export interface VerminSpawnRecord {
   audio: Readonly<{ spawn: string; hit: string; death: string; idle?: string | undefined }>;
 }
 
-/** Module-local counter so successive spawns from the same rng have unique ids. */
-let SPAWN_SEQUENCE = 0;
-
 /**
  * The ONLY allowed path to construct a vermin spawn record.
  * Pre-edit hooks + CI grep gates block any other call site.
  *
  * @param archetypeId — the species class
  * @param overrides   — partial traits layered on top of DEFAULT_TRAITS
- * @param rng         — owning encounter's rng (or a forked stream)
+ * @param rng         — owning encounter's rng (or a forked stream).
+ *                      Two draws are consumed: one for spawnId, one
+ *                      mixed with the seed via hashSeed for uniqueness.
+ *                      No module-global state, so concurrent missions
+ *                      and replays produce identical ids per seed.
  */
 export function composeVermin(
   archetypeId: ArchetypeId,
@@ -59,9 +60,12 @@ export function composeVermin(
   const stats = Object.freeze(applyTraitsToStats(archetype.baseStats, traits));
   const ai = Object.freeze(tuneAIForTraits(BASE_AI_CONFIG, traits));
 
-  // Derive a per-spawn id from rng + counter — deterministic given seed.
-  const sample = Math.floor(rng.next() * 0xffffffff);
-  const spawnId = hashSeed(sample, ++SPAWN_SEQUENCE);
+  // Pure-from-rng spawn id. Two draws → 32-bit-ish unsigned id via hashSeed.
+  // No module global; concurrent missions and replays from the same seed
+  // produce identical ids in the same call order.
+  const a = Math.floor(rng.next() * 0xffffffff);
+  const b = Math.floor(rng.next() * 0xffffffff);
+  const spawnId = hashSeed(a, b);
 
   return {
     spawnId,
@@ -76,11 +80,4 @@ export function composeVermin(
     spriteAtlas: archetype.spriteAtlas,
     audio: archetype.audio,
   };
-}
-
-/** Test/dev helper: reset the module sequence so deterministic tests are
- *  reproducible regardless of side-effects in earlier tests. Not exported
- *  from the package barrel. */
-export function _resetSpawnSequence(): void {
-  SPAWN_SEQUENCE = 0;
 }

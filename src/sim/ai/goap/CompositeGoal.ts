@@ -51,6 +51,15 @@ export class CompositeGoal<Owner = unknown> extends Goal<Owner> {
     return head.tick(ctx);
   }
 
+  /**
+   * Default execute drives the subgoal stack and lifts the head's
+   * status onto the composite. Subclasses (Think, boss scripts) may
+   * override to reinterpret COMPLETED as "replan" rather than "done."
+   */
+  override execute(ctx: GoalContext): void {
+    this.status = this.executeSubgoals(ctx);
+  }
+
   override terminate(ctx: GoalContext): void {
     this.clearSubgoals(ctx);
   }

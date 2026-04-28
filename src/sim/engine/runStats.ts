@@ -17,6 +17,15 @@ import type { MissionStats } from "./scoring";
 
 const HOT_MOMENT_KILLS = 5;
 const HOT_MOMENT_WINDOW_S = 4;
+/**
+ * Cooldown after a hot moment ends before a new one can start. Without
+ * this, a continuous kill stream emits a fresh moment per kill once the
+ * sliding window contains ≥ HOT_MOMENT_KILLS — overlapping records
+ * with sliding startAt. Cooldown is "absolute time since the last
+ * moment's endAt", not "since startAt", so a long fight produces a
+ * series of distinct moments, not one giant one or N tiny ones.
+ */
+const HOT_MOMENT_COOLDOWN_S = 4;
 
 export interface HotMoment {
   startAt: number;
@@ -86,12 +95,22 @@ export function accumulate(stats: RunStats, event: RunEvent): RunStats {
       if (recentKillTimes.length >= HOT_MOMENT_KILLS) {
         const startAt = recentKillTimes[0] as number;
         const last = hotMoments[hotMoments.length - 1];
-        // Replace the trailing hot moment if it's the same window;
-        // otherwise append a new one.
-        if (last && last.startAt === startAt) {
+        // Three cases:
+        // 1. No previous moment OR previous moment ended > cooldown ago
+        //    AND startAt is past the cooldown gate → append new moment.
+        // 2. Previous moment is still "live" (its window overlaps ours)
+        //    → extend it (replace-tail with updated endAt + kill count).
+        // 3. Previous moment ended within cooldown → swallow this kill
+        //    (don't spam new moments while the cooldown is in effect).
+        if (last && startAt < last.endAt + HOT_MOMENT_COOLDOWN_S) {
+          // Continuous run — extend the trailing moment.
           hotMoments = [
             ...hotMoments.slice(0, -1),
-            { startAt, endAt: event.at, kills: recentKillTimes.length },
+            {
+              startAt: last.startAt,
+              endAt: event.at,
+              kills: last.kills + 1,
+            },
           ];
         } else {
           hotMoments = [...hotMoments, { startAt, endAt: event.at, kills: recentKillTimes.length }];
