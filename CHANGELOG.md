@@ -6,6 +6,13 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 Releases are managed by [release-please](https://github.com/googleapis/release-please).
 
+## [1.12.0](https://github.com/arcade-cabinet/concrete-vermin/compare/v1.11.1...v1.12.0) (2026-04-28)
+
+
+### Features
+
+* **theme:** finish DESIGN.md (HUD style + per-act color shift + art direction) + decompose tokens into per-aspect modules ([#32](https://github.com/arcade-cabinet/concrete-vermin/issues/32)) ([975d261](https://github.com/arcade-cabinet/concrete-vermin/commit/975d261bd653245fe88aa35bd0be527be08667af))
+
 ## [1.11.1](https://github.com/arcade-cabinet/concrete-vermin/compare/v1.11.0...v1.11.1) (2026-04-28)
 
 
