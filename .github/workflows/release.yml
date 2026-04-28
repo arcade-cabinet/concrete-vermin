@@ -96,10 +96,31 @@ jobs:
             ./gradlew bundleDebug
           fi
 
-      - name: Upload AAB
+      # Two destinations: the Actions artifact tab (90-day retention,
+      # debug-friendly) and the GitHub Release page (permanent, what
+      # users actually download).
+      - name: Upload AAB as workflow artifact
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: concrete-vermin-android-${{ env.TARGET_REF }}
           path: android/app/build/outputs/bundle/*/app-*.aab
           if-no-files-found: error
+
+      - name: Attach AAB to GitHub Release
+        # Only attach when there's a real signing path — debug AABs
+        # shouldn't sit on the public Release page where players might
+        # mistake them for production.
+        if: ${{ secrets.ANDROID_KEYSTORE_BASE64 != '' }}
+        env:
+          GH_TOKEN: ${{ secrets.CI_GITHUB_TOKEN }}
+        run: |
+          set -e
+          AAB_PATH=$(ls android/app/build/outputs/bundle/release/*.aab 2>/dev/null | head -n1)
+          if [[ -z "$AAB_PATH" ]]; then
+            echo "::warning::No release AAB found — skipping Release upload"
+            exit 0
+          fi
+          DEST_NAME="concrete-vermin-${TARGET_REF}.aab"
+          cp "$AAB_PATH" "$DEST_NAME"
+          gh release upload "${TARGET_REF}" "$DEST_NAME" --clobber
 

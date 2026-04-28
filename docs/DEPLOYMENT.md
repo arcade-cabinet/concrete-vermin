@@ -82,14 +82,26 @@ Currently none. GitHub Pages deploys via `actions/deploy-pages@v4` using the wor
 A dry run of the full path looks like:
 
 1. Land a feature PR; merge. Confirm `cd.yml` deploys to Pages (HTTP 200 on the new bundle hash).
-2. Wait for release-please to open its bump PR (usually within 5 minutes of the feature merge). Verify it carries the right bump (feat → minor, fix → patch).
-3. Merge the release-please PR. Confirm:
-   - A new `vX.Y.Z` tag appears.
-   - `release.yml` fires (use `gh run list --workflow=release.yml --limit 3`).
-   - The `android` job inside `release.yml` succeeds and the GitHub Release page shows a signed `.aab` attached.
+2. Wait for release-please to open its bump PR (usually within 5 minutes of the feature merge). Verify it carries the right bump (feat → minor, fix → patch). The `automerge.yml` workflow auto-approves and enables auto-merge for any PR whose head branch starts with `release-please--` and whose head repo is this repo (the prefix-spoof guard).
+3. The release-please PR auto-merges when CI is green. Confirm:
+   - A new `vX.Y.Z` tag appears (`gh release list --limit 3`).
+   - `release.yml` fires twice — once for the release-please-PR-merge push (release_created=false → android job skips), then again for the tag-creating push (release_created=true → android job runs).
+   - The `android` job inside `release.yml` succeeds — even without signing secrets, it builds a debug AAB and uploads it as a workflow artifact.
+   - **With** signing secrets configured: the GitHub Release page shows a signed `.aab` attached as `concrete-vermin-vX.Y.Z.aab`.
 4. Smoke-test the AAB: `bundletool build-apks` → install on a real device → launch.
 
-If step 3's android job fails on signing, the most likely cause is a base64 secret with embedded line breaks (some clipboards add them). Re-base64 with `base64 -w 0` on Linux or `base64 | tr -d '\n'` on macOS.
+### Verified end-to-end as of 2026-04-28
+
+- Release-please cycles trigger on every merge to `main`. Cadence observed: 19 minor bumps in ~2 days.
+- Auto-merge fires correctly on release-please PRs; auto-approval is granted by the `automerge.yml` job whose `if:` condition matches `startsWith(github.event.pull_request.head.ref, 'release-please--')`.
+- The `android` job runs on every release-created run and successfully builds an unsigned debug AAB. Workflow-artifact upload to the Actions tab works end-to-end.
+- **Open**: signed AAB attachment to the GitHub Release page is gated on `secrets.ANDROID_KEYSTORE_BASE64` being set. Steps to seed are documented above; once set, the next release-please bump will produce a signed `.aab` on the Release page.
+
+### Common failure modes
+
+- **android job fails on signing.** Most likely cause is a base64 secret with embedded line breaks (some clipboards add them). Re-base64 with `base64 -w 0` on Linux or `base64 | tr -d '\n'` on macOS.
+- **release-please PR doesn't auto-merge.** Check that all required CI jobs are green (`balance-benchmark` is `continue-on-error`; only `core` is currently a hard required gate). If `automerge.yml`'s "Approve PR" step shows "Resource not accessible by integration", the `CI_GITHUB_TOKEN` PAT lacks the `pull_requests: write` permission.
+- **android job is skipped silently.** Means `release-please.outputs.release_created` was false — the run was triggered by a non-tag-creating push (e.g. the merge of the release-please PR itself, before the tag is pushed). The next push (the tag) will re-trigger and the android job will run.
 
 ## Mobile QA checklist
 
