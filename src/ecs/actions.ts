@@ -1,5 +1,6 @@
 import type { Entity, World } from "koota";
 import type { TunedWeapon } from "../sim/archetypes/mods";
+import type { ArchetypeId } from "../sim/archetypes/vermin";
 import type { VerminSpawnRecord } from "../sim/factories/actor";
 import {
   AIBrain,
@@ -134,12 +135,13 @@ export function spawnSplash(
   world: World,
   pos: Readonly<{ x: number; y: number }>,
   variantId: string,
+  archetypeId: ArchetypeId,
   now: number,
   ttlS = 0.4,
 ): Entity {
   return world.spawn(
     Position({ x: pos.x, y: pos.y }),
-    Splash({ variantId, intensity: 1, ttlS }),
+    Splash({ variantId, archetypeId, intensity: 1, ttlS }),
     Lifecycle({ spawnedAt: now, deadAt: now + ttlS }),
   );
 }

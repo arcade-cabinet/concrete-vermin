@@ -1,4 +1,5 @@
 import type { World } from "koota";
+import type { ArchetypeId } from "../../sim/archetypes/vermin";
 import { resolveHit } from "../../sim/engine/damage";
 import type { Rng } from "../../sim/rng";
 import { spawnSplash, takeDamage } from "../actions";
@@ -30,7 +31,7 @@ export function collideSystem(world: World, rng: Rng, now: number): CollideEvent
     e: ReturnType<World["query"]>[number];
     pos: { x: number; y: number };
     box: { hw: number; hh: number; headY: number };
-    arche: string;
+    arche: ArchetypeId;
   }> = [];
 
   for (const e of world.query(Vermin, Position, Hitbox, Health, Lifecycle)) {
@@ -97,7 +98,7 @@ export function collideSystem(world: World, rng: Rng, now: number): CollideEvent
       });
 
       if (killed) {
-        spawnSplash(world, v.pos, v.arche, now);
+        spawnSplash(world, v.pos, v.arche, v.arche, now);
       }
       break; // one projectile, one hit
     }
