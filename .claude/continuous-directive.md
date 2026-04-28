@@ -55,7 +55,7 @@ while queue has [ ] items:
 Each `[ ]` is one commit. Group small ones into one PR; large ones get their own.
 
 ### CV-RENDER — make the game LOOK like the design (PR #5)
-- [ ] Render: replace the placeholder ellipse vermin shapes with sprite-grade procedural draws (rat: stretched body + tail, roach: oval + antennae, pigeon: wings)
+- [x] Render: replace the placeholder ellipse vermin shapes with sprite-grade procedural draws (rat: stretched body + tail, roach: oval + antennae, pigeon: wings)
 - [ ] Render: per-archetype splash colors instead of one global cyan (rat=red-brown, roach=tar, pigeon=ash, etc.)
 - [ ] Render: muzzle flash burst on fire (sodium amber, 80ms ttl)
 - [ ] Render: vermin shadow ellipse beneath each entity (sells the depth)
