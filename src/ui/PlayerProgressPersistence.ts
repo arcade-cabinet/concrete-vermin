@@ -9,6 +9,7 @@ interface PersistedShape {
   completedMissionIds: string[];
   selectedMissionId: string;
   firstLaunchSeen?: boolean;
+  unlockedAchievements?: string[];
 }
 
 function snapshot(p: PlayerProgress): PersistedShape {
@@ -19,6 +20,7 @@ function snapshot(p: PlayerProgress): PersistedShape {
     completedMissionIds: [...p.completedMissionIds],
     selectedMissionId: p.selectedMissionId,
     firstLaunchSeen: p.firstLaunchSeen,
+    unlockedAchievements: [...p.unlockedAchievements],
   };
 }
 
@@ -33,6 +35,7 @@ function applySnapshot(data: PersistedShape): void {
     // Default false: a corrupted save / brand-new launch should still
     // see the tutorial overlay once.
     firstLaunchSeen: Boolean(data.firstLaunchSeen),
+    unlockedAchievements: data.unlockedAchievements ?? [],
   });
 }
 

@@ -25,6 +25,7 @@ import { SrLiveRegion } from "./SrLiveRegion";
 import { srMissionComplete, srMissionFailed, srMissionStart } from "../runtime/sr-only";
 import { usePlayerProgress } from "./PlayerProgress";
 import { autoPersistPlayerProgress, loadPlayerProgress } from "./PlayerProgressPersistence";
+import { installAchievementsTracker } from "../runtime/achievementsTracker";
 import { getMission } from "../sim/content/missions";
 
 const MISSION_KILLS_REQUIRED = 1;
@@ -49,7 +50,12 @@ export function App() {
 
   useEffect(() => {
     loadPlayerProgress();
-    return autoPersistPlayerProgress();
+    const teardownPersist = autoPersistPlayerProgress();
+    const teardownAchievements = installAchievementsTracker();
+    return () => {
+      teardownPersist();
+      teardownAchievements();
+    };
   }, []);
 
   // When the runner finishes a mission and credits cashAwarded into the

@@ -14,6 +14,12 @@ export interface PlayerProgress {
    * never re-appears on subsequent loads.
    */
   firstLaunchSeen: boolean;
+  /**
+   * Achievement ids that the player has unlocked. Persisted alongside
+   * cash + completed missions; the AchievementsScreen reads this to
+   * mark each one locked / unlocked.
+   */
+  unlockedAchievements: ReadonlyArray<string>;
   unlockMission: (id: string) => void;
   selectMission: (id: string) => void;
   awardCash: (amount: number) => void;
@@ -21,6 +27,7 @@ export interface PlayerProgress {
   unlockWeapon: (w: WeaponArchetype) => void;
   toggleMod: (modId: string) => void;
   markFirstLaunchSeen: () => void;
+  unlockAchievement: (id: string) => void;
   reset: () => void;
 }
 
@@ -42,6 +49,7 @@ export const usePlayerProgress = create<PlayerProgress>((set) => ({
   completedMissionIds: [],
   selectedMissionId: FIRST_MISSION_ID,
   firstLaunchSeen: false,
+  unlockedAchievements: [],
   unlockMission: (id) =>
     set((s) =>
       s.completedMissionIds.includes(id)
@@ -70,6 +78,12 @@ export const usePlayerProgress = create<PlayerProgress>((set) => ({
         : [...s.activeMods, modId],
     })),
   markFirstLaunchSeen: () => set({ firstLaunchSeen: true }),
+  unlockAchievement: (id) =>
+    set((s) =>
+      s.unlockedAchievements.includes(id)
+        ? s
+        : { unlockedAchievements: [...s.unlockedAchievements, id] },
+    ),
   reset: () =>
     set({
       cash: INITIAL_CASH,
@@ -78,5 +92,6 @@ export const usePlayerProgress = create<PlayerProgress>((set) => ({
       completedMissionIds: [],
       selectedMissionId: FIRST_MISSION_ID,
       firstLaunchSeen: false,
+      unlockedAchievements: [],
     }),
 }));

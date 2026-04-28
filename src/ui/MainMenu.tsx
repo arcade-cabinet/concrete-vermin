@@ -2,6 +2,7 @@ import * as Dialog from "@radix-ui/react-dialog";
 import { useEffect, useRef, useState } from "react";
 import { useGameStore } from "../runtime/store";
 import { COLOR, TYPE } from "../theme/tokens";
+import { AchievementsScreen } from "./AchievementsScreen";
 import { PawnShop } from "./PawnShop";
 import { SettingsDialog } from "./SettingsDialog";
 import { useArrowGridNav } from "./hooks/useArrowGridNav";
@@ -157,6 +158,7 @@ export function MainMenu() {
   const gridRef = useArrowGridNav<HTMLDivElement>();
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [marketOpen, setMarketOpen] = useState(false);
+  const [achievementsOpen, setAchievementsOpen] = useState(false);
 
   // Autofocus Press Start on mount so a keyboard / arcade-stick player
   // can press Enter immediately without tab-hunting.
@@ -242,11 +244,13 @@ export function MainMenu() {
           <MenuButton label="New Run" onClick={() => setPhase("briefing")} />
         ) : null}
         <MenuButton label="Market" onClick={() => setMarketOpen(true)} />
+        <MenuButton label="Achievements" onClick={() => setAchievementsOpen(true)} />
         <MenuButton label="Settings" onClick={() => setSettingsOpen(true)} />
         <MenuButton label="Credits" onClick={() => setPhase("credits")} />
       </div>
       <SettingsDialog open={settingsOpen} onOpenChange={setSettingsOpen} />
       <MarketDialog open={marketOpen} onOpenChange={setMarketOpen} />
+      {achievementsOpen ? <AchievementsScreen onBack={() => setAchievementsOpen(false)} /> : null}
       <style>{`
         @keyframes cv-press-start {
           0%, 100% { box-shadow: 0 0 22px ${COLOR.sodium}55, inset 0 0 10px ${COLOR.sodium}33; }
