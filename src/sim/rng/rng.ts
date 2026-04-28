@@ -93,7 +93,12 @@ function makeRng(seed: number, restoreState?: string): Rng {
       return next() < p;
     },
     fork(label: string): Rng {
-      return makeRng(mixLabel(startSeed ^ Math.floor(next() * 0x7fffffff), label));
+      // Order-independent: derived from the parent's STARTING seed plus the
+      // label. Calling fork() does NOT advance the parent stream, so the
+      // order of sibling forks is irrelevant — important for encounter
+      // composition where adding/removing/re-ordering spawn specs must
+      // not perturb the others' deterministic streams.
+      return makeRng(mixLabel(startSeed, label));
     },
     serialize(): RngState {
       return { seed: startSeed, state: JSON.stringify(generator.state()) };
