@@ -162,10 +162,9 @@ export function MainMenu() {
   }, []);
 
   return (
-    <div
+    <main
       data-testid="main-menu"
       data-phase-root="main-menu"
-      role="dialog"
       aria-label="Concrete Vermin main menu"
       style={{
         position: "fixed",
@@ -264,6 +263,6 @@ export function MainMenu() {
       >
         © 1979 / 2026 · ARCADE CABINET
       </footer>
-    </div>
+    </main>
   );
 }

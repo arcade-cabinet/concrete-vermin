@@ -15,9 +15,14 @@ import { MissionSelect } from "../MissionSelect";
 import { PawnShop } from "../PawnShop";
 import { SettingsDialog } from "../SettingsDialog";
 import { ToastHost, toast } from "../Toast";
+import { usePlayerProgress } from "../PlayerProgress";
 
 beforeEach(() => {
   useGameStore.setState({ phase: "main-menu", missionId: "", missionAct: "streets" });
+  // Reset PlayerProgress so cross-test mutations (cash, completed missions,
+  // active mods, selected mission) don't flip the new-player path to
+  // "Continue" or change shop / mission rendering downstream.
+  usePlayerProgress.getState().reset();
 });
 
 afterEach(() => {
