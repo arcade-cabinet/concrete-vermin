@@ -62,8 +62,8 @@ Each `[ ]` is one commit. Group small ones into one PR; large ones get their own
 - [x] Render: brick-wall hatch pattern instead of solid brick rectangle
 - [x] Render: streetlight pool gradient (sodium amber, ringing the player area)
 - [x] Render: subtle CRT scanline + vignette overlay (separate effect, the only file that may use the neon-cyan POC color per pre-edit-gate)
-- [ ] Render: HUD multiplier flashes (the modifierFlashes from scoring) — pop a small text overlay per kill
-- [ ] Render: kill streak / no-reload / variety badges fade in/out
+- [x] Render: HUD multiplier flashes (the modifierFlashes from scoring) — pop a small text overlay per kill
+- [x] Render: kill streak / no-reload / variety badges fade in/out
 
 ### CV-AUDIO — Tone.js sfx (PR #6)
 - [ ] src/audio/setup.ts: Tone.js master + bus structure (sfx/music/ui)

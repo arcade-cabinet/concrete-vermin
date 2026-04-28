@@ -52,6 +52,9 @@ export class GameRunner {
   // Muzzle flashes are too short-lived (80ms) to be worth ECS entities;
   // hold them in a rolling list pruned by TTL each tick.
   private muzzleFlashes: import("./store").MuzzleFlash[] = [];
+  // Modifier flashes (headshot/two-for-one/variety/no-reload/mid-air)
+  // for the HUD pop-up. Same rolling-list approach.
+  private modifierFlashes: import("./store").ModifierFlashSnapshot[] = [];
 
   constructor(seed: number) {
     this.gw = createGameWorld(seed);
@@ -156,7 +159,21 @@ export class GameRunner {
     const localMissCount = shotFired && events.length === 0 ? 1 : 0;
 
     // 6. Score.
-    scoreSystem(this.gw.world, this.gw.scoreEntity, events, localMissCount, this.now);
+    const flashes = scoreSystem(
+      this.gw.world,
+      this.gw.scoreEntity,
+      events,
+      localMissCount,
+      this.now,
+    );
+    // Append new flashes to the rolling list, prune anything older than the
+    // HUD fade window (1.2s).
+    for (const f of flashes) {
+      if (!this.modifierFlashes.some((m) => m.at === f.at && m.kind === f.kind)) {
+        this.modifierFlashes.push(f);
+      }
+    }
+    this.modifierFlashes = this.modifierFlashes.filter((f) => this.now - f.at < 1.2);
 
     // 7. Cull off-screen + lifecycle GC.
     cullOffscreenSystem(this.gw.world, this.zone, this.now);
@@ -231,6 +248,7 @@ export class GameRunner {
       projectiles,
       splashes,
       muzzleFlashes: this.muzzleFlashes.slice(),
+      modifierFlashes: this.modifierFlashes.slice(),
       now: this.now,
       score: { total, multiplier },
       killCount: this.kills,

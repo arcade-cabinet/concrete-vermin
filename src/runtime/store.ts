@@ -41,6 +41,12 @@ export interface SplashSnapshot {
   archetypeId: string;
 }
 
+export interface ModifierFlashSnapshot {
+  kind: "headshot" | "two-for-one" | "mid-air" | "variety" | "no-reload";
+  bonusPct: number;
+  at: number;
+}
+
 export interface MuzzleFlash {
   /** Player muzzle position (sim coords). */
   x: number;
@@ -71,6 +77,7 @@ export interface GameState {
   projectiles: ReadonlyArray<ProjectileSnapshot>;
   splashes: ReadonlyArray<SplashSnapshot>;
   muzzleFlashes: ReadonlyArray<MuzzleFlash>;
+  modifierFlashes: ReadonlyArray<ModifierFlashSnapshot>;
   /** Sim seconds since mission start — published every frame for time-based fades. */
   now: number;
   missionId: string;
@@ -89,6 +96,7 @@ export interface GameState {
         | "projectiles"
         | "splashes"
         | "muzzleFlashes"
+        | "modifierFlashes"
         | "score"
         | "player"
         | "killCount"
@@ -112,6 +120,7 @@ export const useGameStore = create<GameState>((set) => ({
   projectiles: [],
   splashes: [],
   muzzleFlashes: [],
+  modifierFlashes: [],
   now: 0,
   missionId: "",
   missionStartedAt: 0,
@@ -133,6 +142,7 @@ export const useGameStore = create<GameState>((set) => ({
       projectiles: [],
       splashes: [],
       muzzleFlashes: [],
+      modifierFlashes: [],
       now: 0,
     }),
   endMission: (won) => set({ phase: won ? "won" : "lost" }),

@@ -1,5 +1,11 @@
 import type { World } from "koota";
-import { type KillEvent, recordKill, recordMiss, type ScoreState } from "../../sim/engine/scoring";
+import {
+  type KillEvent,
+  type ModifierFlash,
+  recordKill,
+  recordMiss,
+  type ScoreState,
+} from "../../sim/engine/scoring";
 import { setScore } from "../actions";
 import { Score } from "../traits";
 import type { CollideEvent } from "./collide";
@@ -48,9 +54,9 @@ export function scoreSystem(
   events: ReadonlyArray<CollideEvent>,
   missCount: number,
   now: number,
-): void {
+): ReadonlyArray<ModifierFlash> {
   let s = readScoreState(world, scoreEntityId);
-  if (!s) return;
+  if (!s) return [];
 
   for (let i = 0; i < missCount; i++) s = recordMiss(s, now);
 
@@ -67,4 +73,5 @@ export function scoreSystem(
     multiplierDecayAt: s.multiplierDecayAt,
     noReloadStreak: s.noReloadStreak,
   });
+  return s.modifierFlashes;
 }
