@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { lazy, Suspense, useEffect } from "react";
 import {
   setMasterVolumeDb,
   setMusicVolumeDb,
@@ -10,22 +10,29 @@ import { setHapticsEnabled } from "../platform/haptics";
 import { useGameStore } from "../runtime/store";
 import { ArcadeFrame } from "./ArcadeFrame";
 import { Briefing } from "./Briefing";
-import { Credits } from "./Credits";
-import { FirstLaunchOverlay } from "./FirstLaunchOverlay";
 import { GameStage } from "./GameStage";
 import { GlobalStyles } from "./GlobalStyles";
 import { MainMenu } from "./MainMenu";
 import { MissionResult } from "./MissionResult";
 import { MissionSelect } from "./MissionSelect";
 import { OpeningInterstitial } from "./OpeningInterstitial";
-import { PauseMenu } from "./PauseMenu";
-import { PawnShop } from "./PawnShop";
 import { ToastHost } from "./Toast";
 import { SrLiveRegion } from "./SrLiveRegion";
 import { srMissionComplete, srMissionFailed, srMissionStart } from "../runtime/sr-only";
 import { usePlayerProgress } from "./PlayerProgress";
 import { autoPersistPlayerProgress, loadPlayerProgress } from "./PlayerProgressPersistence";
 import { installAchievementsTracker } from "../runtime/achievementsTracker";
+
+// Lazy-loaded — these screens / overlays are reached after Press Start
+// or only on specific player choices, so deferring their JS shaves the
+// critical-path bundle. React.lazy needs a default export, so each
+// dynamic-import returns a tiny wrapper around the named export.
+const Credits = lazy(() => import("./Credits").then((m) => ({ default: m.Credits })));
+const PauseMenu = lazy(() => import("./PauseMenu").then((m) => ({ default: m.PauseMenu })));
+const FirstLaunchOverlay = lazy(() =>
+  import("./FirstLaunchOverlay").then((m) => ({ default: m.FirstLaunchOverlay })),
+);
+const PawnShop = lazy(() => import("./PawnShop").then((m) => ({ default: m.PawnShop })));
 import { getMission } from "../sim/content/missions";
 
 const MISSION_KILLS_REQUIRED = 1;
@@ -127,7 +134,11 @@ export function App() {
       <ToastHost />
       <OpeningInterstitial />
       {phase === "main-menu" ? <MainMenu /> : null}
-      {phase === "credits" ? <Credits /> : null}
+      {phase === "credits" ? (
+        <Suspense fallback={null}>
+          <Credits />
+        </Suspense>
+      ) : null}
       {phase === "briefing" ? <Briefing /> : null}
       {phase === "mission-select" ? (
         <MissionSelect
@@ -135,18 +146,24 @@ export function App() {
         />
       ) : null}
       {phase === "pawn-shop" ? (
-        <PawnShop
-          onContinue={() => setPhase("mission-select")}
-          onBack={() => setPhase("mission-select")}
-        />
+        <Suspense fallback={null}>
+          <PawnShop
+            onContinue={() => setPhase("mission-select")}
+            onBack={() => setPhase("mission-select")}
+          />
+        </Suspense>
       ) : null}
       {phase === "playing" ? (
         <>
           <ArcadeFrame>
             <GameStage />
           </ArcadeFrame>
-          <PauseMenu onRestart={restart} />
-          <FirstLaunchOverlay />
+          <Suspense fallback={null}>
+            <PauseMenu onRestart={restart} />
+          </Suspense>
+          <Suspense fallback={null}>
+            <FirstLaunchOverlay />
+          </Suspense>
         </>
       ) : null}
       {phase === "won" || phase === "lost" ? (
