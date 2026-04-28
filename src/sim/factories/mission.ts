@@ -43,33 +43,24 @@ export const cutsceneSchema = z
   })
   .strict();
 
-/**
- * Mid-mission dynamic event triggers. The runner inspects each event's
- * trigger every tick after the kill / encounter accounting; when a
- * trigger fires for the first time, the corresponding effect publishes
- * to the store (boss-bark string, surprise-wave spawn injection, or
- * environmental-hazard label). Each event fires at most once per
- * mission run.
- */
+// Each event fires at most once per mission run; the runner evaluates
+// triggers every tick after the kill/encounter accounting.
 export const missionEventTriggerSchema = z.discriminatedUnion("kind", [
   z
     .object({
       kind: z.literal("at-encounter-start"),
-      /** 0-based encounter index. Fires when that encounter becomes active. */
       index: z.number().int().nonnegative(),
     })
     .strict(),
   z
     .object({
       kind: z.literal("at-kill-count"),
-      /** Cumulative mission kill count threshold (>=). */
       threshold: z.number().int().positive(),
     })
     .strict(),
   z
     .object({
       kind: z.literal("at-time"),
-      /** Mission seconds (sim time). */
       seconds: z.number().nonnegative(),
     })
     .strict(),
@@ -79,27 +70,24 @@ export const missionEventEffectSchema = z.discriminatedUnion("kind", [
   z
     .object({
       kind: z.literal("boss-bark"),
-      /** HUD + SR string. Should be short (<=80 chars to fit one HUD line). */
+      // 120-char cap keeps the bark on a single HUD line at 12px mono.
       text: z.string().min(2).max(120),
     })
     .strict(),
   z
     .object({
       kind: z.literal("environmental-hazard"),
-      /** HUD label (e.g., "PIPE BURST", "BLACKOUT", "CROSSWIND"). */
       label: z.string().min(2).max(40),
-      /** Optional flavor sub-line. */
       detail: z.string().min(2).max(120).optional(),
     })
     .strict(),
   z
     .object({
       kind: z.literal("surprise-wave"),
-      /** Variant id from the bestiary. */
       variant: z.string().min(1),
-      /** Number of additional vermin to spawn. */
+      // 20-cap is the same hard limit composeEncounter enforces; mirror
+      // it here to fail at defineMission rather than at runtime.
       count: z.number().int().positive().max(20),
-      /** Spawn pattern key (must be one supported by composeEncounter). */
       pattern: z.enum(SPAWN_PATTERNS).default("left-flood"),
     })
     .strict(),
@@ -117,32 +105,28 @@ export const missionSpecSchema = z
   .object({
     id: z.string().min(1),
     act: z.enum(ACT_IDS),
-    /** Default loadout — player may swap in pawn shop. */
     weapon: z.enum(WEAPON_ARCHETYPES),
     cutscene: cutsceneSchema,
     encounters: z.array(encounterSpecSchema).min(1),
-    /**
-     * Mid-mission dynamic events (boss-bark, environmental-hazard,
-     * surprise-wave). Each fires at most once. Optional; missions
-     * without events run as before.
-     */
     events: z.array(missionEventSchema).default([]),
-    /** Optional designer-authored seed for replay. */
     seed: z.number().int().optional(),
-    /**
-     * Lives the player gets to clear this mission. Defaults to 3.
-     * Boss missions and the tutorial extend to 5 so a single bad
-     * spawn doesn't ice the run.
-     */
+    // 9-life ceiling exists so a designer error (typo of 99) can't
+    // turn a mission into an unkillable run.
     livesAllowance: z.number().int().positive().max(9).default(3),
-    /**
-     * Cash awarded on first clear. Optional; falls back to a per-act
-     * default in the runner (Streets 100 / Underworld 200 / Above 350
-     * for boss tiers).
-     */
     cashAward: z.number().int().nonnegative().optional(),
+    secret: z.boolean().default(false),
+    sGradeUnlockFrom: z.string().min(1).optional(),
   })
-  .strict();
+  .strict()
+  .superRefine((data, ctx) => {
+    if (data.secret && !data.sGradeUnlockFrom) {
+      ctx.addIssue({
+        code: "custom",
+        message: "secret missions must declare sGradeUnlockFrom",
+        path: ["sGradeUnlockFrom"],
+      });
+    }
+  });
 
 export type Collectible = z.infer<typeof collectibleSchema>;
 export type Interstitial = z.input<typeof interstitialSchema>;

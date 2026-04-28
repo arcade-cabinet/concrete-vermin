@@ -591,6 +591,15 @@ function EventBarks() {
   const now = useGameStore((s) => s.now);
   const reduced = useReducedMotion();
   const visible = barks.slice(-3).reverse();
+  // Mirror the freshest visible bark into a hidden polite live region.
+  // The runner already calls announceForScreenReader for every event,
+  // but exposing the bark content alongside the visual stack means
+  // assistive tech that doesn't reach SrLiveRegion still picks up the
+  // message in context.
+  const latest = visible[0] ?? null;
+  const liveText = latest
+    ? `${latest.text}${latest.detail ? ` — ${latest.detail}` : ""}`
+    : "";
   return (
     <div
       data-testid="hud-event-barks"
@@ -653,6 +662,14 @@ function EventBarks() {
           </div>
         );
       })}
+      <div
+        data-testid="hud-event-barks-live"
+        aria-live="polite"
+        aria-atomic="true"
+        style={visuallyHidden}
+      >
+        {liveText}
+      </div>
     </div>
   );
 }

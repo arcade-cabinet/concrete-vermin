@@ -62,7 +62,7 @@ export const mission07: Mission = defineMission({
     },
     {
       id: "icon-glows",
-      trigger: { kind: "at-kill-count", threshold: 14 },
+      trigger: { kind: "at-kill-count", threshold: 11 },
       effect: {
         kind: "environmental-hazard",
         label: "ICON GLOWS",

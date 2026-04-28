@@ -57,21 +57,14 @@ export interface ModifierFlashSnapshot {
 }
 
 /**
- * Mid-mission dynamic event bark — boss line, environmental hazard
- * label, or surprise-wave alert. The HUD renders a stack of recent
- * barks; entries auto-evict after their TTL elapses (driven by `at` +
- * `now` in the renderer).
+ * Eviction is owned by the runner (drops entries past EVENT_BARK_TTL_S
+ * before publishing), so the HUD can render the snapshot as-is.
  */
 export interface EventBarkSnapshot {
-  /** Stable id from the mission event, so the renderer can key + dedupe. */
   id: string;
-  /** Display kind drives icon + color tone in the HUD. */
   kind: "boss" | "hazard" | "wave";
-  /** Primary line. Short — fits one HUD row at 12 px mono. */
   text: string;
-  /** Optional sub-line (used by environmental-hazard's `detail`). */
   detail?: string;
-  /** Sim seconds when the bark fired. */
   at: number;
 }
 
