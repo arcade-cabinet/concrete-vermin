@@ -19,6 +19,27 @@ const MISSION_SHOOTER_OVERRIDES: Record<string, { x: number; y: number; playerLi
   // playerLineY=135 scores roaches at y=210 above rats at y=250, forcing
   // the governor to target them immediately on spawn.
   "streets-secret-cellar": { x: 240, y: 260, playerLineY: 135 },
+
+  // River mutant: flamethrower origin is (240, 246). Boss-scripted at y=135;
+  // surface-from-grate fish at y≈256. Both are within flamethrower rangeMax=180.
+  // Raise shooterPos to y=135 so the lead-point calculation for the boss
+  // (which moves around y=135) stays close to the actual projectile origin,
+  // reducing overshoot-gate misses. playerLineY=135 weights the boss as the
+  // top threat the moment encounter-2 starts.
+  "underworld-07-river-mutant": { x: 240, y: 135, playerLineY: 135 },
+};
+
+/**
+ * Per-mission profile overrides. Applied on top of PLAYTHROUGH defaults.
+ * Use sparingly — only when the mission's weapon mechanics require a
+ * different timing budget (e.g. flamethrower's high fire-rate).
+ */
+const MISSION_PROFILE_OVERRIDES: Partial<Record<string, Partial<GovernorProfile>>> = {
+  // Flamethrower fires at 24 Hz (≈41.7 ms/shot). The default shotCooldownMs=80
+  // throttles the governor to ~12.5 Hz — halving DPS against the 4224 HP armored
+  // boss. Drop to 0 so the governor queues shots at the weapon's maximum cadence
+  // (magSize=80 empties in ~1.33s, then 2400ms reload → 21 effective shots/sec).
+  "underworld-07-river-mutant": { shotCooldownMs: 0 },
 };
 
 export interface PlaythroughResult {
@@ -58,7 +79,8 @@ export function playMissionWithGovernor(
   mission: Readonly<Mission>,
   opts: PlaythroughOpts = {},
 ): PlaythroughResult {
-  const profile = opts.profile ?? PLAYTHROUGH;
+  const profileOverride = MISSION_PROFILE_OVERRIDES[mission.id];
+  const profile = opts.profile ?? (profileOverride ? { ...PLAYTHROUGH, ...profileOverride } : PLAYTHROUGH);
   const maxSimSeconds = opts.maxSimSeconds ?? 180;
   const override = MISSION_SHOOTER_OVERRIDES[mission.id];
   const defaultPos = { x: 240, y: 260 };

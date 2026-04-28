@@ -115,6 +115,14 @@ export function aiSystem(
 
     // Advance step on completion or timeout.
     const elapsed = now - stepStart;
+    // dive-at needs enough time to cross the full viewport height at the
+    // step's speed (zone height 270 ÷ min speed 56 ≈ 4.8s). Using the
+    // fixed 0.6s cap caused ceiling-drop roaches to abort their dive
+    // before entering weapon range, leaving them perpetually unreachable.
+    const diveAtCap =
+      "speed" in step && step.speed > 0
+        ? (zone.maxY - zone.minY) / step.speed + 0.5
+        : STEP_DURATION_S;
     const stepCap =
       step.kind === "wait"
         ? step.durationS
@@ -122,7 +130,9 @@ export function aiSystem(
           ? step.durationS
           : step.kind === "pop-out"
             ? step.durationS
-            : STEP_DURATION_S;
+            : step.kind === "dive-at"
+              ? diveAtCap
+              : STEP_DURATION_S;
     if (drive.finished || elapsed >= stepCap) {
       e.set(AIPlan, { plan: active, stepIndex: stepIdx + 1, stepStartedAt: now });
     } else {

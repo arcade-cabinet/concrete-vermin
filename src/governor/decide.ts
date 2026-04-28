@@ -42,6 +42,13 @@ export interface GovernorTickInput {
   playerLineY: number;
   shooterPos: { x: number; y: number };
   state: GovernorState;
+  /**
+   * Actual projectile origin in sim coords. Defaults to the fixed player
+   * position (zone.maxX/2, zone.maxY-24) = (240, 246). Used to pre-filter
+   * out-of-range targets so the governor doesn't waste shots on vermin that
+   * the projectile can't reach given the weapon's rangeMax.
+   */
+  playerOrigin?: { x: number; y: number };
 }
 
 /**
@@ -50,6 +57,9 @@ export interface GovernorTickInput {
  * Reads useGameStore.getState() — the store is the source of truth for
  * what the player can see, so the governor reads from there too.
  */
+// Default player origin: zone.maxX/2=240, zone.maxY-24=246.
+const DEFAULT_PLAYER_ORIGIN = { x: 240, y: 246 };
+
 export function governorTick(input: GovernorTickInput): void {
   const { runner, weapon, profile, playerLineY, shooterPos, state } = input;
   const snap = useGameStore.getState();
@@ -70,7 +80,15 @@ export function governorTick(input: GovernorTickInput): void {
 
   if (nowMs - state.lastShotAtMs < profile.shotCooldownMs) return;
 
-  const target = selectHighestThreat(snap.vermin, weapon.damage, { playerLineY });
+  // Pre-filter vermin that are beyond weapon range from the actual player
+  // origin. Shots fired at out-of-range targets die in flight and waste
+  // ammo, especially for short-range weapons (sawed-off rangeMax=130).
+  const origin = input.playerOrigin ?? DEFAULT_PLAYER_ORIGIN;
+  const reachable = snap.vermin.filter(
+    (v) => Math.hypot(v.x - origin.x, v.y - origin.y) <= weapon.rangeMax,
+  );
+
+  const target = selectHighestThreat(reachable, weapon.damage, { playerLineY });
   if (!target) return;
 
   const archetype = ARCHETYPES[target.archetypeId as ArchetypeId];
