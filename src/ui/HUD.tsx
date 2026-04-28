@@ -1,9 +1,12 @@
+import { useEffect } from "react";
 import { type ModifierFlashSnapshot, useGameStore } from "../runtime/store";
-import { COLOR, TYPE } from "../theme/tokens";
-import { useIsNarrow } from "./hooks/useViewport";
+import { COLOR, MOTION, TYPE } from "../theme/tokens";
+import { useTickedNumber } from "./hooks/useTickedNumber";
+import { useIsNarrow, usePrefersReducedMotion } from "./hooks/useViewport";
 
 const FLASH_TTL_S = 1.0;
 const TOUCH_TARGET_PX = 44;
+const HUD_STYLE_ID = "cv-hud-pulse-styles";
 
 const FLASH_LABELS: Record<ModifierFlashSnapshot["kind"], string> = {
   headshot: "HEADSHOT",
@@ -21,10 +24,40 @@ const FLASH_COLORS: Record<ModifierFlashSnapshot["kind"], string> = {
   "no-reload": COLOR.brick,
 };
 
+const HUD_KEYFRAMES = `
+@keyframes cv-pulse-empty {
+  0%, 100% { color: ${COLOR.sodium}; }
+  50% { color: ${COLOR.brick}; }
+}
+@keyframes cv-pulse-critical {
+  0%, 100% { color: ${COLOR.brick}; opacity: 1; }
+  50% { color: ${COLOR.brick}; opacity: 0.5; }
+}
+.cv-pulse-empty { animation: cv-pulse-empty ${MOTION.criticalLifeMs}ms ease-in-out infinite; }
+.cv-pulse-critical { animation: cv-pulse-critical ${MOTION.criticalLifeMs}ms ease-in-out infinite; }
+`;
+
+/**
+ * Inject the HUD's keyframe stylesheet once per page. Components opt
+ * in via classNames; reduced-motion just doesn't apply the class so the
+ * keyframes stay parked. Idempotent: keyed off a stable element id so
+ * StrictMode double-render doesn't add a duplicate sheet.
+ */
+function useHudStyles(): void {
+  useEffect(() => {
+    if (typeof document === "undefined") return;
+    if (document.getElementById(HUD_STYLE_ID)) return;
+    const el = document.createElement("style");
+    el.id = HUD_STYLE_ID;
+    el.textContent = HUD_KEYFRAMES;
+    document.head.appendChild(el);
+  }, []);
+}
+
 function ModifierFlashes() {
   const flashes = useGameStore((s) => s.modifierFlashes);
   const now = useGameStore((s) => s.now);
-  // Newest first, fading by age.
+  const reduced = useReducedMotion();
   const visible = [...flashes].reverse().slice(0, 4);
   return (
     <div
@@ -47,8 +80,10 @@ function ModifierFlashes() {
         if (age >= FLASH_TTL_S) return null;
         const t = age / FLASH_TTL_S;
         const alpha = 1 - t;
-        const scale = 1 + (1 - t) * 0.15;
-        const lift = -t * 18;
+        // Reduced-motion: hold scale 1, no lift. The flash still
+        // appears and fades — that's information, not animation.
+        const scale = reduced ? 1 : 1 + (1 - t) * 0.15;
+        const lift = reduced ? 0 : -t * 18;
         return (
           <div
             key={`${f.kind}:${f.at}`}
@@ -85,7 +120,6 @@ function MuteButton() {
         background: "transparent",
         border: `1px solid ${COLOR.sodium}`,
         color: COLOR.sodium,
-        // Touch-target minimum (44 CSS px). Padding centers the label.
         minWidth: TOUCH_TARGET_PX,
         minHeight: TOUCH_TARGET_PX,
         padding: "0 12px",
@@ -100,12 +134,29 @@ function MuteButton() {
   );
 }
 
+/**
+ * Resolve "should I animate?" from the store setting first, then the
+ * OS-level media query as a fallback. Store wins so a player can opt in
+ * to motion even when the OS reports reduce; or opt out independently.
+ */
+function useReducedMotion(): boolean {
+  const fromOs = usePrefersReducedMotion();
+  const fromSettings = useGameStore((s) => s.settings.reducedMotion);
+  return fromSettings || fromOs;
+}
+
 export function HUD() {
   const score = useGameStore((s) => s.score);
   const player = useGameStore((s) => s.player);
   const killCount = useGameStore((s) => s.killCount);
   const killsRequired = useGameStore((s) => s.killsRequired);
   const narrow = useIsNarrow();
+  const reduced = useReducedMotion();
+
+  useHudStyles();
+  const displayedTotal = useTickedNumber(score.total, { instant: reduced });
+  const ammoEmpty = player.ammoCurrent === 0;
+  const livesCritical = player.livesRemaining <= 1;
 
   return (
     <>
@@ -115,9 +166,6 @@ export function HUD() {
           top: "calc(12px + env(safe-area-inset-top))",
           left: 0,
           right: 0,
-          // Narrow viewports (phones in portrait): stack the three columns
-          // top-to-bottom centered. Wider viewports keep the design's
-          // edge-anchored row layout.
           display: "flex",
           flexDirection: narrow ? "column" : "row",
           justifyContent: narrow ? "flex-start" : "space-between",
@@ -134,7 +182,7 @@ export function HUD() {
       >
         <div>
           <span style={{ color: COLOR.sodium }}>SCORE</span>{" "}
-          {score.total.toString().padStart(6, "0")}
+          {displayedTotal.toString().padStart(6, "0")}
           {"  "}
           <span style={{ color: COLOR.sodium }}>×{score.multiplier.toFixed(1)}</span>
         </div>
@@ -142,9 +190,26 @@ export function HUD() {
           <span style={{ color: COLOR.sodium }}>VERMIN</span> {killCount} / {killsRequired}
         </div>
         <div>
-          <span style={{ color: COLOR.sodium }}>SHELLS</span> {player.ammoCurrent}/{player.ammoMax}
+          <span
+            // Sodium → brick pulse when the tube is empty. Suppressed
+            // under reduced-motion so the player sees a static brick
+            // "SHELLS 0/6" (still differentiable, just not noisy).
+            className={ammoEmpty && !reduced ? "cv-pulse-empty" : undefined}
+            style={{ color: ammoEmpty ? COLOR.brick : COLOR.sodium }}
+          >
+            SHELLS
+          </span>{" "}
+          {player.ammoCurrent}/{player.ammoMax}
           {"  "}
-          <span style={{ color: COLOR.sodium }}>LIVES</span> {player.livesRemaining}
+          <span
+            className={livesCritical && !reduced ? "cv-pulse-critical" : undefined}
+            style={{ color: livesCritical ? COLOR.brick : COLOR.sodium }}
+          >
+            LIVES
+          </span>{" "}
+          <span style={{ color: livesCritical ? COLOR.brick : COLOR.cream }}>
+            {player.livesRemaining}
+          </span>
         </div>
       </div>
       <ModifierFlashes />

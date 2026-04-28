@@ -32,6 +32,15 @@ export function useIsNarrow(): boolean {
 }
 
 /**
+ * `true` when the OS reports a reduced-motion preference. Subscribes to
+ * the `prefers-reduced-motion` media query so flips at runtime take
+ * effect without a refresh.
+ */
+export function usePrefersReducedMotion(): boolean {
+  return useMediaMatch("(prefers-reduced-motion: reduce)");
+}
+
+/**
  * Device pixel ratio, refreshed on the `change` of the matching dpr
  * media query. Returns 1 in non-browser environments. Used by the
  * reticle to thicken its stroke on high-DPR displays so the cross

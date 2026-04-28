@@ -28,6 +28,19 @@ export function App() {
     return autoPersistPlayerProgress();
   }, []);
 
+  // Seed the reduced-motion setting from the OS preference at boot, then
+  // keep it in sync with the matchMedia. The user can still override
+  // either way through the settings dialog (CV-UX, coming).
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const mql = window.matchMedia("(prefers-reduced-motion: reduce)");
+    useGameStore.getState().setReducedMotion(mql.matches);
+    const onChange = (e: MediaQueryListEvent) =>
+      useGameStore.getState().setReducedMotion(e.matches);
+    mql.addEventListener("change", onChange);
+    return () => mql.removeEventListener("change", onChange);
+  }, []);
+
   const deploy = (id: string) => {
     try {
       const m = getMission(id);

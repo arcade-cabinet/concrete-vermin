@@ -140,13 +140,13 @@ Each `[ ]` is one commit. Group small ones into one PR; large ones get their own
 - [x] Briefing screen: layout works on 9:16 portrait, 16:9 landscape, ultrawide
 - [x] MissionResult: same — flexbox column on portrait, row on landscape
 - [x] HUD multiplier flash: fade+scale animation tied to scoring modifier flashes
-- [ ] HUD score counter: tick-up animation (rolls from old value to new across 200ms)
-- [ ] HUD ammo: red flash when empty, slow refill bar during reload window
-- [ ] HUD: critical-life pulse when livesRemaining <= 1
+- [x] HUD score counter: tick-up animation (rolls from old value to new across 200ms)
+- [x] HUD ammo: brick pulse when empty (refill bar deferred — needs reload-window state in runner; tracked under CV-INPUT)
+- [x] HUD: critical-life pulse when livesRemaining <= 1
 - [x] HUD: streak badge slot — variety / no-reload / hot-streak chips
 - [ ] Pause menu (Radix Dialog): resume / restart / settings / quit-to-menu
 - [ ] Settings dialog: master volume / mute / motion-reduction / contrast / haptics toggle
-- [ ] Motion-reduction (prefers-reduced-motion): disable splash flashes, slow-down score tick-up
+- [x] Motion-reduction (prefers-reduced-motion): disable splash flashes, slow-down score tick-up
 - [ ] High-contrast mode: bump foreground vs background ratio to AAA
 - [ ] Keyboard focus rings: visible 2px sodium-amber outline on every focusable element
 - [ ] Tab order: Briefing → Begin button focused on mount; Result → Again button focused on mount

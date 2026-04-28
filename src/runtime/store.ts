@@ -66,6 +66,15 @@ export interface Settings {
   /** Master volume in dB. -60 = mute, 0 = unity. Default -6. */
   masterVolumeDb: number;
   muted: boolean;
+  /**
+   * Honor the OS-level "reduce motion" preference. When true, score
+   * tick-up animations snap, modifier flashes don't scale or lift, and
+   * critical-life/ammo-empty pulses go quiet. Initialized from the
+   * `prefers-reduced-motion` media query at app boot.
+   */
+  reducedMotion: boolean;
+  /** AAA contrast: bumps body text to pure cream, dims accent backdrops. */
+  highContrast: boolean;
 }
 
 export interface GameState {
@@ -75,6 +84,8 @@ export interface GameState {
   setCrtOverlay: (on: boolean) => void;
   setMasterVolumeDb: (db: number) => void;
   setMuted: (m: boolean) => void;
+  setReducedMotion: (on: boolean) => void;
+  setHighContrast: (on: boolean) => void;
   reticle: { x: number; y: number };
   score: { total: number; multiplier: number };
   player: { ammoCurrent: number; ammoMax: number; livesRemaining: number };
@@ -116,10 +127,18 @@ export interface GameState {
 export const useGameStore = create<GameState>((set) => ({
   phase: "briefing",
   viewport: { width: 480, height: 270 },
-  settings: { crtOverlay: false, masterVolumeDb: -6, muted: false },
+  settings: {
+    crtOverlay: false,
+    masterVolumeDb: -6,
+    muted: false,
+    reducedMotion: false,
+    highContrast: false,
+  },
   setCrtOverlay: (on) => set((s) => ({ settings: { ...s.settings, crtOverlay: on } })),
   setMasterVolumeDb: (db) => set((s) => ({ settings: { ...s.settings, masterVolumeDb: db } })),
   setMuted: (muted) => set((s) => ({ settings: { ...s.settings, muted } })),
+  setReducedMotion: (on) => set((s) => ({ settings: { ...s.settings, reducedMotion: on } })),
+  setHighContrast: (on) => set((s) => ({ settings: { ...s.settings, highContrast: on } })),
   reticle: { x: 240, y: 200 },
   score: { total: 0, multiplier: 1 },
   player: { ammoCurrent: 6, ammoMax: 6, livesRemaining: 3 },
