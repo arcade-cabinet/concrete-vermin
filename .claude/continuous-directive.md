@@ -159,7 +159,7 @@ Each `[ ]` is one commit. Group small ones into one PR; large ones get their own
 - [x] CRT overlay (src/render/effects/crt.ts) — the one allowed neon-cyan POC color, behind a setting toggle, off by default
 - [x] Performance: Pixi resolution caps at min(devicePixelRatio, 2) on mobile to keep frame rate
 - [x] Performance: useCallback on every render draw — done at write time. Live profile on a 2018-era mobile deferred to CV-DEPLOYMENT (needs an actual device).
-- [ ] Visual regression: take Pages screenshots at 320×568, 375×812, 768×1024, 1280×720, 1920×1080 + commit to docs/screenshots/
+- [x] Visual regression: take Pages screenshots at 320×568, 375×812, 768×1024, 1280×720, 1920×1080 + commit to docs/screenshots/
 
 ### CV-AUDIO-DESIGN — sound bible (PR #8d — creative)
 - [x] docs/AUDIO.md: per-weapon sonic signature description (shotgun = thumpy thwack-pop; revolver = sharp bark; smg = chittering rip; sawed-off = wet boom; flame = sustained roar; tesla = arc-snap)
@@ -192,8 +192,8 @@ Each `[ ]` is one commit. Group small ones into one PR; large ones get their own
 - [x] docs/STATE.md: update to reflect post-v1.0.0 state
 - [x] docs/ARCHITECTURE.md: now-real component diagram (sim → ECS → render → UI → audio)
 - [x] docs/TESTING.md: actual run commands, what each suite covers
-- [ ] CHANGELOG.md: cross-reference release-please's autogen with hand-written release notes
-- [ ] README.md: screenshot of Pages-served game; quickstart for contributors
+- [x] CHANGELOG.md: cross-reference release-please's autogen with hand-written release notes
+- [x] README.md: screenshot of Pages-served game; quickstart for contributors
 
 ## Out of scope until 1.x (do NOT pick up)
 
