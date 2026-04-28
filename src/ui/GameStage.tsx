@@ -1,6 +1,7 @@
 import { Application, useTick } from "@pixi/react";
 import { useEffect, useRef } from "react";
 import "../render/extend";
+import { CRTOverlay } from "../render/CRTOverlay";
 import { MuzzleFlashLayer } from "../render/MuzzleFlashLayer";
 import { ProjectileLayer } from "../render/ProjectileLayer";
 import { ReticleLayer } from "../render/ReticleLayer";
@@ -27,6 +28,7 @@ export function GameStage() {
   const phase = useGameStore((s) => s.phase);
   const startMission = useGameStore((s) => s.startMission);
   const setReticle = useGameStore((s) => s.setReticle);
+  const crtOn = useGameStore((s) => s.settings.crtOverlay);
 
   useEffect(() => {
     if (phase === "playing" && !runnerRef.current) {
@@ -98,6 +100,7 @@ export function GameStage() {
           <MuzzleFlashLayer />
           <SplashLayer />
           <ReticleLayer />
+          {crtOn ? <CRTOverlay /> : null}
           {runnerRef.current ? <Loop runner={runnerRef.current} /> : null}
         </Application>
       </div>
