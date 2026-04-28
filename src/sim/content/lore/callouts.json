@@ -10,19 +10,52 @@
   "headshotStreak": {
     "3": "EYE FOR IT",
     "5": "SURGEON",
-    "10": "PAWNBROKER WOULD APPROVE"
+    "10": "PAWNBROKER WOULD APPROVE",
+    "20": "BOTH EYES OPEN"
   },
   "noReloadStreak": {
     "8": "RHYTHM",
     "16": "NEVER MISS A BEAT",
-    "32": "MACHINE"
+    "32": "MACHINE",
+    "64": "POSSESSED"
   },
+  "chainKill": {
+    "3": "THREE IN ONE",
+    "4": "FOUR-PACK",
+    "5": "FIVE BREATHS",
+    "7": "WHOLE FLOCK"
+  },
+  "bossPhase": {
+    "phase-2": "HE'S NOT HAPPY",
+    "phase-3": "FINAL FORM",
+    "enraged": "HE'S COMING FOR YOU",
+    "wounded": "BLEED HIM OUT",
+    "low-hp": "ONE MORE PUSH"
+  },
+  "noDamage": {
+    "easy": "CLEAN SHAVE",
+    "medium": "NEVER TOUCHED",
+    "hard": "GHOST"
+  },
+  "lowLifeKill": "ONE LIFE LEFT",
+  "lastShellKill": "ONE LEFT IN THE TUBE",
+  "lastSecondClear": "JUST IN TIME",
   "twoForOne": "TWO-FOR-ONE",
   "midAir": "OUT OF THE SKY",
   "variety": "MIXED MENU",
+  "noModsRun": "BARE-KNUCKLE WIN",
   "perfectMission": "NOT A SCRATCH",
-  "lastShellKill": "ONE LEFT IN THE TUBE",
   "comeback": "BACK FROM THE BRINK",
   "bossOpen": "HE SAW YOU COMING",
-  "bossDown": "DOWN. STAY DOWN."
+  "bossDown": "DOWN. STAY DOWN.",
+  "perfectAccuracy": "EVERY SHOT TOLD",
+  "noWasteShells": "NOT ONE WASTED",
+  "firstClear": "FIRST OF MANY",
+  "tutorialClear": "FIRST DAY ON THE JOB",
+  "rapidClear": "BLOCK CLEARED IN A MINUTE",
+  "marathonClear": "LONG NIGHT, GOOD WORK",
+  "bossOnly": "STRAIGHT TO THE TOP",
+  "vermin50": "FIFTY IN THE BOOK",
+  "vermin100": "A HUNDRED ON THE LEDGER",
+  "vermin500": "FIVE HUNDRED. THE BLOCK SLEEPS BETTER."
 }

@@ -135,7 +135,7 @@ Each `[ ]` is one commit. Group small ones into one PR; large surfaces get their
 - [ ] src/sim/content/encounters/: per-act unique encounter compositions (no two missions feel identical)
 - [ ] src/sim/content/missions/secret/: NEW — 3 hidden missions unlocked by S-grade conditions (bonus content for replay)
 - [ ] src/sim/content/lore/*.json: per-mission post-mission Pawnbroker debrief blurb (different per win/loss/S-grade)
-- [ ] src/ui/copy/encounter-callouts.ts: 30+ dynamic callouts (was 10) — chained kills, headshot streaks, no-damage runs, boss-phase transitions
+- [x] src/ui/copy/encounter-callouts.ts: 30+ dynamic callouts (was 10) — chained kills, headshot streaks, no-damage runs, boss-phase transitions
 - [x] src/sim/content/achievements.ts: NEW — 20+ achievements with unlock conditions, persisted via player progress store
 - [x] src/ui/AchievementsScreen.tsx: NEW — gallery view of locked/unlocked
 - [x] tests: src/sim/__tests__/achievements.test.ts — each achievement triggers under expected conditions
