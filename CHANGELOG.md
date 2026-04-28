@@ -6,6 +6,13 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 Releases are managed by [release-please](https://github.com/googleapis/release-please).
 
+## [1.11.1](https://github.com/arcade-cabinet/concrete-vermin/compare/v1.11.0...v1.11.1) (2026-04-28)
+
+
+### Documentation
+
+* **brand:** full BESTIARY + WEAPONS + MODS + BALANCE par tables + DESIGN brand bible + theme tokens ([#30](https://github.com/arcade-cabinet/concrete-vermin/issues/30)) ([550a5aa](https://github.com/arcade-cabinet/concrete-vermin/commit/550a5aa97965489270bd2dc11b5402a637156938))
+
 ## [1.11.0](https://github.com/arcade-cabinet/concrete-vermin/compare/v1.10.0...v1.11.0) (2026-04-28)
 
 
