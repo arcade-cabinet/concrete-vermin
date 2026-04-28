@@ -1,14 +1,15 @@
 import type { World } from "koota";
-import type { ArchetypeId } from "../../sim/archetypes/vermin";
+import { ARCHETYPES, type ArchetypeId } from "../../sim/archetypes/vermin";
 import { resolveHit } from "../../sim/engine/damage";
 import type { Rng } from "../../sim/rng";
 import { spawnSplash, takeDamage } from "../actions";
-import { Health, Hitbox, Lifecycle, Position, Projectile, Vermin } from "../traits";
+import { Health, Hitbox, Lifecycle, Position, Projectile, Velocity, Vermin } from "../traits";
 
 export interface CollideEvent {
   kind: "hit" | "kill";
   verminEntity: number;
   archetypeId: string;
+  baseBounty: number;
   isHeadshot: boolean;
   isCrit: boolean;
   damage: number;
@@ -36,8 +37,9 @@ export function collideSystem(world: World, rng: Rng, now: number): CollideEvent
   const vermin: Array<{
     e: ReturnType<World["query"]>[number];
     pos: { x: number; y: number };
-    box: { hw: number; hh: number; headY: number };
+    box: { hw: number; hh: number; headX: number; headY: number };
     arche: ArchetypeId;
+    bounty: number;
   }> = [];
 
   for (const e of world.query(Vermin, Position, Hitbox, Health, Lifecycle)) {
@@ -48,20 +50,23 @@ export function collideSystem(world: World, rng: Rng, now: number): CollideEvent
     const hb = e.get(Hitbox);
     const v = e.get(Vermin);
     if (!p || !hb || !v) continue;
+    const archetype = ARCHETYPES[v.archetypeId];
     vermin.push({
       e,
       pos: { x: p.x, y: p.y },
-      box: { hw: hb.width / 2, hh: hb.height / 2, headY: hb.headOffsetY },
+      box: { hw: hb.width / 2, hh: hb.height / 2, headX: hb.headOffsetX, headY: hb.headOffsetY },
       arche: v.archetypeId,
+      bounty: archetype?.baseStats.bounty ?? 30,
     });
   }
 
-  for (const proj of world.query(Projectile, Position, Lifecycle)) {
+  for (const proj of world.query(Projectile, Position, Velocity, Lifecycle)) {
     const pl = proj.get(Lifecycle);
     if (!pl || pl.deadAt > 0) continue;
     const pp = proj.get(Position);
     const pj = proj.get(Projectile);
-    if (!pp || !pj) continue;
+    const pv = proj.get(Velocity);
+    if (!pp || !pj || !pv) continue;
 
     for (const v of vermin) {
       // Skip vermin already killed earlier this tick — protects audio,
@@ -72,7 +77,15 @@ export function collideSystem(world: World, rng: Rng, now: number): CollideEvent
       const dy = pp.y - v.pos.y;
       if (Math.abs(dx) > v.box.hw || Math.abs(dy) > v.box.hh) continue;
 
-      const isHeadshot = pp.y < v.pos.y + v.box.headY;
+      // Use trajectory intercept Y at the head's X position rather than
+      // the current projectile Y. This ensures shots aimed at the head zone
+      // register as headshots regardless of which AABB edge the projectile
+      // first enters. For a nearly-vertical approach (|vx| ≈ 0), fall back
+      // to current pp.y.
+      const headX = v.pos.x + v.box.headX;
+      const interceptY =
+        Math.abs(pv.x) > 0.1 ? pp.y + pv.y * ((headX - pp.x) / pv.x) : pp.y;
+      const isHeadshot = interceptY < v.pos.y + v.box.headY;
       const target = {
         health: v.e.get(Health)?.current ?? 0,
         healthMod: "normal" as const,
@@ -101,6 +114,7 @@ export function collideSystem(world: World, rng: Rng, now: number): CollideEvent
         kind: killed ? "kill" : "hit",
         verminEntity: v.e.id(),
         archetypeId: v.arche,
+        baseBounty: v.bounty,
         isHeadshot,
         isCrit: hit.isCrit,
         damage: hit.damage,

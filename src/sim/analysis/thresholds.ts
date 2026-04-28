@@ -55,10 +55,10 @@ export const MISSION_THRESHOLDS: ReadonlyArray<Readonly<MissionThreshold>> = Obj
   {
     missionId: "streets-04-dumpster-bear",
     parAccuracy: 0.65,
-    parDurationS: 75,
-    parDurationWindowS: 18,
+    parDurationS: 160,
+    parDurationWindowS: 30,
     medianGradeMin: "B",
-    trashClearRateMin: 0.4,
+    trashClearRateMin: 0,
     perfectGradeMin: "A",
   },
   {
@@ -82,10 +82,10 @@ export const MISSION_THRESHOLDS: ReadonlyArray<Readonly<MissionThreshold>> = Obj
   {
     missionId: "underworld-07-river-mutant",
     parAccuracy: 0.75,
-    parDurationS: 80,
-    parDurationWindowS: 15,
+    parDurationS: 180,
+    parDurationWindowS: 35,
     medianGradeMin: "A",
-    trashClearRateMin: 0.4,
+    trashClearRateMin: 0,
     perfectGradeMin: "A",
   },
   {
@@ -100,10 +100,10 @@ export const MISSION_THRESHOLDS: ReadonlyArray<Readonly<MissionThreshold>> = Obj
   {
     missionId: "above-09-pigeon-king",
     parAccuracy: 0.7,
-    parDurationS: 100,
-    parDurationWindowS: 20,
+    parDurationS: 105,
+    parDurationWindowS: 15,
     medianGradeMin: "A",
-    trashClearRateMin: 0.4,
+    trashClearRateMin: 0,
     perfectGradeMin: "S+",
   },
 ]);

@@ -1,5 +1,6 @@
 import type { GameRunner } from "../runtime/runner";
 import { useGameStore } from "../runtime/store";
+import { ARCHETYPES, type ArchetypeId } from "../sim/archetypes/vermin";
 import type { WeaponArchetype } from "../sim/archetypes/weapons/_types";
 import { selectHighestThreat } from "./threat";
 import { leadPoint } from "./yuka-adapters";
@@ -65,14 +66,36 @@ export function governorTick(input: GovernorTickInput): void {
   const target = selectHighestThreat(snap.vermin, weapon.damage, { playerLineY });
   if (!target) return;
 
-  const aim = leadPoint(shooterPos, target, {
+  const archetype = ARCHETYPES[target.archetypeId as ArchetypeId];
+  const headOffset = archetype?.hitbox.headOffset;
+
+  // Lead point without head offset — used only for the overshoot gate.
+  // The gate checks whether velocity lead lands inside the target hitbox,
+  // independent of the head offset (which is a fixed anatomical shift, not
+  // a prediction error).
+  const leadOnly = leadPoint(shooterPos, target, {
     reticleMaxSpeed: profile.reticleMaxSpeed,
     predictionFactor: profile.predictionFactor,
   });
 
-  const overshoot = Math.hypot(aim.x - target.x, aim.y - target.y);
-  if (overshoot > weapon.reticleRadius + profile.hitToleranceUnits) return;
+  const tolerance = weapon.reticleRadius + profile.hitToleranceUnits;
+  const leadOvershoot = Math.hypot(leadOnly.x - target.x, leadOnly.y - target.y);
 
-  runner.queueShot(aim.x, aim.y);
+  // Aim point: lead + head offset (aim at head zone for headshot bonus).
+  const aimX = leadOnly.x + (headOffset?.x ?? 0);
+  const aimY = leadOnly.y + (headOffset?.y ?? 0);
+
+  if (leadOvershoot <= tolerance) {
+    runner.queueShot(aimX, aimY);
+    state.lastShotAtMs = nowMs;
+    return;
+  }
+
+  // Fallback: body-center + head offset (no velocity lead).
+  // Fires when the target is moving fast enough that the velocity lead
+  // overshoots — we take the certain body-center shot rather than skipping.
+  const fallbackX = target.x + (headOffset?.x ?? 0);
+  const fallbackY = target.y + (headOffset?.y ?? 0);
+  runner.queueShot(fallbackX, fallbackY);
   state.lastShotAtMs = nowMs;
 }

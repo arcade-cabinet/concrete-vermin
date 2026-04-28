@@ -12,10 +12,10 @@ import { Score } from "../traits";
 import type { CollideEvent } from "./collide";
 
 /** Map a CollideEvent to scoring's KillEvent (when killed). */
-function toKillEvent(ce: CollideEvent, baseBounty = 30): KillEvent {
+function toKillEvent(ce: CollideEvent): KillEvent {
   return {
     archetypeId: ce.archetypeId as KillEvent["archetypeId"],
-    baseBounty,
+    baseBounty: ce.baseBounty,
     healthScale: 1,
     isHeadshot: ce.isHeadshot,
     isMidAir: false,

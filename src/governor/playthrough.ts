@@ -4,6 +4,23 @@ import { WEAPON_REGISTRY } from "../sim/archetypes/weapons";
 import type { Mission } from "../sim/factories/mission";
 import { type GovernorProfile, PLAYTHROUGH, governorTick, makeGovernorState } from "./decide";
 
+/**
+ * Per-mission shooter position overrides for the headless playthrough harness.
+ * Used when the default (240, 260) leaves ceiling-drop or pop-from-vent spawns
+ * out of weapon range. The override positions the governor so all spawn zones
+ * are reachable within the weapon's rangeMax.
+ *
+ * Missions with ONLY ground/surface spawns use the default position.
+ * Missions mixing ground + ceiling spawns use y ≈ viewport centre (135).
+ */
+const MISSION_SHOOTER_OVERRIDES: Record<string, { x: number; y: number; playerLineY: number }> = {
+  // Secret cellar: pop-from-vent roaches spawn at y≈210 then climb toward y≈10.
+  // Must shoot them early (while still in sawed-off range 130) before they ascend.
+  // playerLineY=135 scores roaches at y=210 above rats at y=250, forcing
+  // the governor to target them immediately on spawn.
+  "streets-secret-cellar": { x: 240, y: 260, playerLineY: 135 },
+};
+
 export interface PlaythroughResult {
   outcome: "won" | "lost" | "timeout";
   ticks: number;
@@ -43,8 +60,9 @@ export function playMissionWithGovernor(
 ): PlaythroughResult {
   const profile = opts.profile ?? PLAYTHROUGH;
   const maxSimSeconds = opts.maxSimSeconds ?? 180;
-  const shooterPos = opts.shooterPos ?? { x: 240, y: 260 };
-  const playerLineY = opts.playerLineY ?? 270;
+  const override = MISSION_SHOOTER_OVERRIDES[mission.id];
+  const shooterPos = opts.shooterPos ?? override ?? { x: 240, y: 260 };
+  const playerLineY = opts.playerLineY ?? override?.playerLineY ?? 270;
   const weapon = WEAPON_REGISTRY[mission.weapon];
 
   // Reset the global store so each playthrough starts from a clean

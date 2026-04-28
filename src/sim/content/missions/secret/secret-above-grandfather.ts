@@ -50,7 +50,7 @@ export const secretAboveGrandfather: Mission = defineMission({
       id: "what-grandfather-left",
       isCheckpoint: true,
       spawns: [
-        { variant: "boss-pigeon-king", count: 1, pattern: "boss-scripted" },
+        { variant: "boss-pigeon-king-classic", count: 1, pattern: "boss-scripted" },
       ],
     },
   ],

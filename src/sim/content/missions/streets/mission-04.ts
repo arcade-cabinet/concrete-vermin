@@ -32,7 +32,7 @@ export const mission04: Mission = defineMission({
     {
       id: "boss-bear",
       isCheckpoint: true,
-      spawns: [{ variant: "boss-dumpster-bear", count: 1, pattern: "boss-scripted" }],
+      spawns: [{ variant: "boss-dumpster-bear-classic", count: 1, pattern: "boss-scripted" }],
     },
   ],
   events: [
