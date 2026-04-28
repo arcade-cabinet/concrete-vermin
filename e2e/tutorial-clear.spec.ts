@@ -60,7 +60,7 @@ test.describe("tutorial clear", () => {
     const cleared = page.getByText(/cleared/i);
     const MAX_CLICKS = 250;
     for (let i = 0; i < MAX_CLICKS; i++) {
-      if (await cleared.isVisible().catch(() => false)) break;
+      if (await cleared.isVisible()) break;
       const x = box.x + box.width * (0.15 + (i % 8) * 0.1);
       const y = box.y + box.height * 0.78;
       await page.mouse.click(x, y);

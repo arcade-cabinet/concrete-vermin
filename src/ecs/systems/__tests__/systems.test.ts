@@ -105,7 +105,7 @@ describe("collideSystem", () => {
     });
     const events = collideSystem(world, createRng(7), 0.1);
     const kills = events.filter((e) => e.kind === "kill");
-    expect(kills.length, "multi-pellet blast must produce exactly one kill").toBeLessThanOrEqual(1);
+    expect(kills.length, "multi-pellet blast must produce exactly one kill").toBe(1);
   });
 });
 

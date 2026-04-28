@@ -110,12 +110,7 @@ describe("GameRunner kill dedupe", () => {
       phase,
     );
     const totalSpawnedFromSpec = mission01.encounters.reduce(
-      (sum, enc) =>
-        sum +
-        enc.spawns.reduce(
-          (acc, s) => acc + (s.pattern === "boss-scripted" ? 1 : s.count),
-          0,
-        ),
+      (sum, enc) => sum + enc.spawns.reduce((acc, s) => acc + s.count, 0),
       0,
     );
     expect(useGameStore.getState().killCount).toBeLessThanOrEqual(totalSpawnedFromSpec);
