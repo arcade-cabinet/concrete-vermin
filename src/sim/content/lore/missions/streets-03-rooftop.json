@@ -3,5 +3,10 @@
   "title": "ROOFTOP",
   "blurb": "Six stories up, pigeons aren't going south. Mrs. Costanza on the fifth floor has been screaming for a week. Make her stop screaming.",
   "briefing": "Tar paper, October wind, six stories of fire escape. The pigeons have stopped flying south. They have started flying at people. The black feather pinned to the weather vane is the wrong kind of iridescent. Shoot until quiet.",
-  "epigraph": "\"You shoot pigeons until the rooftop is quiet again, then you go home, and you can't sleep.\""
+  "epigraph": "\"You shoot pigeons until the rooftop is quiet again, then you go home, and you can't sleep.\"",
+  "debrief": {
+    "win": "Mrs. Costanza stopped screaming. She made coffee instead. She wants you to come up Sunday. Don't. Once she sees the kid who did it she sees the kid every time a pigeon lands on her sill.",
+    "loss": "The fire escape held what it could. I'm sorry. The black feather went into the trash bin in the back, and the trash bin went into the river. We don't keep souvenirs from that one.",
+    "sGrade": "The weather vane has stopped turning. Wind blows around it. I don't know what that means. The pigeons that come back this spring will not come to that roof."
+  }
 }

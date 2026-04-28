@@ -84,6 +84,17 @@ const frameSchema = z
   })
   .strict();
 
+const missionDebriefSchema = z
+  .object({
+    /** Pawnbroker's reaction when you cleared the mission (any grade ≥ D). */
+    win: z.string().min(20),
+    /** Pawnbroker's reaction when you wiped out (no grade). */
+    loss: z.string().min(20),
+    /** Special line that overrides win when you scored S or S+. */
+    sGrade: z.string().min(20),
+  })
+  .strict();
+
 const missionLoreSchema = z
   .object({
     id: z.string().min(1),
@@ -91,6 +102,7 @@ const missionLoreSchema = z
     blurb: z.string().min(20),
     briefing: z.string().min(40),
     epigraph: z.string().min(2),
+    debrief: missionDebriefSchema,
   })
   .strict();
 
@@ -192,4 +204,16 @@ export function deathLineFor(archetypeOrCause: string): string {
     (deathLines as Readonly<Record<string, string>>).wipe ??
     "He'll find another kid."
   );
+}
+
+export type DebriefOutcome = "win" | "loss" | "sGrade";
+
+/**
+ * Per-mission Pawnbroker debrief blurb. The MissionResult tabloid pulls
+ * this so each mission's win/loss epilogue is bespoke to that mission's
+ * setting + threats, instead of the same three generic lines repeated
+ * across all nine missions.
+ */
+export function pawnbrokerDebriefFor(missionId: string, outcome: DebriefOutcome): string {
+  return getMissionLore(missionId).debrief[outcome];
 }
