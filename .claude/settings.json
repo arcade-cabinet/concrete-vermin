@@ -41,16 +41,6 @@
             "timeout": 10
           }
         ]
-      },
-      {
-        "matcher": "Bash",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "node ${CLAUDE_PROJECT_DIR}/.claude/hooks/pre-bash-gate.mjs",
-            "timeout": 10
-          }
-        ]
       }
     ],
     "PostToolUse": [
@@ -61,53 +51,6 @@
             "type": "command",
             "command": "node ${CLAUDE_PROJECT_DIR}/.claude/hooks/post-edit-checks.mjs",
             "timeout": 30
-          }
-        ]
-      }
-    ],
-    "SessionStart": [
-      {
-        "hooks": [
-          {
-            "type": "command",
-            "command": "node ${CLAUDE_PROJECT_DIR}/.claude/hooks/session-start.mjs",
-            "timeout": 10
-          }
-        ]
-      }
-    ],
-    "UserPromptSubmit": [
-      {
-        "matcher": "",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "bash ${CLAUDE_PROJECT_DIR}/.claude/hooks/pat-on-back-trap.sh",
-            "timeout": 10
-          }
-        ]
-      }
-    ],
-    "PreCompact": [
-      {
-        "matcher": "",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "bash ${CLAUDE_PROJECT_DIR}/.claude/hooks/task-batch-flush.sh",
-            "timeout": 10
-          }
-        ]
-      }
-    ],
-    "Stop": [
-      {
-        "matcher": "",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "bash ${CLAUDE_PROJECT_DIR}/.claude/hooks/anti-stop-check.sh",
-            "timeout": 15
           }
         ]
       }
