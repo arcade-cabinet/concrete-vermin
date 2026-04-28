@@ -14,8 +14,8 @@ export interface GovernorProfile {
 export const PLAYTHROUGH: GovernorProfile = {
   predictionFactor: 1,
   reticleMaxSpeed: 600,
-  shotCooldownMs: 120,
-  hitToleranceUnits: 6,
+  shotCooldownMs: 80,
+  hitToleranceUnits: 12,
 };
 
 export interface GovernorState {

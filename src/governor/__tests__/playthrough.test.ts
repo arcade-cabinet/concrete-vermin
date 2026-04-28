@@ -12,6 +12,7 @@ const STRICT_PASS_IDS = new Set([
   "streets-01-bodega",
   "streets-02-alley",
   "underworld-05-subway",
+  "underworld-secret-cathedral",
   "above-secret-grandfather",
 ]);
 
