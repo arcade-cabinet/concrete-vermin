@@ -49,6 +49,7 @@ domain: context
 - **2026-04-28** — Anti-stop hook adopted bioluminescent-sea pattern: `{decision: block, reason}` JSON protocol, no SHA-advance escape hatch. UserPromptSubmit hook intercepts brief acknowledgements and injects the open-queue summary.
 - **2026-04-28** — Analysis benchmark uses an **abstract model** (closed-form per-shot resolution) rather than driving the live runner, trading fidelity for speed. balance-benchmark CI job is `continue-on-error` until missions converge under the abstract model — calibration follow-up tracked separately.
 - **2026-04-28** — Browser-canvas test asserts "canvas + WebGL context exists" rather than sampling pixels, because WebGL clears the framebuffer after commit (would need `preserveDrawingBuffer: true` at production perf cost).
+- **2026-04-28** — `src/platform/lifecycle.ts` background → foreground pause/resume **verified end-to-end** in `src/platform/__tests__/lifecycle-runner.dom.test.ts`: visibilitychange→hidden freezes sim time (no advance during a 2 s gap), visibilitychange→visible resumes, and a 10 s background gap leaves `livesRemaining` untouched even on the rats-running-at-the-line tutorial mission. Closes the integration loop the broker tests left open.
 
 ## Blockers
 
