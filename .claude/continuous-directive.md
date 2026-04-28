@@ -169,14 +169,14 @@ Each `[ ]` is one commit. Group small ones into one PR; large ones get their own
 - [x] docs/AUDIO.md: ducking/mix policy (when sfx should duck music, when narration should duck both)
 
 ### CV-ANALYSIS — balance sweeper + lock (PR #9)
-- [ ] src/sim/analysis/effects.ts: per-card / per-variant effect estimator
-- [ ] src/sim/analysis/benchmarks.ts: runSeededBenchmark(missionId, seed[]) → grade distribution
-- [ ] src/sim/analysis/sweeps.ts: parameter sweep across (variant, weapon, mod) param ranges
-- [ ] src/sim/analysis/locking.ts: deriveLockRecommendations(history) → STABLE | UNSTABLE | UNMEASURED
-- [ ] src/sim/analysis/autobalance.ts: nudge raw data within clamped bounds; refuse if working tree dirty
-- [ ] src/sim/analysis/cli.ts: subcommands benchmark / sweep / lock / autobalance / smoke / focus
+- [x] src/sim/analysis/effects.ts: per-card / per-variant effect estimator
+- [x] src/sim/analysis/benchmarks.ts: runSeededBenchmark(missionId, seed[]) → grade distribution
+- [x] src/sim/analysis/sweeps.ts: parameter sweep across (variant, weapon, mod) param ranges
+- [x] src/sim/analysis/locking.ts: deriveLockRecommendations(history) → STABLE | UNSTABLE | UNMEASURED
+- [x] src/sim/analysis/autobalance.ts: nudge raw data within clamped bounds; refuse if working tree dirty
+- [x] src/sim/analysis/cli.ts: subcommands benchmark / sweep / lock / autobalance / smoke / focus
 - [ ] src/sim/analysis/__tests__/release-gate.test.ts: verify the lock for v1 missions
-- [ ] package.json: re-add analysis:* + test:release scripts
+- [x] package.json: analysis:smoke / analysis:benchmark / analysis:focus / analysis:sweep / analysis:lock:quick / analysis:autobalance scripts wired (test:release deferred — needs CI workflow update under CV-RELEASE-INFRA)
 - [ ] CI: re-add Release gate + Balance benchmark (CI profile) jobs
 - [ ] CI: re-add browser canvas + e2e-smoke + autobalance jobs (need actual e2e/*.spec.ts and at least one browser test)
 - [ ] e2e/tutorial-clear.spec.ts: load Pages preview; click 8 times; assert "Cleared" overlay appears
