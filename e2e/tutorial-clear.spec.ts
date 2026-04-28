@@ -49,17 +49,30 @@ test.describe("tutorial clear", () => {
     const kills = page.getByTestId("hud-kills");
     await expect(kills).toBeVisible();
 
-    // Fire repeatedly. Spread + the rat-ground-y intercept should
-    // accumulate enough hits to clear the 8 spawns. We click in a
-    // grid across the rat lane.
+    // Fire repeatedly. Mission-01 spawns 14 rats across two waves
+    // (warmup 6 + second-wave 8). The shotgun has a 1.4s reload after
+    // every 6 shots, so we need to click for long enough that the runner
+    // gets time to complete multiple reload cycles AND we cover the
+    // second encounter's spawn delay. We cycle the click position
+    // across the rat lane so straggler rats walking in either direction
+    // get covered, then add a long tail of pause+click to wait through
+    // reload windows.
     const box = await stage.boundingBox();
     if (!box) throw new Error("stage has no bounding box");
-    for (let i = 0; i < 40; i++) {
+    const burst = 200;
+    for (let i = 0; i < burst; i++) {
+      const x = box.x + box.width * (0.15 + (i % 8) * 0.1);
+      const y = box.y + box.height * 0.78;
+      await page.mouse.click(x, y);
+      await page.waitForTimeout(80);
+    }
+    // Final sweep — slow shots to ensure any straggler in the last
+    // encounter gets cleaned up after a reload.
+    for (let i = 0; i < 30; i++) {
       const x = box.x + box.width * (0.2 + (i % 6) * 0.12);
       const y = box.y + box.height * 0.78;
       await page.mouse.click(x, y);
-      // Tiny pause so the runner ticks between clicks.
-      await page.waitForTimeout(120);
+      await page.waitForTimeout(250);
     }
 
     // The mission ends with the "Cleared" verdict from MissionResult.

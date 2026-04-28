@@ -244,8 +244,15 @@ export class GameRunner {
       this.gw.rng.fork(`collide:${this.now.toFixed(3)}`),
       this.now,
     );
-    const newKills = events.filter((e) => e.kind === "kill").length;
-    this.kills += newKills;
+    // Dedupe kill events: a multi-pellet shotgun blast can fire multiple
+    // "kill" events against the same entity in one frame because
+    // collideSystem doesn't track killed entities across pellets.
+    // Count each entity at most once per tick.
+    const killedThisTick = new Set<number>();
+    for (const e of events) {
+      if (e.kind === "kill") killedThisTick.add(e.verminEntity);
+    }
+    this.kills += killedThisTick.size;
     for (const e of events) {
       if (e.kind === "kill") {
         playVerminDeath(e.archetypeId);
