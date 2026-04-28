@@ -39,9 +39,10 @@ jobs:
         run: gh pr merge "$PR_URL" --auto --squash
 
   release-please:
-    if: |
-      github.actor == 'github-actions[bot]' &&
-      startsWith(github.event.pull_request.head.ref, 'release-please--')
+    # Match by branch prefix: release-please-action runs under whatever
+    # token we hand it, so the actor is the token owner — not always
+    # github-actions[bot]. Branch ref is the stable signal.
+    if: startsWith(github.event.pull_request.head.ref, 'release-please--')
     runs-on: ubuntu-latest
     steps:
       - name: Approve PR
