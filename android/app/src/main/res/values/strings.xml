@@ -4,4 +4,11 @@
     <string name="title_activity_main">Concrete Vermin</string>
     <string name="package_name">com.arcadecabinet.concretevermin</string>
     <string name="custom_url_scheme">com.arcadecabinet.concretevermin</string>
+    <!--
+        Default (phone) orientation lock: landscape only. The 16:9 game canvas
+        is unplayable in portrait — the reticle hit-box becomes microscopic.
+        Tablets override to fullSensor in values-sw600dp/strings.xml below
+        because the canvas comfortably fits either rotation on a 7"+ display.
+    -->
+    <string name="screen_orientation">userLandscape</string>
 </resources>

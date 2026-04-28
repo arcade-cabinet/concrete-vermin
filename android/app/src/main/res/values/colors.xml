@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!--
+        Concrete Vermin brand colors — referenced by styles.xml +
+        ic_launcher_background.xml. These mirror the in-game theme tokens
+        defined in src/theme/colors.ts:
+          asphalt = #1A1715  (splash + adaptive-icon background)
+          sodium  = #D4943A  (accent)
+          brick   = #7A2818  (alerts / pawnbroker accents)
+    -->
+    <color name="cv_splash_background">#1A1715</color>
+    <color name="cv_sodium">#D4943A</color>
+    <color name="cv_brick">#7A2818</color>
+    <!--
+        Capacitor scaffold defaults — kept so the AppTheme parent's
+        colorPrimary references resolve. Tinted toward the brand sodium
+        amber so any Material widget that surfaces during the brief
+        WebView-loading window reads on-brand.
+    -->
+    <color name="colorPrimary">#D4943A</color>
+    <color name="colorPrimaryDark">#7A2818</color>
+    <color name="colorAccent">#D4943A</color>
+</resources>

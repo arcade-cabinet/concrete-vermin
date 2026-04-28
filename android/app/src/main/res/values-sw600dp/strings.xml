@@ -1,0 +1,10 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <!--
+        Tablet override (smallest-width >= 600 dp): orientation is free.
+        On a 7"+ panel the 16:9 canvas fits either rotation comfortably,
+        and locking to landscape is more annoying than letting players
+        rotate naturally.
+    -->
+    <string name="screen_orientation">fullSensor</string>
+</resources>
