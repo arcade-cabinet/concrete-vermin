@@ -27,11 +27,11 @@ const FLASH_COLORS: Record<ModifierFlashSnapshot["kind"], string> = {
 const HUD_KEYFRAMES = `
 @keyframes cv-pulse-empty {
   0%, 100% { color: ${COLOR.sodium}; }
-  50% { color: ${COLOR.brick}; }
+  50% { color: ${COLOR.brickAccessible}; }
 }
 @keyframes cv-pulse-critical {
-  0%, 100% { color: ${COLOR.brick}; opacity: 1; }
-  50% { color: ${COLOR.brick}; opacity: 0.5; }
+  0%, 100% { color: ${COLOR.brickAccessible}; opacity: 1; }
+  50% { color: ${COLOR.brickAccessible}; opacity: 0.5; }
 }
 .cv-pulse-empty { animation: cv-pulse-empty ${MOTION.criticalLifeMs}ms ease-in-out infinite; }
 .cv-pulse-critical { animation: cv-pulse-critical ${MOTION.criticalLifeMs}ms ease-in-out infinite; }
@@ -52,6 +52,38 @@ function useHudStyles(): void {
     el.textContent = HUD_KEYFRAMES;
     document.head.appendChild(el);
   }, []);
+}
+
+function StreakChipsLive() {
+  // Surface the most recent streak/multiplier chip into a polite
+  // aria-live so non-sighted players hear "Two for one bonus, +25 %"
+  // when the chip flashes onscreen. Re-keyed by `at` so AT software
+  // re-reads even on identical chip text.
+  const flashes = useGameStore((s) => s.modifierFlashes);
+  const latest = flashes[flashes.length - 1];
+  const text = latest
+    ? `${FLASH_LABELS[latest.kind]} bonus, plus ${Math.round(latest.bonusPct)} percent.`
+    : "";
+  return (
+    <div
+      data-testid="hud-streak-live"
+      aria-live="polite"
+      aria-atomic="true"
+      style={{
+        position: "absolute",
+        width: 1,
+        height: 1,
+        padding: 0,
+        margin: -1,
+        overflow: "hidden",
+        clip: "rect(0, 0, 0, 0)",
+        whiteSpace: "nowrap",
+        border: 0,
+      }}
+    >
+      {text}
+    </div>
+  );
 }
 
 function ModifierFlashes() {
@@ -197,7 +229,7 @@ export function HUD() {
             // under reduced-motion so the player sees a static brick
             // "SHELLS 0/6" (still differentiable, just not noisy).
             className={ammoEmpty && !reduced && !reloading ? "cv-pulse-empty" : undefined}
-            style={{ color: ammoEmpty ? COLOR.brick : COLOR.sodium }}
+            style={{ color: ammoEmpty ? COLOR.brickAccessible : COLOR.sodium }}
           >
             SHELLS
           </span>{" "}
@@ -243,11 +275,11 @@ export function HUD() {
           {"  "}
           <span
             className={livesCritical && !reduced ? "cv-pulse-critical" : undefined}
-            style={{ color: livesCritical ? COLOR.brick : COLOR.sodium }}
+            style={{ color: livesCritical ? COLOR.brickAccessible : COLOR.sodium }}
           >
             LIVES
           </span>{" "}
-          <span style={{ color: livesCritical ? COLOR.brick : COLOR.cream }}>
+          <span style={{ color: livesCritical ? COLOR.brickAccessible : COLOR.cream }}>
             {player.livesRemaining}
           </span>
         </div>
@@ -275,6 +307,7 @@ export function HUD() {
         Score {displayedTotal}, vermin {killCount} of {killsRequired}, shells {player.ammoCurrent}{" "}
         of {player.ammoMax}, lives {player.livesRemaining}.
       </div>
+      <StreakChipsLive />
     </>
   );
 }

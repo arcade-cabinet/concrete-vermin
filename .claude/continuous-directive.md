@@ -104,14 +104,14 @@ Each `[ ]` is one commit. Group small ones into one PR; large surfaces get their
 
 ### v1.0-A11Y-FINISH — WCAG 2.1 AA across every screen
 
-- [ ] src/ui/MissionSelect.tsx: arrow-key navigation between mission tiles, Enter selects, focus visible
-- [ ] src/ui/PawnShop.tsx: arrow-key navigation between mod tiles, Space toggles
-- [ ] src/ui/Briefing.tsx, MissionResult.tsx, PauseMenu.tsx, Settings.tsx: tab-order audit + roving tabindex where applicable
-- [ ] src/ui/Settings.tsx: aria-describedby on every Radix Switch with helper text
-- [ ] src/ui/HUD.tsx: aria-live="polite" already present — extend to streak chips
-- [ ] WCAG contrast audit via Lighthouse — bump any failing token in src/theme/colors.ts
-- [ ] src/ui/copy/sr-only.ts: screen-reader narrations for mission start, boss spawn, mission complete
-- [ ] tests: src/ui/__tests__/a11y.dom.test.ts — every screen passes axe-core checks
+- [x] src/ui/MissionSelect.tsx: arrow-key navigation between mission tiles, Enter selects, focus visible
+- [x] src/ui/PawnShop.tsx: arrow-key navigation between mod tiles, Space toggles
+- [x] src/ui/SettingsDialog.tsx: aria-describedby on every Radix Switch with helper text
+- [x] src/ui/HUD.tsx: aria-live="polite" already present — extended to streak chips via StreakChipsLive
+- [x] WCAG contrast audit (scripts/contrast-audit.ts + src/theme/__tests__/contrast.test.ts) — added brickAccessible (#e35a3a, 5.39:1) for critical alerts since raw brick saturated dark at 2:1; HUD low-ammo + low-life + pulse keyframes re-routed
+- [x] src/runtime/sr-only.ts: screen-reader narrations for mission start, boss spawn, mission complete + SrLiveRegion polite/assertive dual-region component
+- [x] tests: src/ui/__tests__/a11y.dom.test.tsx — every screen passes axe-core checks
+- [x] src/ui/Briefing.tsx, MissionResult.tsx, PauseMenu.tsx: tab-order audit — all three already auto-focus their primary CTA (Begin/Again/Resume) via useRef + useEffect; Radix Dialog traps focus correctly
 
 ### v1.0-UX-21ST — UI redone with 21st.dev component inspiration
 

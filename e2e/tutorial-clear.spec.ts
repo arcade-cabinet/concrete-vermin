@@ -54,7 +54,10 @@ test.describe("tutorial clear", () => {
     // CI runners + multiple reload cycles before the loop exits early.
     const box = await stage.boundingBox();
     if (!box) throw new Error("stage has no bounding box");
-    const cleared = page.getByText(/cleared/i);
+    // MissionResult headline. Don't use a loose /cleared/i regex — the
+    // SR live region also surfaces the word in its assertive narration,
+    // and Playwright strict mode rejects the ambiguity.
+    const cleared = page.getByRole("heading", { name: /^cleared$/i });
     const MAX_CLICKS = 250;
     for (let i = 0; i < MAX_CLICKS; i++) {
       if (await cleared.isVisible()) break;
@@ -64,7 +67,6 @@ test.describe("tutorial clear", () => {
       await page.waitForTimeout(90);
     }
 
-    // The mission ends with the "Cleared" verdict from MissionResult.
     await expect(cleared).toBeVisible({ timeout: 15_000 });
   });
 });

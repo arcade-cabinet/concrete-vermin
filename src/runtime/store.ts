@@ -146,6 +146,9 @@ export interface GameState {
   killCount: number;
   /** Append-only ring of recent damage numbers for the floating HUD. */
   damageEvents: ReadonlyArray<DamageEvent>;
+  /** Most-recent screen-reader narration string + monotonic id (stable across same text). */
+  srAnnouncement: { text: string; urgency: "polite" | "assertive"; id: number };
+  announceForScreenReader: (text: string, urgency?: "polite" | "assertive") => void;
   // Setters
   setPhase: (p: MissionPhase) => void;
   setViewport: (w: number, h: number) => void;
@@ -226,6 +229,9 @@ export const useGameStore = create<GameState>((set) => ({
   killsRequired: 0,
   killCount: 0,
   damageEvents: [],
+  srAnnouncement: { text: "", urgency: "polite", id: 0 },
+  announceForScreenReader: (text, urgency = "polite") =>
+    set((s) => ({ srAnnouncement: { text, urgency, id: s.srAnnouncement.id + 1 } })),
   setPhase: (phase) => set({ phase }),
   setViewport: (width, height) => set({ viewport: { width, height } }),
   setReticle: (x, y) => set({ reticle: { x, y } }),

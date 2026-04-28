@@ -17,6 +17,8 @@ import { MissionResult } from "./MissionResult";
 import { MissionSelect } from "./MissionSelect";
 import { PauseMenu } from "./PauseMenu";
 import { PawnShop } from "./PawnShop";
+import { SrLiveRegion } from "./SrLiveRegion";
+import { srMissionComplete, srMissionFailed, srMissionStart } from "../runtime/sr-only";
 import { usePlayerProgress } from "./PlayerProgress";
 import { autoPersistPlayerProgress, loadPlayerProgress } from "./PlayerProgressPersistence";
 import { getMission } from "../sim/content/missions";
@@ -58,6 +60,13 @@ export function App() {
       }
       if (s.phase === "won" && prev.phase !== "won" && s.missionId) {
         usePlayerProgress.getState().unlockMission(s.missionId);
+        const score = s.score.total;
+        useGameStore
+          .getState()
+          .announceForScreenReader(srMissionComplete("Cleared", score).text, "assertive");
+      }
+      if (s.phase === "lost" && prev.phase !== "lost") {
+        useGameStore.getState().announceForScreenReader(srMissionFailed().text, "assertive");
       }
     });
     return unsub;
@@ -86,6 +95,10 @@ export function App() {
         return acc + enc;
       }, 0);
       startMission(id, Math.max(MISSION_KILLS_REQUIRED, total), m.act);
+      const title = id
+        .replace(/^[a-z]+-\d+-/, "")
+        .replace(/-/g, " ");
+      useGameStore.getState().announceForScreenReader(srMissionStart(title, m.weapon).text, "polite");
     } catch {
       // Bad id — fallback to tutorial.
       startMission("streets-01-bodega", MISSION_KILLS_REQUIRED, "streets");
@@ -100,6 +113,7 @@ export function App() {
   return (
     <div style={{ width: "100%", height: "100%" }}>
       <GlobalStyles />
+      <SrLiveRegion />
       {phase === "briefing" ? <Briefing /> : null}
       {phase === "mission-select" ? (
         <MissionSelect onPickMission={() => setPhase("pawn-shop")} />
