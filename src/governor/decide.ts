@@ -108,28 +108,22 @@ export function governorTick(input: GovernorTickInput): void {
   const tolerance = snap.reticleRadius + profile.hitToleranceUnits;
   const leadOvershoot = Math.hypot(leadOnly.x - target.x, leadOnly.y - target.y);
 
-  // Aim point: lead + head offset (aim at head zone for headshot bonus).
   const aim = applyOffset(leadOnly, headOffset);
 
   if (leadOvershoot <= tolerance) {
-    // Charge-shot path: when the profile enables it and the weapon has a
-    // chargeProfile, build a charge until 80% then release onto the target.
     if (profile.useChargeShot && weapon.chargeProfile) {
       const chargeProgress = snap.chargeProgress;
       if (chargeProgress === null && state.chargeStartedAtMs === null) {
-        // Start a new charge.
         runner.queueChargeStart();
         state.chargeStartedAtMs = nowMs;
         return;
       }
       if (chargeProgress !== null && chargeProgress >= 0.8) {
-        // Release: charge is full enough — fire the charge effect.
         runner.queueChargeRelease(aim.x, aim.y);
         state.chargeStartedAtMs = null;
         state.lastShotAtMs = nowMs;
         return;
       }
-      // Still building charge — wait.
       return;
     }
 
@@ -138,14 +132,10 @@ export function governorTick(input: GovernorTickInput): void {
     return;
   }
 
-  // Fallback: body-center + head offset (no velocity lead).
-  // Fires when the target is moving fast enough that the velocity lead
-  // overshoots — we take the certain body-center shot rather than skipping.
+  // Velocity lead overshoots: take the certain body-center shot rather than skipping.
   const fallback = applyOffset({ x: target.x, y: target.y }, headOffset);
-  // Charge-shot fallback: continue building if charge is in progress.
+  // Don't interrupt a charge mid-build — wait for release condition on next in-tolerance tick.
   if (profile.useChargeShot && weapon.chargeProfile && state.chargeStartedAtMs !== null) {
-    // Don't interrupt a charge in progress just because overshoot check
-    // flipped — wait for release condition on the next in-tolerance tick.
     return;
   }
   runner.queueShot(fallback.x, fallback.y);
