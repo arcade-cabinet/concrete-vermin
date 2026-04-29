@@ -30,10 +30,9 @@ test.describe("keyboard-only navigation", () => {
     );
     await page.keyboard.press("Enter");
 
-    // Briefing — Begin button must be reachable via Tab.
+    // Briefing autofocuses the Begin button on mount.
     const begin = page.getByRole("button", { name: /^▸ begin$|^begin$/i });
     await expect(begin).toBeVisible({ timeout: 15_000 });
-    await page.keyboard.press("Tab");
     await page.waitForFunction(
       () => {
         const el = document.activeElement;
