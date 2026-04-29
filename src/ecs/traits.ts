@@ -149,11 +149,6 @@ export const Vermin = trait({
   locomotion: "ground" as Locomotion,
 });
 
-/**
- * NapalmPool — a burning puddle spawned by the flamethrower charge-shot.
- * Applies damage-over-time to every vermin entity within `radius` each
- * sim tick. Expires when `nowMs >= expiresAt`.
- */
 export const NapalmPool = trait({
   x: 0,
   y: 0,

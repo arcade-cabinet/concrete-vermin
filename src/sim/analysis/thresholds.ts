@@ -58,6 +58,7 @@ export const MISSION_THRESHOLDS: ReadonlyArray<Readonly<MissionThreshold>> = Obj
     parDurationS: 160,
     parDurationWindowS: 30,
     medianGradeMin: "B",
+    // Boss-only encounter — no trash waves by design; clearRate is legitimately 0.
     trashClearRateMin: 0,
     perfectGradeMin: "A",
   },
@@ -85,6 +86,7 @@ export const MISSION_THRESHOLDS: ReadonlyArray<Readonly<MissionThreshold>> = Obj
     parDurationS: 180,
     parDurationWindowS: 35,
     medianGradeMin: "A",
+    // Boss-only encounter — no trash waves by design; clearRate is legitimately 0.
     trashClearRateMin: 0,
     perfectGradeMin: "A",
   },
@@ -103,6 +105,7 @@ export const MISSION_THRESHOLDS: ReadonlyArray<Readonly<MissionThreshold>> = Obj
     parDurationS: 105,
     parDurationWindowS: 15,
     medianGradeMin: "A",
+    // Boss-only encounter — no trash waves by design; clearRate is legitimately 0.
     trashClearRateMin: 0,
     perfectGradeMin: "S+",
   },

@@ -1,15 +1,5 @@
 import { expect, test } from "@playwright/test";
 
-/**
- * Keyboard-only navigation: Tab + Enter through MainMenu → MissionSelect
- * → Briefing. Asserts focus is managed (each screen's primary CTA is
- * focused on mount) and focus-visible ring is applied.
- *
- * We don't assert the exact CSS value of the ring — that would be
- * brittle across themes. Instead we verify that the element receiving
- * focus has an outline that is not "none" / "0px".
- */
-
 test.describe("keyboard-only navigation", () => {
   test.skip(({ browserName }) => browserName !== "chromium", "Chromium-only");
 
@@ -30,38 +20,43 @@ test.describe("keyboard-only navigation", () => {
     await page.goto("/");
     await expect(page.getByTestId("main-menu")).toBeVisible({ timeout: 20_000 });
 
-    // The "Press Start" button should receive focus on mount (the component uses
-    // a ref.focus() call in useEffect). Verify focus is already on it or Tab to it.
+    // Tab until the start button is focused, then activate with Enter.
     const start = page.getByTestId("main-menu-start");
     await expect(start).toBeVisible({ timeout: 10_000 });
-
-    // Use keyboard to activate the start button.
-    await start.focus();
+    await page.keyboard.press("Tab");
+    await page.waitForFunction(
+      () => document.activeElement?.getAttribute("data-testid") === "main-menu-start",
+      { timeout: 5_000 },
+    );
     await page.keyboard.press("Enter");
 
-    // Briefing should appear with focus on the Begin button.
+    // Briefing — Begin button must be reachable via Tab.
     const begin = page.getByRole("button", { name: /^▸ begin$|^begin$/i });
     await expect(begin).toBeVisible({ timeout: 15_000 });
-
-    // Verify focus is on the begin button (or reachable via Tab).
-    await begin.focus();
-
-    // Verify focus is on the right element; outline check via :focus-visible
-    // is brittle across themes so we only assert focus placement.
+    await page.keyboard.press("Tab");
+    await page.waitForFunction(
+      () => {
+        const el = document.activeElement;
+        return el !== null && /begin/i.test(el.textContent ?? "");
+      },
+      { timeout: 5_000 },
+    );
     const isFocused = await begin.evaluate((el) => document.activeElement === el);
     expect(isFocused).toBe(true);
-
-    // Activate Begin via keyboard.
     await page.keyboard.press("Enter");
 
-    // MissionSelect should appear.
+    // MissionSelect — Deploy button must be reachable via Tab.
     const missionSelect = page.locator('[data-phase-root="mission-select"]');
     await expect(missionSelect).toBeVisible({ timeout: 15_000 });
-
-    // Tab to the DEPLOY button and confirm focus lands on it.
     const deploy = missionSelect.getByRole("button", { name: /deploy/i });
     await expect(deploy).toBeVisible({ timeout: 10_000 });
-    await deploy.focus();
+
+    // Tab through the mission list until Deploy is focused.
+    for (let i = 0; i < 20; i++) {
+      await page.keyboard.press("Tab");
+      const focused = await deploy.evaluate((el) => document.activeElement === el);
+      if (focused) break;
+    }
     const deployFocused = await deploy.evaluate((el) => document.activeElement === el);
     expect(deployFocused).toBe(true);
   });

@@ -27,7 +27,7 @@ export interface GovernorLoopProps {
   shooterPos: { x: number; y: number }; // pursuit lookahead origin
 }
 
-/** Headless sibling of <Loop>: drives runner.queueShot/queueReload via Yuka pursuit. Returns null. */
+// Returns null — renders no Pixi nodes; side-effects only via runner.queue*.
 export function GovernorLoop({
   runner,
   weapon,

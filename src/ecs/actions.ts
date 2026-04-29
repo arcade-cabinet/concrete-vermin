@@ -63,16 +63,6 @@ export interface FireWeaponOptions {
   ownerEntity: number;
 }
 
-/**
- * Spawns one projectile entity per pellet (shotguns produce many).
- * Spread is applied as a small angle perturbation per pellet — the
- * caller can pre-compute a deterministic spread sequence via rng to
- * keep visuals stable.
- *
- * @param pelletOverride - When provided, overrides weapon.base.pellets for
- *   the pellet loop count (used by charge-shot effects). Damage calculation
- *   still uses weapon.base.damage unchanged.
- */
 export function fireWeapon(
   world: World,
   weapon: TunedWeapon,

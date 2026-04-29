@@ -244,16 +244,9 @@ export function playVerminDeath(archetypeId?: string): void {
   _verminDeath?.triggerAttackRelease(note, "8n");
 }
 
-/**
- * Charge-whine stub: plays a low-pitched version of the weapon-fire sample
- * to indicate a charge is building. Best-effort — silently skips if audio
- * context is not yet unlocked.
- */
+// tesla synth at C2: capacitor charge feel, distinct from weapon-fire pitch, short enough to not clash with release SFX.
 export function playChargeWhine(): void {
   ensureInstruments();
-  // Use the tesla synth (capacitor charge feel) at low octave as a generic
-  // charge-building whine. It's distinct from any weapon fire and short enough
-  // not to clash with the release SFX.
   _tesla?.triggerAttackRelease("C2", "32n");
 }
 

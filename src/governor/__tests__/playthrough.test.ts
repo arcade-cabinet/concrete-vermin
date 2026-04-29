@@ -4,7 +4,7 @@ import { gradeFromScore, playMissionWithGovernor } from "../playthrough";
 
 const ALL_MISSIONS = [...MISSIONS, ...SECRET_MISSIONS];
 
-describe("STRICT_PASS_IDS integrity", () => {
+describe("mission registry sanity", () => {
   it("ALL_MISSIONS is non-empty", () => {
     expect(ALL_MISSIONS.length).toBeGreaterThan(0);
   });

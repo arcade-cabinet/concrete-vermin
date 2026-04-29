@@ -65,16 +65,6 @@ export interface PlaythroughOpts {
   seed?: number;
 }
 
-/**
- * Headless playthrough: constructs a real GameRunner for the mission,
- * drives runner.step(1/60) in a loop, and calls governorTick() every
- * frame to issue queueShot/queueReload via the SAME public methods
- * GameStage uses. Returns when the runner reports "won" or "lost", or
- * when the wall-clock budget is exhausted.
- *
- * Pure node-environment — no React, no Pixi. The runner publishes its
- * snapshot to useGameStore on every step; governorTick reads from there.
- */
 export function playMissionWithGovernor(
   mission: Readonly<Mission>,
   opts: PlaythroughOpts = {},
@@ -120,7 +110,6 @@ export function playMissionWithGovernor(
 
   while (ticks < maxTicks) {
     runner.step(dt);
-    governorTick({ runner, weapon, profile, playerLineY, shooterPos, state });
     ticks++;
     const phase = useGameStore.getState().phase;
     if (phase === "won" || phase === "lost") {
@@ -136,6 +125,7 @@ export function playMissionWithGovernor(
         livesRemaining: snap.player.livesRemaining,
       };
     }
+    governorTick({ runner, weapon, profile, playerLineY, shooterPos, state });
   }
 
   const snap = useGameStore.getState();

@@ -291,11 +291,8 @@ export function GameStage() {
   // Charge-shot pointer model. Pointer down starts a charge; release
   // decides tap (< 80 ms) vs charge release (>= 80 ms).
   function onPointerDown(e: React.PointerEvent<HTMLDivElement>) {
-    // Mouse: only fire on primary (left) button. Right-click should fall
-    // through to the browser context menu, middle-click is reserved.
-    // Touch and pen events report button === 0 by default, so this
-    // doesn't break either.
     if (e.pointerType === "mouse" && e.button !== 0) return;
+    e.currentTarget.setPointerCapture(e.pointerId);
     const p = clientToStage(e, e.currentTarget);
     setReticle(p.x, p.y);
     pointerDownAt.current = Date.now();
@@ -305,10 +302,12 @@ export function GameStage() {
 
   function onPointerUp(e: React.PointerEvent<HTMLDivElement>) {
     if (e.pointerType === "mouse" && e.button !== 0) return;
+    if (e.currentTarget.hasPointerCapture(e.pointerId)) {
+      e.currentTarget.releasePointerCapture(e.pointerId);
+    }
     const heldMs = Date.now() - pointerDownAt.current;
     const p = clientToStage(e, e.currentTarget);
     if (heldMs < 80) {
-      // Short tap — treat as immediate shot at the original press position.
       fireWithAssist(pointerDownPos.current.x, pointerDownPos.current.y);
     } else {
       runnerRef.current?.queueChargeRelease(p.x, p.y);

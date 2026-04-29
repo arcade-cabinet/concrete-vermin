@@ -17,13 +17,6 @@ export interface GovernorProfile {
   reticleMaxSpeed: number; // sim-units/sec; reticle snaps, knob only
   shotCooldownMs: number; // gap between consecutive queueShot calls
   hitToleranceUnits: number; // slack on lead-vs-current overshoot gate
-  /**
-   * When true, the governor uses queueChargeStart / queueChargeRelease for
-   * weapons with a chargeProfile when a high-threat target is in range.
-   * Charge builds until progress >= 0.8, then releases. Tap shots are used
-   * for all other targets. `PLAYTHROUGH` keeps this false (beginner-safe);
-   * `STRESS` enables it to stress-test the charge-shot mechanic end-to-end.
-   */
   useChargeShot?: boolean;
 }
 
@@ -35,11 +28,6 @@ export const PLAYTHROUGH: GovernorProfile = {
   useChargeShot: false,
 };
 
-/**
- * STRESS profile — mirrors PLAYTHROUGH but enables charge-shot usage.
- * Used by stress-test harnesses to exercise the full charge pipeline
- * through the governor in an end-to-end playthrough.
- */
 export const STRESS: GovernorProfile = {
   ...PLAYTHROUGH,
   useChargeShot: true,
@@ -48,7 +36,6 @@ export const STRESS: GovernorProfile = {
 export interface GovernorState {
   lastShotAtMs: number;
   reloadQueued: boolean;
-  /** Sim ms when the current charge started; null if not charging. */
   chargeStartedAtMs: number | null;
 }
 

@@ -1,22 +1,5 @@
-/**
- * Stress-profile gate: runs `playMissionWithGovernor` with `profile: STRESS`
- * (charge-shot enabled) on representative missions — tutorial, boss, and a
- * secret — and asserts outcome = "won". Verifies that charge-shot doesn't
- * break end-to-end gameplay across weapon archetypes that carry a chargeProfile.
- *
- * Missions chosen:
- *   - streets-01-bodega  (shotgun/chargeProfile, tutorial, beginner balance)
- *   - above-09-pigeon-king  (tesla/arc-repeater chargeProfile, "ACT III · BOSS")
- *   - streets-secret-cellar  (sawed-off/chargeProfile, secret)
- *
- * `underworld-07-river-mutant` is excluded from the STRESS gate: the
- * flamethrower napalm-pool charge effect is intentionally weak against the
- * armored river-mutant boss (charge DPS < continuous tap DPS). That mission
- * is covered by the PLAYTHROUGH gate in playthrough.test.ts. The pigeon-king
- * boss (`above-09-pigeon-king`, tesla/arc-repeater) is the right proxy: its
- * weapon's charge effect fires 3 arcs per charge, making STRESS genuinely
- * competitive with tap-fire.
- */
+// `underworld-07-river-mutant` excluded: napalm-pool charge DPS < tap DPS against armored boss;
+// covered by PLAYTHROUGH gate in playthrough.test.ts instead.
 import { describe, expect, it } from "vitest";
 import { getMission } from "../../sim/content/missions";
 import { STRESS } from "../decide";

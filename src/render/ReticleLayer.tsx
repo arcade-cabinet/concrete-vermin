@@ -127,17 +127,6 @@ function drawTicks(g: PixiGraphics, x: number, y: number, r: number, tickW: numb
     .stroke({ color: SODIUM, width: tickW });
 }
 
-/**
- * Draw the charge-progress arc ring around the reticle.
- * Exported for unit testing — the draw logic is pure (no hooks).
- *
- * @param g        Pixi Graphics instance
- * @param x        Reticle center X
- * @param y        Reticle center Y
- * @param radius   Reticle base radius (sim units)
- * @param shape    Reticle shape variant
- * @param progress Charge progress in [0, 1]
- */
 // biome-ignore lint/suspicious/noExplicitAny: Graphics type erased for testability outside pixi.js
 export function drawChargeRing(
   g: any,

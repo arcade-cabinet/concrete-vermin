@@ -1,30 +1,8 @@
 import { expect, test } from "@playwright/test";
 
-/**
- * Android launch smoke — web-preview edition.
- *
- * Why web preview instead of a real emulator:
- *   Playwright's `androidDevice` fixture requires a running Android emulator or
- *   physical device connected via ADB, which is unavailable in standard CI
- *   runners. The Capacitor web bundle is identical to what runs inside the
- *   Android WebView, so exercising it in a mobile-viewport Chromium session
- *   catches all JS/layout regressions at a fraction of the CI cost. Real-device
- *   verification is tracked in the manual QA checklist in docs/DEPLOYMENT.md.
- *
- * What this test covers:
- *   - The built web bundle boots without unhandled JS errors in a portrait
- *     mobile viewport (375 × 812 — Pixel 7 profile via the "mobile-portrait"
- *     Playwright project).
- *   - MainMenu renders within 10 s.
- *   - The viewport is portrait (height > width), matching the Android
- *     orientation-lock set in AndroidManifest.xml.
- *
- * What this test does NOT cover:
- *   - Capacitor native plugin init (haptics, screen-orientation, splash, SQLite).
- *   - Touch latency / real GPU rendering path inside Android WebView.
- *   - App lifecycle events (background → foreground) on a real device.
- *   See docs/DEPLOYMENT.md §"Android QA checklist" for manual verification steps.
- */
+// `androidDevice` fixture requires ADB — unavailable in CI. web-preview in
+// mobile-portrait Chromium is identical to the Capacitor WebView JS path.
+// Native plugin init and real-GPU path are manual QA only (docs/DEPLOYMENT.md).
 
 test.describe("Android launch smoke", () => {
   test.skip(({ browserName }) => browserName !== "chromium", "Chromium-only smoke");
