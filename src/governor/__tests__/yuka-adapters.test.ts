@@ -34,7 +34,6 @@ describe("leadPoint", () => {
       { reticleMaxSpeed: 200, predictionFactor: 2 },
     );
     expect(b.x - 100).toBeGreaterThan(a.x - 100);
-    // canonical lead = 20; 2x prediction = 40
     expect(b.x).toBeCloseTo(140);
   });
 
@@ -58,11 +57,6 @@ describe("leadPoint", () => {
       { x: 100, y: 100, vx: 30, vy: -40 },
       { reticleMaxSpeed: 250 },
     );
-    // distance = sqrt(100^2 + 100^2) ≈ 141.42
-    // targetSpeed = sqrt(30^2 + 40^2) = 50
-    // lookahead = 141.42 / 300 ≈ 0.4714s
-    // x = 100 + 30 * 0.4714 ≈ 114.14
-    // y = 100 + -40 * 0.4714 ≈ 81.14
     expect(aim.x).toBeCloseTo(114.14, 1);
     expect(aim.y).toBeCloseTo(81.14, 1);
   });

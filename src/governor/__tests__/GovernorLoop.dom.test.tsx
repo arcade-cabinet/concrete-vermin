@@ -163,7 +163,6 @@ describe("GovernorLoop", () => {
     expect(runner.queueShot).toHaveBeenCalledOnce();
     const shotMock = vi.mocked(runner.queueShot);
     const [x, y] = shotMock.mock.calls[0];
-    // Stationary rat: leadPoint = target pos; aim = pos + rat.headOffset {x:12, y:-6}
     expect(x).toBeCloseTo(252);
     expect(y).toBeCloseTo(244);
   });
@@ -233,7 +232,6 @@ describe("GovernorLoop", () => {
       />,
     );
     tickCb?.();
-    // Overshoot > tolerance → fallback: body-center + rat.headOffset {x:12, y:-6}
     expect(runner.queueShot).toHaveBeenCalledOnce();
     const shotMock = vi.mocked(runner.queueShot);
     const [x, y] = shotMock.mock.calls[0];
