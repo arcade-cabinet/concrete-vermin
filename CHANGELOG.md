@@ -49,6 +49,13 @@ For the per-PR record, see the autogen sections below.
 
 Releases are managed by [release-please](https://github.com/googleapis/release-please).
 
+## [2.0.1](https://github.com/arcade-cabinet/concrete-vermin/compare/v2.0.0...v2.0.1) (2026-04-29)
+
+
+### CI
+
+* restore CI_GITHUB_TOKEN for release-please and AAB upload ([#87](https://github.com/arcade-cabinet/concrete-vermin/issues/87)) ([073b868](https://github.com/arcade-cabinet/concrete-vermin/commit/073b868cd1257122eca915db9e23f564c78eb774))
+
 ## [2.0.0](https://github.com/arcade-cabinet/concrete-vermin/compare/v1.20.0...v2.0.0) (2026-04-29)
 
 
