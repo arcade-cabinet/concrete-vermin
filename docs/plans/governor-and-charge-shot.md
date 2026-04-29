@@ -60,7 +60,7 @@ End state: a headless React component that drives the SAME `queueShot`/`queueRel
 
 ### 1.3 Governor harness (1 PR)
 
-- `src/governor/__tests__/playthrough.dom.test.ts` — boots the full `<Application>` in jsdom + Pixi node-canvas mock, mounts every canonical + secret mission with `<GovernorLoop enabled profile="playthrough" />`, asserts `phase === "won"` and grade tier per mission within a wall-clock budget.
+- `src/governor/__tests__/playthrough.test.ts` — headless `GameRunner` loop (no Pixi/jsdom), drives `governorTick()` per frame, asserts `phase === "won"` and grade tier per mission within a wall-clock budget.
 - One mission per test (parallelizable). Hard 30 s/mission timeout.
 - Replaces the abstract `analysis:benchmark` for pass/fail; `analysis:benchmark` keeps running for tuning sweeps.
 
