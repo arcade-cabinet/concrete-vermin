@@ -20,10 +20,10 @@ test.describe("keyboard-only navigation", () => {
     await page.goto("/");
     await expect(page.getByTestId("main-menu")).toBeVisible({ timeout: 20_000 });
 
-    // Tab until the start button is focused, then activate with Enter.
+    // MainMenu autofocuses the start button on mount — confirm real focus
+    // landed there (not just that the element exists), then activate with Enter.
     const start = page.getByTestId("main-menu-start");
     await expect(start).toBeVisible({ timeout: 10_000 });
-    await page.keyboard.press("Tab");
     await page.waitForFunction(
       () => document.activeElement?.getAttribute("data-testid") === "main-menu-start",
       { timeout: 5_000 },
