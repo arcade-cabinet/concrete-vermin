@@ -49,6 +49,50 @@ For the per-PR record, see the autogen sections below.
 
 Releases are managed by [release-please](https://github.com/googleapis/release-please).
 
+## [2.0.0](https://github.com/arcade-cabinet/concrete-vermin/compare/v1.20.0...v2.0.0) (2026-04-29)
+
+
+### ⚠ BREAKING CHANGES
+
+* **governor:** v1.0 production release. Adds Yuka-driven headshot-aware governor (all 12 missions strict-gated), per-weapon tap-vs-hold charge-shot with 6 effects (wide-spray, auto-burst, double-barrel, mag-dump-cone, arc-repeater, napalm-pool DoT), reticle charge ring, 5 Playwright e2e specs, 85% coverage gate, and WCAG AA-passing MissionSelect palette.
+
+### Features
+
+* **a11y:** arrow-key nav + axe smoke + sr narrations + WCAG contrast audit ([#62](https://github.com/arcade-cabinet/concrete-vermin/issues/62)) ([61421bd](https://github.com/arcade-cabinet/concrete-vermin/commit/61421bd53ccaf9cdf4ec9f9cee7cfba46526e4f2))
+* **analysis:** calibrate benchmark model + flip balance gate to required ([#56](https://github.com/arcade-cabinet/concrete-vermin/issues/56)) ([a0ebc19](https://github.com/arcade-cabinet/concrete-vermin/commit/a0ebc1922c411c82d53b2719c6ec12a359eaee83))
+* **android:** orientation lock + splash branding + adaptive-icon palette ([#71](https://github.com/arcade-cabinet/concrete-vermin/issues/71)) ([d496518](https://github.com/arcade-cabinet/concrete-vermin/commit/d496518a97248690012e4075e7f3b66f69e918d0))
+* **audio:** per-act ambient + stings + boss leitmotif + ducking matrix ([#59](https://github.com/arcade-cabinet/concrete-vermin/issues/59)) ([8e40e54](https://github.com/arcade-cabinet/concrete-vermin/commit/8e40e54b5748d123a1bb51fd7b1b09569e83c859))
+* **content:** achievements system — 22 unlocks, registry, tracker, gallery ([#66](https://github.com/arcade-cabinet/concrete-vermin/issues/66)) ([264ea11](https://github.com/arcade-cabinet/concrete-vermin/commit/264ea115ad6aec02de5b57da08b1fe58e526577b))
+* **copy:** expand encounter-callouts from 12 → 32 lines, add chain-kill / boss-phase / no-damage tiers ([#67](https://github.com/arcade-cabinet/concrete-vermin/issues/67)) ([89675d3](https://github.com/arcade-cabinet/concrete-vermin/commit/89675d3989fc932f5e5218072a56490df7105a50))
+* **governor:** Phase 1 — Yuka-driven end-to-end playthrough harness ([#83](https://github.com/arcade-cabinet/concrete-vermin/issues/83)) ([ef25738](https://github.com/arcade-cabinet/concrete-vermin/commit/ef25738caad908dc49e09176c66d953ca7f28155))
+* **lore:** bespoke per-mission Pawnbroker debrief blurbs (win/loss/sGrade) ([#73](https://github.com/arcade-cabinet/concrete-vermin/issues/73)) ([f28ec3a](https://github.com/arcade-cabinet/concrete-vermin/commit/f28ec3a2ed79cc3988705cc7f742184425e92236))
+* **missions:** per-mission dynamic event triggers (boss-bark / hazard / surprise-wave) ([#75](https://github.com/arcade-cabinet/concrete-vermin/issues/75)) ([1c7c119](https://github.com/arcade-cabinet/concrete-vermin/commit/1c7c119e0f76a17db29a80170a57e36794c229b8))
+* **perf:** scripts/perf-trace.ts — Playwright frame-time gate + JSON output ([#70](https://github.com/arcade-cabinet/concrete-vermin/issues/70)) ([93f58f3](https://github.com/arcade-cabinet/concrete-vermin/commit/93f58f3de27f1fb111afbf50738bdda87fd6d3b4))
+* **render+input:** 3-layer parallax + aim assist + gamepad ([#61](https://github.com/arcade-cabinet/concrete-vermin/issues/61)) ([d9589a3](https://github.com/arcade-cabinet/concrete-vermin/commit/d9589a34144ae50a6ed9407c9c85bad53e181fed))
+* **render:** per-act lighting + idle anims + screen shake + damage numbers ([#60](https://github.com/arcade-cabinet/concrete-vermin/issues/60)) ([193994c](https://github.com/arcade-cabinet/concrete-vermin/commit/193994c43e32fc14abaaebea534a0655c1995a2a))
+* **runtime:** mission-aware runner + reload window + per-weapon audio ([#57](https://github.com/arcade-cabinet/concrete-vermin/issues/57)) ([3da0876](https://github.com/arcade-cabinet/concrete-vermin/commit/3da087690882df874165579b2b284670c29e4dbf))
+* **ux:** 21st-inspired redesign — MainMenu, tabloid result, subway map, wood-counter pawnshop, polaroid pause ([#63](https://github.com/arcade-cabinet/concrete-vermin/issues/63)) ([fbe1f19](https://github.com/arcade-cabinet/concrete-vermin/commit/fbe1f1985923212fd0bccb59607d316f8fd7aa05))
+* **ux:** Settings categorized accordion + screens DOM smoke ([#64](https://github.com/arcade-cabinet/concrete-vermin/issues/64)) ([d0b3823](https://github.com/arcade-cabinet/concrete-vermin/commit/d0b3823a40a334cf7b380f942fd6b076d920e1b0))
+
+
+### Bug Fixes
+
+* **runtime:** dedupe per-tick kill events across shotgun pellets ([#58](https://github.com/arcade-cabinet/concrete-vermin/issues/58)) ([dd45697](https://github.com/arcade-cabinet/concrete-vermin/commit/dd4569726ff335728a549d4e38e459dfb50b703c))
+* **ui:** canvas fills well, tutorial inlined into briefing, no HUD overlap; lifecycle pause on background ([#72](https://github.com/arcade-cabinet/concrete-vermin/issues/72)) ([21c018c](https://github.com/arcade-cabinet/concrete-vermin/commit/21c018c51a5f14eee46a2b6933cccaf135e4640f))
+* **ux:** arcade-cabinet frame, tap-to-fire reticle, Market modal, opening interstitial ([#65](https://github.com/arcade-cabinet/concrete-vermin/issues/65)) ([70e0fd5](https://github.com/arcade-cabinet/concrete-vermin/commit/70e0fd5fd5ca263be6a1c30dcf2a91dff2f96c9f))
+
+
+### Performance
+
+* bundle-size budget (1.5MB gz/chunk) + lazy-load 6 non-critical screens ([#68](https://github.com/arcade-cabinet/concrete-vermin/issues/68)) ([30f98fe](https://github.com/arcade-cabinet/concrete-vermin/commit/30f98fe8b4e68c24ec9432eb45e00fd618cfe49d))
+* **runtime:** pre-allocated object pool for muzzle flashes + damage events ([#69](https://github.com/arcade-cabinet/concrete-vermin/issues/69)) ([555539d](https://github.com/arcade-cabinet/concrete-vermin/commit/555539d72d7afd4f816c4d866100b84a4765e46e))
+
+
+### CI
+
+* fall back to github.token when CI_GITHUB_TOKEN secret absent ([#84](https://github.com/arcade-cabinet/concrete-vermin/issues/84)) ([61613ce](https://github.com/arcade-cabinet/concrete-vermin/commit/61613cee5a80e551b0d7f18675183821986c47c1))
+* fix release workflow — use github.token, env vars for secret comparisons ([#85](https://github.com/arcade-cabinet/concrete-vermin/issues/85)) ([516c2b7](https://github.com/arcade-cabinet/concrete-vermin/commit/516c2b7584ab1fd11fd24690cd63c68978a18f8d))
+
 ## [1.20.0](https://github.com/arcade-cabinet/concrete-vermin/compare/v1.19.1...v1.20.0) (2026-04-28)
 
 
