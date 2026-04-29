@@ -28,8 +28,14 @@ describe("render/effects/parallax", () => {
     for (const layer of ["far", "mid", "near"] as const) {
       const probes: number[] = [];
       for (let t = 0.5; t <= 12; t += 0.5) probes.push(t);
-      const peakX = probes.reduce((m, t) => Math.max(m, Math.abs(parallaxOffset(layer, t, false).dx)), 0);
-      const peakY = probes.reduce((m, t) => Math.max(m, Math.abs(parallaxOffset(layer, t, false).dy)), 0);
+      const peakX = probes.reduce(
+        (m, t) => Math.max(m, Math.abs(parallaxOffset(layer, t, false).dx)),
+        0,
+      );
+      const peakY = probes.reduce(
+        (m, t) => Math.max(m, Math.abs(parallaxOffset(layer, t, false).dy)),
+        0,
+      );
       expect(peakY).toBeLessThan(peakX);
     }
   });

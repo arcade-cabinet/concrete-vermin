@@ -1,10 +1,5 @@
 import { afterEach, describe, expect, it } from "vitest";
-import {
-  activeShakeCount,
-  pushShake,
-  resetShakeForTest,
-  sampleShake,
-} from "../screenShake";
+import { activeShakeCount, pushShake, resetShakeForTest, sampleShake } from "../screenShake";
 
 afterEach(() => resetShakeForTest());
 

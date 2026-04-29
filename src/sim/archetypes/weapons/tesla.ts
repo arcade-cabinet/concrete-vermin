@@ -24,5 +24,6 @@ export const tesla: Readonly<WeaponArchetype> = Object.freeze(
     },
     reticleRadius: 7,
     reticleShape: "diamond",
+    chargeProfile: { maxChargeMs: 900, shellsConsumed: 2, effect: "arc-repeater" },
   }),
 );

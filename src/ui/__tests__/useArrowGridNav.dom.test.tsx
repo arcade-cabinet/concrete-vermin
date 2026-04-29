@@ -15,12 +15,7 @@ function Grid({ count }: { count: number }) {
   return (
     <div ref={ref} data-testid="grid">
       {ITEMS.slice(0, count).map((item, i) => (
-        <button
-          key={item.id}
-          type="button"
-          data-arrow-nav-item="x"
-          data-testid={`btn-${i}`}
-        >
+        <button key={item.id} type="button" data-arrow-nav-item="x" data-testid={`btn-${i}`}>
           {item.label}
         </button>
       ))}

@@ -17,6 +17,7 @@ export default defineConfig({
       "src/runtime/**/*.test.ts",
       "src/audio/**/*.test.ts",
       "src/input/**/*.test.ts",
+      "src/governor/**/*.test.ts",
       // Pure-logic UI tests (stores, copy modules, helpers) — no DOM.
       // Anything that needs jsdom uses the .dom.test.ts suffix and goes
       // through vitest.dom.config.ts.
@@ -26,6 +27,17 @@ export default defineConfig({
     ],
     exclude: ["e2e/**", "node_modules/**", "**/*.dom.test.*", "**/*.browser.test.*"],
     passWithNoTests: true,
+    coverage: {
+      provider: "v8",
+      include: ["src/sim/**", "src/ecs/**", "src/runtime/**", "src/audio/**"],
+      exclude: ["**/__tests__/**", "**/*.test.ts", "**/*.test.tsx"],
+      thresholds: {
+        lines: 85,
+        functions: 80,
+        branches: 75,
+      },
+      reporter: ["text", "lcov"],
+    },
   },
   resolve: {
     alias: {

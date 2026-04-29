@@ -31,10 +31,13 @@ function useReticleScale(): number {
   return Math.min(1.6, Math.max(1.0, 0.6 + dpr * 0.4));
 }
 
+const AMBER = 0xffb347; // sodium amber — brand-compliant charge ring color
+
 export function ReticleLayer() {
   const reticle = useGameStore((s) => s.reticle);
   const radius = useGameStore((s) => s.reticleRadius);
   const shape = useGameStore((s) => s.reticleShape);
+  const chargeProgress = useGameStore((s) => s.chargeProgress);
   const k = useReticleScale();
 
   const draw = useCallback(
@@ -97,8 +100,13 @@ export function ReticleLayer() {
           break;
         }
       }
+
+      // Charge ring — fills clockwise from 12 o'clock as charge builds.
+      if (chargeProgress !== null && chargeProgress > 0) {
+        drawChargeRing(g, x, y, radius, shape, chargeProgress);
+      }
     },
-    [reticle, radius, shape, k],
+    [reticle, radius, shape, chargeProgress, k],
   );
 
   return <pixiGraphics draw={draw} />;
@@ -117,4 +125,50 @@ function drawTicks(g: PixiGraphics, x: number, y: number, r: number, tickW: numb
   g.moveTo(x, y + r - 1)
     .lineTo(x, y + r + 4)
     .stroke({ color: SODIUM, width: tickW });
+}
+
+// biome-ignore lint/suspicious/noExplicitAny: Graphics type erased for testability outside pixi.js
+export function drawChargeRing(
+  g: any,
+  x: number,
+  y: number,
+  radius: number,
+  shape: string,
+  progress: number,
+): void {
+  if (progress <= 0) return;
+  const alpha = 0.8 + 0.2 * progress;
+  const endAngle = -Math.PI / 2 + 2 * Math.PI * progress;
+
+  if (shape === "double") {
+    // Two arcs: left pip and right pip (shared chargeProgress).
+    const offset = radius * 0.6;
+    const pipR = radius * 0.6 + 3;
+    g.arc(x - offset, y, pipR, -Math.PI / 2, endAngle, false).stroke({
+      color: AMBER,
+      width: 2,
+      alpha,
+    });
+    g.arc(x + offset, y, pipR, -Math.PI / 2, endAngle, false).stroke({
+      color: AMBER,
+      width: 2,
+      alpha,
+    });
+  } else {
+    // cross, ring, wide, diamond — single arc.
+    g.arc(x, y, radius + 4, -Math.PI / 2, endAngle, false).stroke({
+      color: AMBER,
+      width: 2,
+      alpha,
+    });
+  }
+
+  // Pulse ring at full charge.
+  if (progress >= 1) {
+    g.arc(x, y, radius + 6, 0, Math.PI * 2).stroke({
+      color: AMBER,
+      width: 3,
+      alpha: 1.0,
+    });
+  }
 }

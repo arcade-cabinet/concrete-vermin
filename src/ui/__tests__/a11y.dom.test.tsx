@@ -59,9 +59,7 @@ describe("a11y axe smoke", () => {
   });
 
   it("PawnShop has no axe violations", async () => {
-    const { container, unmount } = render(
-      <PawnShop onContinue={() => {}} onBack={() => {}} />,
-    );
+    const { container, unmount } = render(<PawnShop onContinue={() => {}} onBack={() => {}} />);
     const v = await runAxe(container);
     expect(v, JSON.stringify(v, null, 2)).toEqual([]);
     unmount();

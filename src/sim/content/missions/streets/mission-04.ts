@@ -32,19 +32,27 @@ export const mission04: Mission = defineMission({
     {
       id: "boss-bear",
       isCheckpoint: true,
-      spawns: [{ variant: "boss-dumpster-bear", count: 1, pattern: "boss-scripted" }],
+      spawns: [{ variant: "boss-dumpster-bear-classic", count: 1, pattern: "boss-scripted" }],
     },
   ],
   events: [
     {
       id: "lazzaro-warning",
       trigger: { kind: "at-time", seconds: 4 },
-      effect: { kind: "boss-bark", text: "Pawnbroker: \"Six rounds. One for the head. Make it count.\"" },
+      effect: {
+        kind: "boss-bark",
+        text: 'Pawnbroker: "Six rounds. One for the head. Make it count."',
+      },
     },
     {
       id: "engorged-extra",
       trigger: { kind: "at-kill-count", threshold: 4 },
-      effect: { kind: "surprise-wave", variant: "raccoon-engorged", count: 1, pattern: "right-flood" },
+      effect: {
+        kind: "surprise-wave",
+        variant: "raccoon-engorged",
+        count: 1,
+        pattern: "right-flood",
+      },
     },
     {
       id: "bear-roars",

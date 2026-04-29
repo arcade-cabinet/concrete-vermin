@@ -40,7 +40,9 @@ export function isMissionUnlocked(
   // linear act progression.
   const secret = SECRET_MISSIONS.find((m) => m.id === missionId);
   if (secret) {
-    return secret.sGradeUnlockFrom !== undefined && sGradeMissions.includes(secret.sGradeUnlockFrom);
+    return (
+      secret.sGradeUnlockFrom !== undefined && sGradeMissions.includes(secret.sGradeUnlockFrom)
+    );
   }
   if (missionId === FIRST_MISSION_ID) return true;
   const idx = MISSIONS.findIndex((m) => m.id === missionId);
@@ -66,9 +68,7 @@ export const usePlayerProgress = create<PlayerProgress>((set) => ({
     ),
   markSGradeEarned: (id) =>
     set((s) =>
-      s.sGradeMissionIds.includes(id)
-        ? s
-        : { sGradeMissionIds: [...s.sGradeMissionIds, id] },
+      s.sGradeMissionIds.includes(id) ? s : { sGradeMissionIds: [...s.sGradeMissionIds, id] },
     ),
   selectMission: (id) => set({ selectedMissionId: id }),
   awardCash: (amount) => set((s) => ({ cash: s.cash + Math.max(0, amount) })),

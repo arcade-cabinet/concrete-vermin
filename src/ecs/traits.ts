@@ -148,3 +148,12 @@ export const Vermin = trait({
   isBoss: false,
   locomotion: "ground" as Locomotion,
 });
+
+export const NapalmPool = trait({
+  x: 0,
+  y: 0,
+  radius: 24,
+  dps: 15,
+  ttlMs: 1000,
+  expiresAt: 0,
+});

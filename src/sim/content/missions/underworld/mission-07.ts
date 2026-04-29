@@ -32,14 +32,17 @@ export const mission07: Mission = defineMission({
     {
       id: "boss-mutant",
       isCheckpoint: true,
-      spawns: [{ variant: "boss-river-mutant", count: 1, pattern: "boss-scripted" }],
+      spawns: [{ variant: "boss-river-mutant-classic", count: 1, pattern: "boss-scripted" }],
     },
   ],
   events: [
     {
       id: "medal-warning",
       trigger: { kind: "at-time", seconds: 3 },
-      effect: { kind: "boss-bark", text: "Pawnbroker: \"Keep the Saint-Anthony medal on. I mean it.\"" },
+      effect: {
+        kind: "boss-bark",
+        text: 'Pawnbroker: "Keep the Saint-Anthony medal on. I mean it."',
+      },
     },
     {
       id: "low-tide-suck",
@@ -53,7 +56,12 @@ export const mission07: Mission = defineMission({
     {
       id: "engorged-fish-extra",
       trigger: { kind: "at-kill-count", threshold: 6 },
-      effect: { kind: "surprise-wave", variant: "sewer-fish-engorged", count: 2, pattern: "surface-from-grate" },
+      effect: {
+        kind: "surprise-wave",
+        variant: "sewer-fish-engorged",
+        count: 2,
+        pattern: "surface-from-grate",
+      },
     },
     {
       id: "boss-rises",

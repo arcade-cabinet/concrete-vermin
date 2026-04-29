@@ -53,7 +53,10 @@ export const mission03: Mission = defineMission({
     {
       id: "rabid-warning",
       trigger: { kind: "at-encounter-start", index: 1 },
-      effect: { kind: "boss-bark", text: "Pawnbroker: \"Black-feather ones bite. Don't get close.\"" },
+      effect: {
+        kind: "boss-bark",
+        text: 'Pawnbroker: "Black-feather ones bite. Don\'t get close."',
+      },
     },
     {
       id: "soot-flock-extra",

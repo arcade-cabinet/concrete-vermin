@@ -39,14 +39,17 @@ export const mission09: Mission = defineMission({
     {
       id: "boss-king",
       isCheckpoint: true,
-      spawns: [{ variant: "boss-pigeon-king", count: 1, pattern: "boss-scripted" }],
+      spawns: [{ variant: "boss-pigeon-king-classic", count: 1, pattern: "boss-scripted" }],
     },
   ],
   events: [
     {
       id: "grandfather-line",
       trigger: { kind: "at-time", seconds: 4 },
-      effect: { kind: "boss-bark", text: "Pawnbroker: \"He's been waiting longer than you've been alive.\"" },
+      effect: {
+        kind: "boss-bark",
+        text: "Pawnbroker: \"He's been waiting longer than you've been alive.\"",
+      },
     },
     {
       id: "court-parts",
@@ -60,7 +63,12 @@ export const mission09: Mission = defineMission({
     {
       id: "rabid-extra",
       trigger: { kind: "at-kill-count", threshold: 8 },
-      effect: { kind: "surprise-wave", variant: "pigeon-rabid", count: 4, pattern: "dive-from-sky" },
+      effect: {
+        kind: "surprise-wave",
+        variant: "pigeon-rabid",
+        count: 4,
+        pattern: "dive-from-sky",
+      },
     },
     {
       id: "king-rises",

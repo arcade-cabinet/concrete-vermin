@@ -4,6 +4,7 @@ import "../render/extend";
 import { CRTOverlay } from "../render/CRTOverlay";
 import { HudOverlay } from "../render/HudOverlay";
 import { MuzzleFlashLayer } from "../render/MuzzleFlashLayer";
+import { NapalmPoolLayer } from "../render/NapalmPoolLayer";
 import { ProjectileLayer } from "../render/ProjectileLayer";
 import { ReticleLayer } from "../render/ReticleLayer";
 import { SplashLayer } from "../render/SplashLayer";
@@ -61,6 +62,13 @@ export function GameStage() {
   // always read the current settings without re-installing.
   const aimAssistRef = useRef(aimAssistOn);
   aimAssistRef.current = aimAssistOn;
+
+  // Tap-vs-charge disambiguation: record the timestamp and position of each
+  // pointer/key/trigger press so the release handler can decide whether the
+  // hold was long enough to count as a charge release (>= 80 ms) or a tap.
+  const pointerDownAt = useRef<number>(0);
+  const pointerDownPos = useRef<{ x: number; y: number }>({ x: 0, y: 0 });
+  const spaceDownAt = useRef<number>(0);
 
   // Reset the splash visibility every time the player re-enters the
   // playing phase (next mission, restart). The Application unmounts +
@@ -136,7 +144,9 @@ export function GameStage() {
           break;
         case " ":
         case "Enter":
-          fireWithAssist(lastReticleRef.current.x, lastReticleRef.current.y);
+          // Charge-shot: start charging on press; release decides tap vs charge.
+          spaceDownAt.current = Date.now();
+          runnerRef.current?.queueChargeStart();
           e.preventDefault();
           break;
         case "r":
@@ -160,6 +170,19 @@ export function GameStage() {
         case "ArrowRight":
           keysHeld.current.right = false;
           break;
+        case " ":
+        case "Enter": {
+          const heldMs = Date.now() - spaceDownAt.current;
+          const rx = lastReticleRef.current.x;
+          const ry = lastReticleRef.current.y;
+          if (heldMs < 80) {
+            fireWithAssist(rx, ry);
+          } else {
+            runnerRef.current?.queueChargeRelease(rx, ry);
+          }
+          e.preventDefault();
+          break;
+        }
       }
     };
     window.addEventListener("keydown", onDown);
@@ -179,6 +202,8 @@ export function GameStage() {
     const reticleRef = lastReticleRef;
     const speedPxPerS = RETICLE_KEY_SPEED_PX;
     let lastTick = performance.now();
+    // Track when the gamepad trigger was pressed for tap-vs-charge split.
+    let gamePadHeldAt = 0;
     const uninstall = installGamepad(
       {
         onAim: (dx, dy) => {
@@ -192,7 +217,19 @@ export function GameStage() {
           setReticle(nx, ny);
         },
         onFire: () => {
-          fireWithAssist(reticleRef.current.x, reticleRef.current.y);
+          // Rising edge of trigger: start charging.
+          gamePadHeldAt = Date.now();
+          runnerRef.current?.queueChargeStart();
+        },
+        onFireRelease: () => {
+          // Falling edge of trigger: decide tap vs charge release.
+          const heldMs = Date.now() - gamePadHeldAt;
+          const r = reticleRef.current;
+          if (heldMs < 80) {
+            fireWithAssist(r.x, r.y);
+          } else {
+            runnerRef.current?.queueChargeRelease(r.x, r.y);
+          }
         },
         onReload: () => {
           runnerRef.current?.queueReload();
@@ -251,20 +288,30 @@ export function GameStage() {
     r.queueShot(snapped.x, snapped.y);
   }
 
-  // Tap-to-fire model. Click / tap places the reticle at the pointer
-  // position and immediately queues a shot. No drag-to-aim, no long-
-  // press-to-reload — reload is bound to R / gamepad bumper / auto when
-  // the magazine drains. The reticle is the hit-box; weapon archetype
-  // controls reticle radius via the `reticleShape` snapshot.
+  // Charge-shot pointer model. Pointer down starts a charge; release
+  // decides tap (< 80 ms) vs charge release (>= 80 ms).
   function onPointerDown(e: React.PointerEvent<HTMLDivElement>) {
-    // Mouse: only fire on primary (left) button. Right-click should fall
-    // through to the browser context menu, middle-click is reserved.
-    // Touch and pen events report button === 0 by default, so this
-    // doesn't break either.
     if (e.pointerType === "mouse" && e.button !== 0) return;
+    e.currentTarget.setPointerCapture(e.pointerId);
     const p = clientToStage(e, e.currentTarget);
     setReticle(p.x, p.y);
-    fireWithAssist(p.x, p.y);
+    pointerDownAt.current = Date.now();
+    pointerDownPos.current = p;
+    runnerRef.current?.queueChargeStart();
+  }
+
+  function onPointerUp(e: React.PointerEvent<HTMLDivElement>) {
+    if (e.pointerType === "mouse" && e.button !== 0) return;
+    if (e.currentTarget.hasPointerCapture(e.pointerId)) {
+      e.currentTarget.releasePointerCapture(e.pointerId);
+    }
+    const heldMs = Date.now() - pointerDownAt.current;
+    const p = clientToStage(e, e.currentTarget);
+    if (heldMs < 80) {
+      fireWithAssist(pointerDownPos.current.x, pointerDownPos.current.y);
+    } else {
+      runnerRef.current?.queueChargeRelease(p.x, p.y);
+    }
   }
 
   return (
@@ -287,6 +334,7 @@ export function GameStage() {
         WebkitTouchCallout: "none",
       }}
       onPointerDown={onPointerDown}
+      onPointerUp={onPointerUp}
     >
       <div
         className="cv-pixi-frame"
@@ -328,6 +376,7 @@ export function GameStage() {
           <VerminLayer />
           <ProjectileLayer />
           <MuzzleFlashLayer />
+          <NapalmPoolLayer />
           <SplashLayer />
           <HudOverlay />
           <ReticleLayer />

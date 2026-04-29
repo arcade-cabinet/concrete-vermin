@@ -10,7 +10,28 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 **Hand-written narrative summaries** for major version milestones live in this top section. Add a "Narrative — vX" heading per major release with a paragraph or two of human context (themes, big decisions, anything the autogen can't capture). The autogen entries below remain the source of truth for *what changed*; the narrative is the *why*.
 
-### Narrative — v1 (2026-04-28)
+### Narrative — v1.0.0 (2026-04-28) — SHIP
+
+v1.0.0 is the production release. Every checkbox in the directive is checked. No stubs, no deferrals, no `continue-on-error`.
+
+**What changed since the v1 pre-release line:**
+
+The governor PR (#83) landed everything that was on the board. The Yuka-driven governor (`src/governor/`) now plays every mission headlessly — it reads the same `useGameStore` snapshot the player sees, calls the same `queueShot`/`queueReload` methods `GameStage` uses, and asserts grade ≥ B on all 12 missions in CI. The abstract benchmark graduated from `continue-on-error` to a required hard gate.
+
+Per-weapon charge-shot ships. Every weapon has a tap path (unchanged, balanced) and a hold path (charged heavy variant): shotgun → wide-spray, revolver → 5-shot auto-burst, sawed-off → double-barrel, SMG → mag-dump cone, tesla → 3-arc chain, flamethrower → napalm pool DoT. The charge ring is a segmented sodium-amber arc on the reticle. Input works on mouse/touch (80ms tap threshold), Space/Enter, and gamepad R2.
+
+The AI dive-at cap bug was the silent reason `underworld-06-sewer-shallows` was unwinnable by any governor — roaches spawn at the ceiling and climb down, but the step duration cap (`STEP_DURATION_S = 0.6`) prevented them from completing the descent into weapon range. Fixed by computing the actual time needed for the step.
+
+Coverage landed as a hard gate (≥85% lines on sim/ecs/runtime/audio). Five e2e specs run on every PR: full player journey, axe-core accessibility audit on every screen, mobile-viewport golden path, keyboard-only navigation, and gamepad smoke. All required in CI — no `continue-on-error` anywhere.
+
+**Shape decisions for this release:**
+
+- Governor lives in `src/governor/`, the only file in the repo that imports `yuka`. Sim stays pure.
+- Charge tap threshold is 80ms — short enough that fast players never accidentally charge, long enough that a deliberate hold is unambiguous.
+- Napalm TTL and radius scale with charge depth so there's a real hold-longer-for-more-power curve.
+- `tsconfig.e2e.json` was added as a separate composite project (lib: ES2022+DOM, types: node) to give e2e specs both Node imports and DOM types inside `page.evaluate()` callbacks without polluting the Node tooling tsconfig.
+
+### Narrative — v1 pre-release (2026-04-28)
 
 The v1 line covers everything from "first commit" to "playable across 3 acts with full pause / settings / accessibility polish, the analysis stack landed, JSON-decomposed lore, and 5 green CI jobs."
 

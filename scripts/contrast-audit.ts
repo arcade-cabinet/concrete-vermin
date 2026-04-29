@@ -25,15 +25,71 @@ interface Pair {
 }
 
 const PAIRS: Pair[] = [
-  { fg: COLOR.cream, bg: COLOR.bgAsphalt, fgName: "cream", bgName: "bgAsphalt", kind: "text", context: "HUD body text" },
-  { fg: COLOR.cream, bg: COLOR.bgConcreteDark, fgName: "cream", bgName: "bgConcreteDark", kind: "text", context: "MissionSelect tile text on background" },
-  { fg: COLOR.sodium, bg: COLOR.bgAsphalt, fgName: "sodium", bgName: "bgAsphalt", kind: "text", context: "HUD labels (SCORE, SHELLS)" },
-  { fg: COLOR.sodium, bg: COLOR.bgConcreteDark, fgName: "sodium", bgName: "bgConcreteDark", kind: "text", context: "Section headers" },
-  { fg: COLOR.brickAccessible, bg: COLOR.bgAsphalt, fgName: "brickAccessible", bgName: "bgAsphalt", kind: "text", context: "Critical alerts (low ammo / lives)" },
-  { fg: COLOR.creamDim, bg: COLOR.bgAsphalt, fgName: "creamDim", bgName: "bgAsphalt", kind: "text", context: "Settings descriptions" },
+  {
+    fg: COLOR.cream,
+    bg: COLOR.bgAsphalt,
+    fgName: "cream",
+    bgName: "bgAsphalt",
+    kind: "text",
+    context: "HUD body text",
+  },
+  {
+    fg: COLOR.cream,
+    bg: COLOR.bgConcreteDark,
+    fgName: "cream",
+    bgName: "bgConcreteDark",
+    kind: "text",
+    context: "MissionSelect tile text on background",
+  },
+  {
+    fg: COLOR.sodium,
+    bg: COLOR.bgAsphalt,
+    fgName: "sodium",
+    bgName: "bgAsphalt",
+    kind: "text",
+    context: "HUD labels (SCORE, SHELLS)",
+  },
+  {
+    fg: COLOR.sodium,
+    bg: COLOR.bgConcreteDark,
+    fgName: "sodium",
+    bgName: "bgConcreteDark",
+    kind: "text",
+    context: "Section headers",
+  },
+  {
+    fg: COLOR.brickAccessible,
+    bg: COLOR.bgAsphalt,
+    fgName: "brickAccessible",
+    bgName: "bgAsphalt",
+    kind: "text",
+    context: "Critical alerts (low ammo / lives)",
+  },
+  {
+    fg: COLOR.creamDim,
+    bg: COLOR.bgAsphalt,
+    fgName: "creamDim",
+    bgName: "bgAsphalt",
+    kind: "text",
+    context: "Settings descriptions",
+  },
   // UI components (≥ 3:1).
-  { fg: COLOR.sodium, bg: COLOR.bgAsphalt, fgName: "sodium", bgName: "bgAsphalt", kind: "ui", context: "Sodium-bordered button outlines" },
-  { fg: COLOR.bgConcreteDark, bg: COLOR.sodium, fgName: "bgConcreteDark", bgName: "sodium", kind: "text", context: "DEPLOY button (dark text on sodium)" },
+  {
+    fg: COLOR.sodium,
+    bg: COLOR.bgAsphalt,
+    fgName: "sodium",
+    bgName: "bgAsphalt",
+    kind: "ui",
+    context: "Sodium-bordered button outlines",
+  },
+  {
+    fg: COLOR.bgConcreteDark,
+    bg: COLOR.sodium,
+    fgName: "bgConcreteDark",
+    bgName: "sodium",
+    kind: "text",
+    context: "DEPLOY button (dark text on sodium)",
+  },
 ];
 
 const ROW = (p: Pair, ratio: number, ok: boolean) =>

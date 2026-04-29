@@ -57,6 +57,8 @@ export const weaponModSchema = z
     reticleRadiusMul: z.number().positive().default(1),
     /** Override the reticle shape (otherwise weapon's natural shape). */
     reticleShape: z.enum(RETICLE_SHAPES).optional(),
+    /** Charge-shot timing multiplier; <1 charges faster, >1 slower. */
+    chargeTimeMul: z.number().positive().optional(),
   })
   .strict();
 
@@ -339,6 +341,11 @@ export interface TunedWeapon {
   reticleRadius: number;
   /** Reticle visual + behavior shape. */
   reticleShape: ReticleShape;
+  /**
+   * Charge-shot profile with any chargeTimeMul from mods applied.
+   * Undefined if the weapon has no charge profile.
+   */
+  chargeProfile: WeaponArchetype["chargeProfile"];
 }
 
 export class LoadoutError extends Error {}
@@ -371,6 +378,7 @@ export function applyLoadout(
   let armorPierce = weapon.armorPierce;
   let reticleRadius = weapon.reticleRadius;
   let reticleShape: ReticleShape = weapon.reticleShape;
+  let chargeTimeMulAcc = 1;
   const damageMods: number[] = [];
   const critChanceMods: number[] = [];
 
@@ -386,6 +394,16 @@ export function applyLoadout(
     if (m.reticleShape) reticleShape = m.reticleShape;
     if (m.damageMod !== 1) damageMods.push(m.damageMod);
     if (m.critChanceAdd > 0) critChanceMods.push(m.critChanceAdd);
+    if (m.chargeTimeMul !== undefined) chargeTimeMulAcc *= m.chargeTimeMul;
+  }
+
+  // Apply chargeTimeMul to the weapon's chargeProfile if any mod carries one.
+  let chargeProfile: WeaponArchetype["chargeProfile"] = weapon.chargeProfile;
+  if (chargeProfile !== undefined && chargeTimeMulAcc !== 1) {
+    chargeProfile = {
+      ...chargeProfile,
+      maxChargeMs: Math.round(chargeProfile.maxChargeMs * chargeTimeMulAcc),
+    };
   }
 
   return {
@@ -402,5 +420,6 @@ export function applyLoadout(
     critChanceMods,
     reticleRadius,
     reticleShape,
+    chargeProfile,
   };
 }

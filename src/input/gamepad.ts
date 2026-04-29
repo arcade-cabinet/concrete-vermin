@@ -19,6 +19,12 @@ export interface GamepadHandler {
   onAim(dx: number, dy: number): void;
   /** Edge-triggered: rising edge of the right trigger. */
   onFire(): void;
+  /**
+   * Edge-triggered: falling edge of the right trigger.
+   * Optional — callers that use charge-shot provide this to decide
+   * between a tap (short hold) and a charge release (long hold).
+   */
+  onFireRelease?(): void;
   /** Edge-triggered: rising edge of the left bumper. */
   onReload(): void;
   /** Edge-triggered: rising edge of the start button. */
@@ -82,10 +88,11 @@ export function pollGamepadFrame(
   }
 
   const fireNow = (gamepad.buttons[7]?.value ?? 0) > triggerThreshold;
-  const reloadNow = !!(gamepad.buttons[4]?.pressed);
-  const pauseNow = !!(gamepad.buttons[9]?.pressed);
+  const reloadNow = !!gamepad.buttons[4]?.pressed;
+  const pauseNow = !!gamepad.buttons[9]?.pressed;
 
   if (fireNow && !prev.fire) handler.onFire();
+  if (!fireNow && prev.fire) handler.onFireRelease?.();
   if (reloadNow && !prev.reload) handler.onReload();
   if (pauseNow && !prev.pause) handler.onPause();
 
@@ -97,10 +104,7 @@ export function pollGamepadFrame(
  * function. Safe in node/SSR (no-op if navigator.getGamepads is
  * missing).
  */
-export function installGamepad(
-  handler: GamepadHandler,
-  opts: GamepadOptions = {},
-): () => void {
+export function installGamepad(handler: GamepadHandler, opts: GamepadOptions = {}): () => void {
   if (
     typeof navigator === "undefined" ||
     typeof navigator.getGamepads !== "function" ||

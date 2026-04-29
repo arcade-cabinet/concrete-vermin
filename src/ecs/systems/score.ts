@@ -12,10 +12,10 @@ import { Score } from "../traits";
 import type { CollideEvent } from "./collide";
 
 /** Map a CollideEvent to scoring's KillEvent (when killed). */
-function toKillEvent(ce: CollideEvent, baseBounty = 30): KillEvent {
+function toKillEvent(ce: CollideEvent): KillEvent {
   return {
     archetypeId: ce.archetypeId as KillEvent["archetypeId"],
-    baseBounty,
+    baseBounty: ce.baseBounty,
     healthScale: 1,
     isHeadshot: ce.isHeadshot,
     isMidAir: false,
@@ -25,22 +25,19 @@ function toKillEvent(ce: CollideEvent, baseBounty = 30): KillEvent {
 
 /** Read the singleton Score trait into a ScoreState. */
 function readScoreState(world: World, scoreEntityId: number): ScoreState | null {
-  for (const e of world.query(Score)) {
-    if (e.id() !== scoreEntityId) continue;
-    const s = e.get(Score);
-    if (!s) return null;
-    return {
-      total: s.total,
-      multiplier: s.multiplier,
-      multiplierDecayAt: s.multiplierDecayAt,
-      multiplierGraceUntil: s.multiplierGraceUntil,
-      noReloadStreak: s.noReloadStreak,
-      lastArchetypeKilled: null,
-      varietyChain: [],
-      modifierFlashes: [],
-    };
-  }
-  return null;
+  const e = world.query(Score).find((e) => e.id() === scoreEntityId);
+  const s = e?.get(Score);
+  if (!s) return null;
+  return {
+    total: s.total,
+    multiplier: s.multiplier,
+    multiplierDecayAt: s.multiplierDecayAt,
+    multiplierGraceUntil: s.multiplierGraceUntil,
+    noReloadStreak: s.noReloadStreak,
+    lastArchetypeKilled: null,
+    varietyChain: [],
+    modifierFlashes: [],
+  };
 }
 
 /**

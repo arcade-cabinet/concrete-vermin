@@ -1,0 +1,17 @@
+{
+  "compilerOptions": {
+    "composite": true,
+    "target": "ES2022",
+    "module": "ESNext",
+    "moduleResolution": "Bundler",
+    "lib": ["ES2022", "DOM", "DOM.Iterable"],
+    "types": ["node"],
+    "strict": true,
+    "skipLibCheck": true,
+    "esModuleInterop": true,
+    "resolveJsonModule": true,
+    "outDir": "./dist/types/e2e",
+    "tsBuildInfoFile": "./tsconfig.e2e.tsbuildinfo"
+  },
+  "include": ["e2e/**/*.ts"]
+}

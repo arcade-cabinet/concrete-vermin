@@ -163,6 +163,7 @@ describe("scoreSystem", () => {
           kind: "kill",
           verminEntity: 0,
           archetypeId: "rat",
+          baseBounty: 20,
           isHeadshot: false,
           isCrit: false,
           damage: 5,

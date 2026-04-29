@@ -24,5 +24,6 @@ export const smg: Readonly<WeaponArchetype> = Object.freeze(
     },
     reticleRadius: 9,
     reticleShape: "ring",
+    chargeProfile: { maxChargeMs: 1500, shellsConsumed: 8, effect: "mag-dump-cone" },
   }),
 );

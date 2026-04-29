@@ -57,10 +57,7 @@ describe("bundle-size budget", () => {
     // this floor without updating the directive we want CI to flag it.
     const fs = await import("node:fs/promises");
     const path = await import("node:path");
-    const cfg = await fs.readFile(
-      path.resolve(process.cwd(), "vite.config.ts"),
-      "utf8",
-    );
+    const cfg = await fs.readFile(path.resolve(process.cwd(), "vite.config.ts"), "utf8");
     expect(cfg).toMatch(/MAX_CHUNK_GZIP_BYTES\s*=\s*1\.5\s*\*\s*1024\s*\*\s*1024/);
     expect(cfg).toContain("bundleSizeBudget");
   });

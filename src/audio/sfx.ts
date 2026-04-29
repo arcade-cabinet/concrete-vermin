@@ -244,6 +244,12 @@ export function playVerminDeath(archetypeId?: string): void {
   _verminDeath?.triggerAttackRelease(note, "8n");
 }
 
+// tesla synth at C2: capacitor charge feel, distinct from weapon-fire pitch, short enough to not clash with release SFX.
+export function playChargeWhine(): void {
+  ensureInstruments();
+  _tesla?.triggerAttackRelease("C2", "32n");
+}
+
 /**
  * Dispatcher: pick the per-weapon SFX given a weapon archetype id.
  * Falls back to shotgun for unknown ids.

@@ -49,16 +49,14 @@ export const secretAboveGrandfather: Mission = defineMission({
     {
       id: "what-grandfather-left",
       isCheckpoint: true,
-      spawns: [
-        { variant: "boss-pigeon-king", count: 1, pattern: "boss-scripted" },
-      ],
+      spawns: [{ variant: "boss-pigeon-king-classic", count: 1, pattern: "boss-scripted" }],
     },
   ],
   events: [
     {
       id: "grandfather-line",
       trigger: { kind: "at-time", seconds: 5 },
-      effect: { kind: "boss-bark", text: "Pawnbroker: \"He stood where you're standing.\"" },
+      effect: { kind: "boss-bark", text: 'Pawnbroker: "He stood where you\'re standing."' },
     },
     {
       id: "chimney-dust",
@@ -72,7 +70,10 @@ export const secretAboveGrandfather: Mission = defineMission({
     {
       id: "old-court-bark",
       trigger: { kind: "at-encounter-start", index: 1 },
-      effect: { kind: "boss-bark", text: "Gulls came up from the harbor. They're not on his side." },
+      effect: {
+        kind: "boss-bark",
+        text: "Gulls came up from the harbor. They're not on his side.",
+      },
     },
     {
       id: "boss-bark-king",
@@ -82,7 +83,12 @@ export const secretAboveGrandfather: Mission = defineMission({
     {
       id: "rabid-extra",
       trigger: { kind: "at-kill-count", threshold: 18 },
-      effect: { kind: "surprise-wave", variant: "pigeon-rabid", count: 5, pattern: "dive-from-sky" },
+      effect: {
+        kind: "surprise-wave",
+        variant: "pigeon-rabid",
+        count: 5,
+        pattern: "dive-from-sky",
+      },
     },
   ],
   seed: 1979_03_99,

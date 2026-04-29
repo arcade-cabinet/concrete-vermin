@@ -1,5 +1,10 @@
 import { describe, expect, it } from "vitest";
-import { MISSIONS, SECRET_MISSIONS, getMission, listSecretMissionsByAct } from "../content/missions";
+import {
+  MISSIONS,
+  SECRET_MISSIONS,
+  getMission,
+  listSecretMissionsByAct,
+} from "../content/missions";
 import { ACT_IDS, defineMission } from "../factories/mission";
 
 describe("secret missions catalog", () => {

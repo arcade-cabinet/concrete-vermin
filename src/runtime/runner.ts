@@ -1,4 +1,5 @@
 import {
+  playChargeWhine,
   playEmpty,
   playWeaponFire,
   playWeaponReload,
@@ -26,6 +27,7 @@ import {
   cullOffscreenSystem,
   lifecycleSystem,
   motionSystem,
+  napalmSystem,
   type PendingSpawn,
   projectileSystem,
   scoreSystem,
@@ -36,6 +38,7 @@ import {
   Health,
   Hitbox,
   Lifecycle,
+  NapalmPool,
   Position,
   Projectile,
   Score,
@@ -54,6 +57,7 @@ import { useGameStore } from "./store";
 import type {
   DamageEvent,
   EventBarkSnapshot,
+  NapalmPoolSnapshot,
   ProjectileSnapshot,
   SplashSnapshot,
   VerminSnapshot,
@@ -90,15 +94,28 @@ export class GameRunner {
   private encounterIndex = 0;
   private pendingShot: { x: number; y: number } | null = null;
   private pendingReload = false;
-  private readonly muzzleFlashPool: ObjectPool<import("./store").MuzzleFlash> =
-    createObjectPool(MUZZLE_FLASH_POOL, () => ({
+  private chargeStartedAt: number | null = null;
+  private chargePending = false;
+  private pendingBurstQueue: {
+    x: number;
+    y: number;
+    remaining: number;
+    intervalMs: number;
+    nextAt: number;
+    burstIndex: number;
+    isCone: boolean;
+  } | null = null;
+  private readonly muzzleFlashPool: ObjectPool<import("./store").MuzzleFlash> = createObjectPool(
+    MUZZLE_FLASH_POOL,
+    () => ({
       x: 0,
       y: 0,
       targetX: 0,
       targetY: 0,
       firedAt: 0,
       ttlS: 0,
-    }));
+    }),
+  );
   private modifierFlashes: import("./store").ModifierFlashSnapshot[] = [];
   // Mid-mission event dispatch — each event fires at most once per
   // mission run. We track ids of fired events here so we don't double-
@@ -183,6 +200,33 @@ export class GameRunner {
     this.pendingReload = true;
   }
 
+  /** Player pressed and held — begin charging a charge-shot. */
+  queueChargeStart(): void {
+    if (this.mag > 0 && this.reloadStartedAt === null && !this.chargePending) {
+      this.chargeStartedAt = this.now;
+      this.chargePending = true;
+      playChargeWhine();
+    }
+  }
+
+  /** Player released after holding — fire the charge effect (or tap fallback). */
+  queueChargeRelease(aimX: number, aimY: number): void {
+    if (!this.chargePending || this.chargeStartedAt === null) return;
+    const chargeProgress = Math.min(
+      1,
+      ((this.now - this.chargeStartedAt) * 1000) /
+        (this.tunedWeapon.chargeProfile?.maxChargeMs ?? 1000),
+    );
+    this.chargePending = false;
+    this.chargeStartedAt = null;
+    if (chargeProgress < 0.1) {
+      // Too short — treat as tap
+      this.queueShot(aimX, aimY);
+      return;
+    }
+    this.applyChargeEffect(aimX, aimY, chargeProgress);
+  }
+
   pause(): void {
     this.paused = true;
   }
@@ -222,7 +266,11 @@ export class GameRunner {
     }
 
     // Auto-start reload when player tapped R / long-pressed.
-    if (this.pendingReload && this.reloadStartedAt === null && this.mag < this.tunedWeapon.magSize) {
+    if (
+      this.pendingReload &&
+      this.reloadStartedAt === null &&
+      this.mag < this.tunedWeapon.magSize
+    ) {
       this.reloadStartedAt = this.now;
       playWeaponReload(this.tunedWeapon.base.id);
     }
@@ -298,6 +346,60 @@ export class GameRunner {
       }
       this.pendingShot = null;
     }
+
+    // Burst drain — fires queued burst shots on their scheduled intervals.
+    if (this.pendingBurstQueue !== null) {
+      const nowMs = this.now * 1000;
+      while (
+        this.pendingBurstQueue !== null &&
+        nowMs >= this.pendingBurstQueue.nextAt &&
+        this.pendingBurstQueue.remaining > 0
+      ) {
+        const bq = this.pendingBurstQueue;
+        if (this.mag <= 0) {
+          // Ran out of ammo mid-burst — abort.
+          this.pendingBurstQueue = null;
+          break;
+        }
+        const tuned = this.tunedWeapon;
+        const playerPos = { x: this.zone.maxX / 2, y: this.zone.maxY - 24 };
+        const target = { x: bq.x, y: bq.y };
+        const fireOpts = {
+          origin: playerPos,
+          target,
+          now: this.now,
+          ownerEntity: this.gw.playerEntity,
+        };
+
+        if (bq.isCone) {
+          // Widen spread per shot for the cone effect.
+          const wideSpread = Math.min(Math.PI / 3, tuned.base.spread + bq.burstIndex * 0.04);
+          const spreadRng = this.gw.rng.fork(`burst:cone:${bq.burstIndex}:${this.now.toFixed(3)}`);
+          const spreads = Array.from(
+            { length: tuned.base.pellets },
+            () => (spreadRng.next() * 2 - 1) * wideSpread,
+          );
+          fireWeapon(this.gw.world, tuned, fireOpts, spreads);
+        } else {
+          const spreadRng = this.gw.rng.fork(`burst:auto:${bq.burstIndex}:${this.now.toFixed(3)}`);
+          const spreads = Array.from(
+            { length: tuned.base.pellets },
+            () => (spreadRng.next() * 2 - 1) * tuned.spread,
+          );
+          fireWeapon(this.gw.world, tuned, fireOpts, spreads);
+        }
+
+        this.mag = Math.max(0, this.mag - 1);
+        bq.remaining--;
+        bq.burstIndex++;
+        bq.nextAt += bq.intervalMs;
+
+        if (bq.remaining === 0) {
+          this.pendingBurstQueue = null;
+        }
+      }
+    }
+
     this.muzzleFlashPool.retainWhere((m) => this.now - m.firedAt < m.ttlS);
 
     // 4. Integrate motion; advance projectiles.
@@ -375,6 +477,10 @@ export class GameRunner {
     }
     lifecycleSystem(this.gw.world, this.now);
 
+    // 7.25 Napalm pool DoT — applies damage to vermin inside active pools,
+    // then expires pools whose TTL has elapsed.
+    napalmSystem(this.gw.world, this.now * 1000);
+
     // 7.5 Mid-mission dynamic event triggers.
     this.dispatchMissionEvents();
 
@@ -393,7 +499,10 @@ export class GameRunner {
           .awardCash(this.mission.cashAward ?? defaultCashFor(this.mission.act));
         // S-grade fanfare on a flawless run (no lives lost), otherwise
         // the standard win sting.
-        if (this.livesRemaining === this.mission.livesAllowance && this.playerHp === this.maxHpPerLife) {
+        if (
+          this.livesRemaining === this.mission.livesAllowance &&
+          this.playerHp === this.maxHpPerLife
+        ) {
           playSGradeFanfare();
         } else {
           playWinSting();
@@ -531,6 +640,137 @@ export class GameRunner {
     if (this.livesRemaining <= 0) this.playerHp = 0;
   }
 
+  /**
+   * Execute the charge-shot effect for the active weapon. Consumes
+   * shellsConsumed from mag (floored at 0). Implements simple effects
+   * inline; deferred effects (burst-loop, napalm-pool) log a warning
+   * and fall back to a single shot until their respective phases land.
+   */
+  private applyChargeEffect(aimX: number, aimY: number, chargeProgress: number): void {
+    const profile = this.tunedWeapon.chargeProfile;
+    if (!profile) {
+      // Weapon has no charge profile — treat as normal shot.
+      this.queueShot(aimX, aimY);
+      return;
+    }
+
+    // Consume shells (never below zero).
+    this.mag = Math.max(0, this.mag - profile.shellsConsumed);
+
+    const tuned = this.tunedWeapon;
+    const playerPos = { x: this.zone.maxX / 2, y: this.zone.maxY - 24 };
+    const target = { x: aimX, y: aimY };
+    const fireOpts = {
+      origin: playerPos,
+      target,
+      now: this.now,
+      ownerEntity: this.gw.playerEntity,
+    };
+
+    switch (profile.effect) {
+      case "double-barrel": {
+        // Both barrels fire at the same coords — two independent shots.
+        const spreads = Array.from(
+          { length: tuned.base.pellets },
+          () =>
+            (this.gw.rng.fork(`charge:db1:${this.now.toFixed(3)}`).next() * 2 - 1) * tuned.spread,
+        );
+        fireWeapon(this.gw.world, tuned, fireOpts, spreads);
+        const spreads2 = Array.from(
+          { length: tuned.base.pellets },
+          () =>
+            (this.gw.rng.fork(`charge:db2:${this.now.toFixed(3)}`).next() * 2 - 1) * tuned.spread,
+        );
+        fireWeapon(this.gw.world, tuned, fireOpts, spreads2);
+        break;
+      }
+      case "wide-spray": {
+        // Extra pellets proportional to charge progress.
+        const extraPellets = Math.ceil(tuned.base.pellets * (1 + chargeProgress));
+        const spreads = Array.from(
+          { length: extraPellets },
+          () =>
+            (this.gw.rng.fork(`charge:ws:${this.now.toFixed(3)}`).next() * 2 - 1) * tuned.spread,
+        );
+        fireWeapon(this.gw.world, tuned, fireOpts, spreads, extraPellets);
+        break;
+      }
+      case "arc-repeater": {
+        // 3 rapid single-pellet arcs.
+        for (let i = 0; i < 3; i++) {
+          const spreads = [
+            (this.gw.rng.fork(`charge:arc:${i}:${this.now.toFixed(3)}`).next() * 2 - 1) *
+              tuned.spread,
+          ];
+          fireWeapon(this.gw.world, tuned, fireOpts, spreads, 1);
+        }
+        break;
+      }
+      case "auto-burst": {
+        // 5-shot burst, one shell per shot, 120 ms between shots.
+        // shellsConsumed shells were already deducted above; cap remaining
+        // burst to actual mag count so we never fire into an empty mag.
+        const burstSize = Math.min(5, this.mag + profile.shellsConsumed);
+        this.pendingBurstQueue = {
+          x: aimX,
+          y: aimY,
+          remaining: burstSize,
+          intervalMs: 120,
+          nextAt: this.now * 1000,
+          burstIndex: 0,
+          isCone: false,
+        };
+        // Restore the shellsConsumed deduction — burst drain handles per-shot
+        // mag tracking itself.
+        this.mag = Math.min(this.tunedWeapon.magSize, this.mag + profile.shellsConsumed);
+        break;
+      }
+      case "mag-dump-cone": {
+        // Dump up to 8 shells in a widening cone, 50 ms between shots.
+        const dumpSize = Math.min(this.mag + profile.shellsConsumed, 8);
+        this.pendingBurstQueue = {
+          x: aimX,
+          y: aimY,
+          remaining: dumpSize,
+          intervalMs: 50,
+          nextAt: this.now * 1000,
+          burstIndex: 0,
+          isCone: true,
+        };
+        // Restore the shellsConsumed deduction — burst drain handles per-shot
+        // mag tracking itself.
+        this.mag = Math.min(this.tunedWeapon.magSize, this.mag + profile.shellsConsumed);
+        break;
+      }
+      case "napalm-pool": {
+        // Spawn a burning puddle. Radius and DPS scale with charge progress.
+        const ttlMs = 1000 + chargeProgress * 3000; // 1–4 s
+        const radius = 24 + chargeProgress * 16; // 24–40 px
+        const dps = 15 + chargeProgress * 25; // 15–40 dps
+        this.gw.world.spawn(
+          NapalmPool({
+            x: aimX,
+            y: aimY,
+            radius,
+            dps,
+            ttlMs,
+            expiresAt: this.now * 1000 + ttlMs,
+          }),
+        );
+        break;
+      }
+    }
+
+    playWeaponFire(tuned.base.id);
+    duckBus("music", 4, 0.18, 0.25);
+
+    // Auto-reload if mag is now empty.
+    if (this.mag === 0 && this.reloadStartedAt === null) {
+      this.reloadStartedAt = this.now;
+      playWeaponReload(tuned.base.id);
+    }
+  }
+
   /** Read traits → plain snapshots → push into the zustand store. */
   private publishSnapshot(): void {
     const w = this.gw.world;
@@ -542,12 +782,15 @@ export class GameRunner {
       const p = e.get(Position);
       const hb = e.get(Hitbox);
       const v = e.get(Vermin);
+      const vel = e.get(Velocity);
       if (!p || !hb || !v) continue;
       vermin.push({
         id: e.id(),
         archetypeId: v.archetypeId,
         x: p.x,
         y: p.y,
+        vx: vel?.x ?? 0,
+        vy: vel?.y ?? 0,
         width: hb.width,
         height: hb.height,
         health: h.current,
@@ -582,6 +825,22 @@ export class GameRunner {
       });
     }
 
+    const napalmPools: NapalmPoolSnapshot[] = [];
+    for (const e of w.query(NapalmPool)) {
+      const pool = e.get(NapalmPool);
+      if (!pool) continue;
+      const nowMs = this.now * 1000;
+      const ageFrac = Math.min(1, Math.max(0, 1 - (pool.expiresAt - nowMs) / pool.ttlMs));
+      napalmPools.push({
+        id: e.id(),
+        x: pool.x,
+        y: pool.y,
+        radius: pool.radius,
+        dps: pool.dps,
+        ageFrac,
+      });
+    }
+
     let total = 0;
     let multiplier = 1;
     for (const e of w.query(Score)) {
@@ -597,10 +856,20 @@ export class GameRunner {
         ? null
         : Math.min(1, ((this.now - this.reloadStartedAt) * 1000) / this.tunedWeapon.reloadMs);
 
+    const chargeProgress =
+      this.chargeStartedAt !== null
+        ? Math.min(
+            1,
+            ((this.now - this.chargeStartedAt) * 1000) /
+              (this.tunedWeapon.chargeProfile?.maxChargeMs ?? 1000),
+          )
+        : null;
+
     useGameStore.getState().setSnapshot({
       vermin,
       projectiles,
       splashes,
+      napalmPools,
       muzzleFlashes: this.muzzleFlashPool.liveSnapshot(),
       modifierFlashes: this.modifierFlashes.slice(),
       eventBarks: this.eventBarks.slice(),
@@ -617,6 +886,7 @@ export class GameRunner {
       reloadDurationMs: this.tunedWeapon.reloadMs,
       reticleRadius: this.tunedWeapon.reticleRadius,
       reticleShape: this.tunedWeapon.reticleShape,
+      chargeProgress,
     });
   }
 }

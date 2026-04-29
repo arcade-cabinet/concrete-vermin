@@ -18,7 +18,11 @@ describe("input/gamepad pollGamepadFrame", () => {
   it("dispatches stick aim past the deadzone", () => {
     const h = handler();
     const buttons = Array.from({ length: 16 }, () => ({ pressed: false, value: 0 }));
-    pollGamepadFrame(makePad([0.6, -0.4], buttons), { fire: false, reload: false, pause: false }, h);
+    pollGamepadFrame(
+      makePad([0.6, -0.4], buttons),
+      { fire: false, reload: false, pause: false },
+      h,
+    );
     expect(h.onAim).toHaveBeenCalledOnce();
     const [dx, dy] = h.onAim.mock.calls[0]!;
     expect(Math.abs(dx)).toBeGreaterThan(0);
@@ -28,7 +32,11 @@ describe("input/gamepad pollGamepadFrame", () => {
   it("zeros stick aim inside the deadzone", () => {
     const h = handler();
     const buttons = Array.from({ length: 16 }, () => ({ pressed: false, value: 0 }));
-    pollGamepadFrame(makePad([0.05, 0.05], buttons), { fire: false, reload: false, pause: false }, h);
+    pollGamepadFrame(
+      makePad([0.05, 0.05], buttons),
+      { fire: false, reload: false, pause: false },
+      h,
+    );
     expect(h.onAim).toHaveBeenCalledWith(0, 0);
   });
 
@@ -36,8 +44,12 @@ describe("input/gamepad pollGamepadFrame", () => {
     const h1 = handler();
     const h2 = handler();
     const buttons = Array.from({ length: 16 }, () => ({ pressed: false, value: 0 }));
-    pollGamepadFrame(makePad([0, 0.6], buttons), { fire: false, reload: false, pause: false }, h1, { invertY: false });
-    pollGamepadFrame(makePad([0, 0.6], buttons), { fire: false, reload: false, pause: false }, h2, { invertY: true });
+    pollGamepadFrame(makePad([0, 0.6], buttons), { fire: false, reload: false, pause: false }, h1, {
+      invertY: false,
+    });
+    pollGamepadFrame(makePad([0, 0.6], buttons), { fire: false, reload: false, pause: false }, h2, {
+      invertY: true,
+    });
     const [, dy1] = h1.onAim.mock.calls[0]!;
     const [, dy2] = h2.onAim.mock.calls[0]!;
     expect(Math.sign(dy1)).toBe(-Math.sign(dy2));
@@ -47,7 +59,11 @@ describe("input/gamepad pollGamepadFrame", () => {
     const h = handler();
     const buttons = Array.from({ length: 16 }, () => ({ pressed: false, value: 0 }));
     buttons[7] = { pressed: true, value: 0.9 };
-    const e1 = pollGamepadFrame(makePad([0, 0], buttons), { fire: false, reload: false, pause: false }, h);
+    const e1 = pollGamepadFrame(
+      makePad([0, 0], buttons),
+      { fire: false, reload: false, pause: false },
+      h,
+    );
     expect(h.onFire).toHaveBeenCalledOnce();
     // Holding the trigger down should NOT fire again.
     pollGamepadFrame(makePad([0, 0], buttons), e1, h);

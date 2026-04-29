@@ -289,8 +289,7 @@ function simulateEncounter(
       // Per-target engagement window: time the player spent on this
       // target. Drives both encounter duration and exposure to contact
       // damage.
-      const engagementS =
-        profile.reactionS + shotsThisTarget / Math.max(0.001, sustainedFireRate);
+      const engagementS = profile.reactionS + shotsThisTarget / Math.max(0.001, sustainedFireRate);
       totalEngagementTimeS += engagementS;
 
       const isBoss = archetype.isBoss === true;

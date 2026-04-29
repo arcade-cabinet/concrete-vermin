@@ -27,6 +27,9 @@ export interface VerminSnapshot {
   archetypeId: string;
   x: number;
   y: number;
+  /** Per-tick velocity from the Velocity trait — used by the governor for lead aim. */
+  vx: number;
+  vy: number;
   width: number;
   height: number;
   health: number;
@@ -48,6 +51,16 @@ export interface SplashSnapshot {
   ageS: number;
   ttlS: number;
   archetypeId: string;
+}
+
+export interface NapalmPoolSnapshot {
+  id: number;
+  x: number;
+  y: number;
+  radius: number;
+  dps: number;
+  /** Fraction of TTL elapsed (0 = fresh, 1 = expired). */
+  ageFrac: number;
 }
 
 export interface ModifierFlashSnapshot {
@@ -150,6 +163,7 @@ export interface GameState {
   vermin: ReadonlyArray<VerminSnapshot>;
   projectiles: ReadonlyArray<ProjectileSnapshot>;
   splashes: ReadonlyArray<SplashSnapshot>;
+  napalmPools: ReadonlyArray<NapalmPoolSnapshot>;
   muzzleFlashes: ReadonlyArray<MuzzleFlash>;
   modifierFlashes: ReadonlyArray<ModifierFlashSnapshot>;
   /**
@@ -167,6 +181,11 @@ export interface GameState {
   reloadProgress: number | null;
   /** Total reload duration in ms for the active mission's weapon. */
   reloadDurationMs: number;
+  /**
+   * Charge-shot progress. null = not charging; 0..1 = charge fraction.
+   * The reticle charge ring visual reads this every frame.
+   */
+  chargeProgress: number | null;
   /** Cash awarded across the current session (sums per-mission awards). */
   cashAwarded: number;
   missionId: string;
@@ -191,6 +210,7 @@ export interface GameState {
         | "vermin"
         | "projectiles"
         | "splashes"
+        | "napalmPools"
         | "muzzleFlashes"
         | "modifierFlashes"
         | "eventBarks"
@@ -203,10 +223,15 @@ export interface GameState {
         | "damageEvents"
         | "reticleRadius"
         | "reticleShape"
+        | "chargeProgress"
       >
     >,
   ) => void;
-  startMission: (id: string, killsRequired: number, act?: "streets" | "underworld" | "above") => void;
+  startMission: (
+    id: string,
+    killsRequired: number,
+    act?: "streets" | "underworld" | "above",
+  ) => void;
   endMission: (won: boolean) => void;
   awardCash: (amount: number) => void;
   resetCash: () => void;
@@ -233,6 +258,7 @@ export const INITIAL_SNAPSHOT: Pick<
   | "vermin"
   | "projectiles"
   | "splashes"
+  | "napalmPools"
   | "muzzleFlashes"
   | "modifierFlashes"
   | "eventBarks"
@@ -248,6 +274,7 @@ export const INITIAL_SNAPSHOT: Pick<
   | "reticleRadius"
   | "reticleShape"
   | "reticle"
+  | "chargeProgress"
 > = {
   phase: "main-menu",
   now: 0,
@@ -255,6 +282,7 @@ export const INITIAL_SNAPSHOT: Pick<
   vermin: [],
   projectiles: [],
   splashes: [],
+  napalmPools: [],
   muzzleFlashes: [],
   modifierFlashes: [],
   eventBarks: [],
@@ -270,6 +298,7 @@ export const INITIAL_SNAPSHOT: Pick<
   reticleRadius: 8,
   reticleShape: "cross",
   reticle: { x: 240, y: 200 },
+  chargeProgress: null,
 };
 
 export const useGameStore = create<GameState>((set) => ({

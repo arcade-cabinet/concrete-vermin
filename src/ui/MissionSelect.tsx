@@ -1,10 +1,6 @@
 import { useGameStore } from "../runtime/store";
 import { getMissionLore } from "../sim/content/lore";
-import {
-  getMission,
-  listMissionsByAct,
-  listSecretMissionsByAct,
-} from "../sim/content/missions";
+import { getMission, listMissionsByAct, listSecretMissionsByAct } from "../sim/content/missions";
 import { ACT_IDS, type ActId } from "../sim/factories/mission";
 import { useArrowGridNav } from "./hooks/useArrowGridNav";
 import { useIsNarrow } from "./hooks/useViewport";
@@ -23,6 +19,14 @@ const ACT_LINE_COLOR: Record<ActId, string> = {
   streets: COLOR.sodium,
   underworld: COLOR.eliteGreen,
   above: COLOR.flashSodiumLight,
+};
+
+// AA-passing text variants for each act's line color used in headings /
+// labels where WCAG 4.5:1 contrast against bgAsphalt is required.
+const ACT_LINE_TEXT_COLOR: Record<ActId, string> = {
+  streets: COLOR.sodium, // sodium already passes (7.2:1)
+  underworld: COLOR.eliteGreenAccessible, // eliteGreen fails; accessible variant passes (5.5:1)
+  above: COLOR.flashSodiumLight, // flashSodiumLight passes on bgAsphalt
 };
 
 const ACT_BULLET_LABEL: Record<ActId, string> = {
@@ -177,10 +181,20 @@ export function MissionSelect({ onPickMission }: { onPickMission: (id: string) =
         }}
       >
         <div>
-          <h2 style={{ color: COLOR.sodium, margin: 0, letterSpacing: "0.2em", fontSize: "1.6rem" }}>
+          <h2
+            style={{ color: COLOR.sodium, margin: 0, letterSpacing: "0.2em", fontSize: "1.6rem" }}
+          >
             SELECT LINE · STOP
           </h2>
-          <p style={{ color: COLOR.creamDim, fontFamily: TYPE.faceMono, fontSize: 11, margin: "4px 0 0", letterSpacing: "0.15em" }}>
+          <p
+            style={{
+              color: COLOR.creamDim,
+              fontFamily: TYPE.faceMono,
+              fontSize: 11,
+              margin: "4px 0 0",
+              letterSpacing: "0.15em",
+            }}
+          >
             METRO TRANSIT AUTHORITY · 1979
           </p>
         </div>
@@ -199,13 +213,14 @@ export function MissionSelect({ onPickMission }: { onPickMission: (id: string) =
         }}
       >
         {ACT_IDS.map((act) => {
-          const lineColor = ACT_LINE_COLOR[act];
+          const lineColor = ACT_LINE_COLOR[act] ?? COLOR.sodium;
+          const lineTextColor = ACT_LINE_TEXT_COLOR[act] ?? COLOR.sodium;
           const stops = listMissionsByAct(act);
           return (
             <section key={act}>
               <h3
                 style={{
-                  color: lineColor,
+                  color: lineTextColor,
                   letterSpacing: "0.2em",
                   fontSize: 13,
                   margin: "0 0 12px",
@@ -263,6 +278,7 @@ export function MissionSelect({ onPickMission }: { onPickMission: (id: string) =
                 <SecretRail
                   act={act}
                   lineColor={lineColor}
+                  lineTextColor={lineTextColor}
                   completed={completed}
                   sGradeMissions={sGradeMissions}
                   selected={selected}
@@ -349,6 +365,7 @@ function selectedWeaponLabel(selectedId: string): string {
 interface SecretRailProps {
   act: ActId;
   lineColor: string;
+  lineTextColor: string;
   completed: ReadonlyArray<string>;
   sGradeMissions: ReadonlyArray<string>;
   selected: string;
@@ -358,6 +375,7 @@ interface SecretRailProps {
 function SecretRail({
   act,
   lineColor,
+  lineTextColor,
   completed,
   sGradeMissions,
   selected,
@@ -376,7 +394,7 @@ function SecretRail({
     >
       <div
         style={{
-          color: lineColor,
+          color: lineTextColor,
           fontFamily: TYPE.faceMono,
           fontSize: 10,
           letterSpacing: "0.3em",
