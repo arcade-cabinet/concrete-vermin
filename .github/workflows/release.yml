@@ -30,7 +30,7 @@ jobs:
       - id: rp
         uses: googleapis/release-please-action@5c625bfb5d1ff62eadeeb3772007f7f66fdcf071 # v4.1.3
         with:
-          token: ${{ github.token }}
+          token: ${{ secrets.CI_GITHUB_TOKEN }}
           config-file: release-please-config.json
           manifest-file: .release-please-manifest.json
 
@@ -105,7 +105,7 @@ jobs:
         # Only upload the signed AAB — debug builds should not appear on the public Release page.
         if: env.ANDROID_KEYSTORE_BASE64 != ''
         env:
-          GH_TOKEN: ${{ github.token }}
+          GH_TOKEN: ${{ secrets.CI_GITHUB_TOKEN }}
         run: |
           set -e
           AAB_PATH=$(ls android/app/build/outputs/bundle/release/*.aab 2>/dev/null | head -n1)
