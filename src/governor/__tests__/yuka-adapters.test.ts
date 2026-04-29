@@ -18,8 +18,6 @@ describe("leadPoint", () => {
       { x: 100, y: 0, vx: 50, vy: 0 },
       { reticleMaxSpeed: 200 },
     );
-    // distance = 100, sumSpeed = 200 + 50 = 250, lookahead = 0.4s
-    // predicted x = 100 + 50 * 0.4 = 120
     expect(aim.x).toBeCloseTo(120);
     expect(aim.y).toBeCloseTo(0);
   });
