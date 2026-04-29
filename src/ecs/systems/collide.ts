@@ -8,7 +8,7 @@ import { Health, Hitbox, Lifecycle, Position, Projectile, Velocity, Vermin } fro
 export interface CollideEvent {
   kind: "hit" | "kill";
   verminEntity: number;
-  archetypeId: string;
+  archetypeId: ArchetypeId;
   baseBounty: number;
   isHeadshot: boolean;
   isCrit: boolean;
@@ -17,15 +17,6 @@ export interface CollideEvent {
   at: number;
 }
 
-/**
- * Collide system: AABB hit-tests every live projectile against every
- * live vermin (small N, so brute force is fine). On hit, calls the
- * pure damage resolver, applies takeDamage, kills the projectile, and
- * spawns a splash for the renderer. Returns events for the score
- * system.
- *
- * The rng is forked per-call so crit rolls are tick-deterministic.
- */
 export function collideSystem(world: World, rng: Rng, now: number): CollideEvent[] {
   const events: CollideEvent[] = [];
   // Track entities killed earlier in this same tick so subsequent

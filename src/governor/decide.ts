@@ -59,13 +59,7 @@ export interface GovernorTickInput {
   playerOrigin?: { x: number; y: number };
 }
 
-/**
- * One decision step. Mutates `state` in place. The playthrough harness
- * calls this in a loop; the React GovernorLoop wraps it in useTick.
- * Reads useGameStore.getState() — the store is the source of truth for
- * what the player can see, so the governor reads from there too.
- */
-// Default player origin: zone.maxX/2=240, zone.maxY-24=246.
+// zone.maxX/2=240, zone.maxY-24=246 — center of player hitbox at ground level.
 const DEFAULT_PLAYER_ORIGIN = { x: 240, y: 246 };
 
 export function governorTick(input: GovernorTickInput): void {
@@ -111,7 +105,7 @@ export function governorTick(input: GovernorTickInput): void {
     predictionFactor: profile.predictionFactor,
   });
 
-  const tolerance = weapon.reticleRadius + profile.hitToleranceUnits;
+  const tolerance = snap.reticleRadius + profile.hitToleranceUnits;
   const leadOvershoot = Math.hypot(leadOnly.x - target.x, leadOnly.y - target.y);
 
   // Aim point: lead + head offset (aim at head zone for headshot bonus).
