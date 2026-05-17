@@ -1,8 +1,3 @@
-/**
- * HUD charge bar: appears under SHELLS while chargeProgress is non-null,
- * hidden when null, suppressed during reload, suppressed under reduced
- * motion. Mirrors the parallel reload bar pattern.
- */
 import { render, screen } from "@testing-library/react";
 import { act } from "react";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
