@@ -59,6 +59,28 @@ beforeEach(() => {
   setSnapshot({});
 });
 
+describe("governorTick — charge gate (data-driven)", () => {
+  it("absent governorGate: charge engages on every in-tolerance target (even boss)", () => {
+    setSnapshot({
+      now: 1,
+      player: { ammoCurrent: 6, ammoMax: 6, livesRemaining: 3 },
+      // Boss, stationary, in tolerance — shotgun has NO governorGate so
+      // boss + speed-cap checks must not apply.
+      vermin: [vermin({ id: 1, archetypeId: "boss-river-mutant", maxHealth: 800, vx: 0, vy: 0 })],
+    });
+    const runner = makeMockRunner();
+    governorTick({
+      runner: runner as unknown as GameRunner,
+      weapon: shotgun,
+      profile: STRESS,
+      playerLineY: 270,
+      shooterPos: { x: 240, y: 246 },
+      state: makeGovernorState(),
+    });
+    expect(runner.queueChargeStart).toHaveBeenCalledOnce();
+  });
+});
+
 describe("governorTick — charge gate", () => {
   it("napalm-pool gate: skips charge against fast targets and tap-fires instead", () => {
     setSnapshot({

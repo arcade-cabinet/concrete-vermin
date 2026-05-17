@@ -76,6 +76,22 @@ export const weaponArchetypeSchema = z
           "arc-repeater",
           "napalm-pool",
         ] as const),
+        /**
+         * Declarative gate read by the governor's shouldCharge() — replaces
+         * the previous hard-coded effect-name switch. Each predicate is
+         * additive: omit a field and that check passes. Tap-fire is always
+         * the fallback when any predicate refuses, per docs §2.7.
+         */
+        governorGate: z
+          .object({
+            /** Refuse charge against any vermin whose archetypeId starts with "boss-". */
+            refuseIfBoss: z.boolean().optional(),
+            /** Refuse charge against targets above this speed (sim units / sec). */
+            maxTargetSpeed: z.number().nonnegative().optional(),
+            /** Refuse charge against targets with maxHealth above this cap. */
+            maxTargetMaxHealth: z.number().positive().optional(),
+          })
+          .optional(),
       })
       .optional(),
   })

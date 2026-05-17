@@ -62,11 +62,6 @@ export interface GovernorTickInput {
 // zone.maxX/2=240, zone.maxY-24=246 — center of player hitbox at ground level.
 const DEFAULT_PLAYER_ORIGIN = { x: 240, y: 246 };
 
-// Above these caps, charge is strictly worse than sustained tap; tuned per
-// docs/plans/governor-and-charge-shot.md §2.7 — never weaken tap to compensate.
-const NAPALM_TARGET_SPEED_MAX = 30;
-const ARC_REPEATER_TARGET_HEALTH_MAX = 150;
-
 function shouldCharge(
   weapon: WeaponArchetype,
   target: { vx: number; vy: number; maxHealth: number; archetypeId: string },
@@ -76,17 +71,16 @@ function shouldCharge(
   if (!profile) return false;
   if (snap.player.ammoCurrent < profile.shellsConsumed) return false;
 
-  const isBoss = target.archetypeId.startsWith("boss-");
-  const targetSpeed = Math.hypot(target.vx, target.vy);
-  switch (profile.effect) {
-    case "napalm-pool":
-      if (isBoss) return false;
-      return targetSpeed <= NAPALM_TARGET_SPEED_MAX;
-    case "arc-repeater":
-      return target.maxHealth <= ARC_REPEATER_TARGET_HEALTH_MAX;
-    default:
-      return true;
+  const gate = profile.governorGate;
+  if (!gate) return true;
+  if (gate.refuseIfBoss && target.archetypeId.startsWith("boss-")) return false;
+  if (gate.maxTargetSpeed !== undefined) {
+    if (Math.hypot(target.vx, target.vy) > gate.maxTargetSpeed) return false;
   }
+  if (gate.maxTargetMaxHealth !== undefined && target.maxHealth > gate.maxTargetMaxHealth) {
+    return false;
+  }
+  return true;
 }
 
 export function governorTick(input: GovernorTickInput): void {
