@@ -324,9 +324,17 @@ export function PawnShop({ onContinue, onBack }: { onContinue: () => void; onBac
 
 function modBlurb(mod: {
   slot: string;
-  damageMod?: number;
-  spreadMul?: number;
-  magSizeAdd?: number;
+  damageMod?: number | undefined;
+  spreadMul?: number | undefined;
+  magSizeAdd?: number | undefined;
+  reloadMul?: number | undefined;
+  rangeMul?: number | undefined;
+  headshotBonusAdd?: number | undefined;
+  critChanceAdd?: number | undefined;
+  chargeTimeMul?: number | undefined;
+  chargeShellsDelta?: number | undefined;
+  chargeEffectMul?: number | undefined;
+  chargeArcCount?: number | undefined;
 }) {
   const parts: string[] = [];
   if (mod.damageMod && mod.damageMod !== 1)
@@ -334,6 +342,25 @@ function modBlurb(mod: {
   if (mod.spreadMul && mod.spreadMul < 1) parts.push("tighter spread");
   if (mod.spreadMul && mod.spreadMul > 1) parts.push("wider spread");
   if (mod.magSizeAdd && mod.magSizeAdd > 0) parts.push(`+${mod.magSizeAdd} mag`);
+  if (mod.reloadMul && mod.reloadMul < 1)
+    parts.push(`-${Math.round((1 - mod.reloadMul) * 100)}% reload`);
+  if (mod.reloadMul && mod.reloadMul > 1)
+    parts.push(`+${Math.round((mod.reloadMul - 1) * 100)}% reload`);
+  if (mod.rangeMul && mod.rangeMul !== 1)
+    parts.push(`${mod.rangeMul > 1 ? "+" : "−"}${Math.round(Math.abs(mod.rangeMul - 1) * 100)}% range`);
+  if (mod.headshotBonusAdd && mod.headshotBonusAdd > 0)
+    parts.push(`+${Math.round(mod.headshotBonusAdd * 100)}% headshot`);
+  if (mod.critChanceAdd && mod.critChanceAdd > 0)
+    parts.push(`+${Math.round(mod.critChanceAdd * 100)}% crit`);
+  if (mod.chargeTimeMul && mod.chargeTimeMul < 1)
+    parts.push(`-${Math.round((1 - mod.chargeTimeMul) * 100)}% charge time`);
+  if (mod.chargeTimeMul && mod.chargeTimeMul > 1)
+    parts.push(`+${Math.round((mod.chargeTimeMul - 1) * 100)}% charge time`);
+  if (mod.chargeShellsDelta && mod.chargeShellsDelta !== 0)
+    parts.push(`${mod.chargeShellsDelta > 0 ? "+" : ""}${mod.chargeShellsDelta} charge cost`);
+  if (mod.chargeEffectMul && mod.chargeEffectMul !== 1)
+    parts.push(`+${Math.round((mod.chargeEffectMul - 1) * 100)}% charge effect`);
+  if (mod.chargeArcCount) parts.push(`${mod.chargeArcCount} arcs`);
   return parts.length > 0 ? parts.join(" · ") : `${mod.slot}-class`;
 }
 
