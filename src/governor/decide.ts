@@ -62,13 +62,9 @@ export interface GovernorTickInput {
 // zone.maxX/2=240, zone.maxY-24=246 — center of player hitbox at ground level.
 const DEFAULT_PLAYER_ORIGIN = { x: 240, y: 246 };
 
-// Speed cap above which a stationary-AOE charge effect (napalm-pool) is
-// counterproductive — the target out-walks the pool before the DoT pays
-// for the charge-time. Tap-fire is strictly better above this threshold.
-const NAPALM_TARGET_SPEED_MAX = 30; // sim units / sec
-// Health cap above which boss-class targets out-tank an arc-repeater's
-// 3 rapid arcs vs sustained tap from a charged-up mag. Bosses ≥150 HP
-// are better killed by tap; below that, the burst clears trash quickly.
+// Above these caps, charge is strictly worse than sustained tap; tuned per
+// docs/plans/governor-and-charge-shot.md §2.7 — never weaken tap to compensate.
+const NAPALM_TARGET_SPEED_MAX = 30;
 const ARC_REPEATER_TARGET_HEALTH_MAX = 150;
 
 function shouldCharge(
@@ -78,19 +74,15 @@ function shouldCharge(
 ): boolean {
   const profile = weapon.chargeProfile;
   if (!profile) return false;
-  // Don't engage charge until ammo is at least the cost — otherwise we
-  // burn the whine + 80% wait for a tap-fallback.
   if (snap.player.ammoCurrent < profile.shellsConsumed) return false;
 
   const isBoss = target.archetypeId.startsWith("boss-");
   const targetSpeed = Math.hypot(target.vx, target.vy);
   switch (profile.effect) {
     case "napalm-pool":
-      // Stationary pool can't catch a moving boss; sustained tap wins.
       if (isBoss) return false;
       return targetSpeed <= NAPALM_TARGET_SPEED_MAX;
     case "arc-repeater":
-      // Three rapid arcs lose to sustained tap on heavy bosses.
       return target.maxHealth <= ARC_REPEATER_TARGET_HEALTH_MAX;
     default:
       return true;
@@ -104,8 +96,6 @@ export function governorTick(input: GovernorTickInput): void {
 
   if (snap.reloadProgress !== null) {
     state.reloadQueued = false;
-    // Reload in progress + a stale charge held: cancel so we don't leak the
-    // chargePending flag across the reload window.
     if (state.chargeStartedAtMs !== null) {
       runner.cancelCharge();
       state.chargeStartedAtMs = null;
@@ -137,8 +127,6 @@ export function governorTick(input: GovernorTickInput): void {
 
   const target = selectHighestThreat(reachable, weapon.damage, { playerLineY });
   if (!target) {
-    // No reachable target. If a charge was held against a now-dead/culled
-    // target, cancel so the next valid target can engage a fresh charge.
     if (state.chargeStartedAtMs !== null) {
       runner.cancelCharge();
       state.chargeStartedAtMs = null;

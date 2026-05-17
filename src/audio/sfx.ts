@@ -244,17 +244,13 @@ export function playVerminDeath(archetypeId?: string): void {
   _verminDeath?.triggerAttackRelease(note, "8n");
 }
 
-// Sustained per-weapon charge whine. Held while the player holds-to-charge;
-// stops on release / cancel via stopChargeWhine. Distinct timbre per weapon so
-// the player ear-learns which gun is charging from the audio alone.
+// Per-weapon timbre: ear-learnable charge identity without looking at the ring.
 let _chargeOsc: Tone.Oscillator | null = null;
 let _chargeFilt: Tone.Filter | null = null;
 let _chargeAmp: Tone.Gain | null = null;
 let _chargeWeapon: string | null = null;
-// Generation counter — each call to stopChargeWhine bumps it, so deferred
-// disposal closures only run against the graph they captured. Without this,
-// a release→recharge cycle within the 40 ms ramp window would leave two
-// oscillator chains feeding the sfx bus simultaneously.
+// Bumped by stopChargeWhine; deferred-disposal closures gate on this so a
+// release→recharge inside the 40ms ramp window doesn't double-connect the bus.
 let _chargeGen = 0;
 
 type ChargeProfile = {
@@ -355,19 +351,51 @@ export function stopChargeWhine(): void {
  * meatier than half-charges. Stacks on top of playWeaponFire's regular call
  * for the per-weapon character; this one is the extra "thud."
  */
+/**
+ * Fire a one-shot NoiseSynth with a custom envelope, then dispose. Used by
+ * playChargeRelease so the heavier envelope doesn't poison subsequent
+ * normal-fire calls of the shared _sawedOff / _smg synths.
+ */
+function fireOneShotNoise(
+  noise: Tone.NoiseType,
+  envelope: { attack: number; decay: number; sustain: number; release: number },
+  volumeDb: number,
+  duration: string,
+): void {
+  const buses = getBuses();
+  if (!buses) return;
+  const synth = new Tone.NoiseSynth({
+    noise: { type: noise },
+    envelope,
+    volume: volumeDb,
+  }).connect(buses.sfx);
+  synth.triggerAttackRelease(duration);
+  // Tail = decay + release + 100ms safety. Dispose after to free the AudioNode.
+  const tailS = envelope.decay + envelope.release + 0.1;
+  setTimeout(() => {
+    try {
+      synth.dispose();
+    } catch {
+      // Tone may already be torn down in tests — ignore.
+    }
+  }, tailS * 1000);
+}
+
 export function playChargeRelease(weaponId: string, chargeProgress: number): void {
   ensureInstruments();
-  // 0..1 → down up to 7 semitones at saturation. Transpose the note we
-  // trigger rather than poking detune.value: triggerAttackRelease is async,
-  // and resetting detune synchronously fires before the synth uses it.
+  // 0..1 → down up to 7 semitones at saturation. Transpose at trigger
+  // time because triggerAttackRelease is async and a synchronous detune
+  // reset would fire before the synth used it.
   const semis = -7 * chargeProgress;
   switch (weaponId) {
     case "shotgun":
     case "sawed-off":
-      if (_sawedOff) {
-        _sawedOff.set({ envelope: { attack: 0.003, decay: 0.4, sustain: 0, release: 0.18 } });
-        _sawedOff.triggerAttackRelease("4n");
-      }
+      fireOneShotNoise(
+        "brown",
+        { attack: 0.003, decay: 0.4, sustain: 0, release: 0.18 },
+        -6,
+        "4n",
+      );
       break;
     case "revolver":
       if (_revolver) {
@@ -375,10 +403,12 @@ export function playChargeRelease(weaponId: string, chargeProgress: number): voi
       }
       break;
     case "smg":
-      if (_smg) {
-        _smg.set({ envelope: { attack: 0.001, decay: 0.12, sustain: 0, release: 0.04 } });
-        _smg.triggerAttackRelease("8n");
-      }
+      fireOneShotNoise(
+        "white",
+        { attack: 0.001, decay: 0.12, sustain: 0, release: 0.04 },
+        -10,
+        "8n",
+      );
       break;
     case "flamethrower":
       // Napalm whoomph — deep membrane thud, not the regular pink-noise roar.
