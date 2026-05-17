@@ -104,6 +104,12 @@ export function governorTick(input: GovernorTickInput): void {
 
   if (snap.reloadProgress !== null) {
     state.reloadQueued = false;
+    // Reload in progress + a stale charge held: cancel so we don't leak the
+    // chargePending flag across the reload window.
+    if (state.chargeStartedAtMs !== null) {
+      runner.cancelCharge();
+      state.chargeStartedAtMs = null;
+    }
     return;
   }
 
@@ -111,6 +117,10 @@ export function governorTick(input: GovernorTickInput): void {
     if (!state.reloadQueued) {
       runner.queueReload();
       state.reloadQueued = true;
+    }
+    if (state.chargeStartedAtMs !== null) {
+      runner.cancelCharge();
+      state.chargeStartedAtMs = null;
     }
     return;
   }
@@ -126,7 +136,15 @@ export function governorTick(input: GovernorTickInput): void {
   );
 
   const target = selectHighestThreat(reachable, weapon.damage, { playerLineY });
-  if (!target) return;
+  if (!target) {
+    // No reachable target. If a charge was held against a now-dead/culled
+    // target, cancel so the next valid target can engage a fresh charge.
+    if (state.chargeStartedAtMs !== null) {
+      runner.cancelCharge();
+      state.chargeStartedAtMs = null;
+    }
+    return;
+  }
 
   const archetype = ARCHETYPES[target.archetypeId as ArchetypeId];
   const headOffset = archetype?.hitbox.headOffset;
@@ -180,8 +198,14 @@ export function governorTick(input: GovernorTickInput): void {
 
   // Velocity lead overshoots: take the certain body-center shot rather than skipping.
   const fallback = applyOffset({ x: target.x, y: target.y }, headOffset);
-  // Don't interrupt a charge mid-build — wait for release condition on next in-tolerance tick.
-  if (profile.useChargeShot && weapon.chargeProfile && state.chargeStartedAtMs !== null) {
+  // If a charge was started but the target's now out of tolerance, release
+  // at the fallback aim — otherwise the chargePending flag stays true
+  // forever if the target dies / gets culled / leaves range mid-charge,
+  // and queueChargeStart is blocked for the rest of the mission.
+  if (state.chargeStartedAtMs !== null) {
+    runner.queueChargeRelease(fallback.x, fallback.y);
+    state.chargeStartedAtMs = null;
+    state.lastShotAtMs = nowMs;
     return;
   }
   runner.queueShot(fallback.x, fallback.y);
