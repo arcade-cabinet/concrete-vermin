@@ -701,8 +701,11 @@ export class GameRunner {
         break;
       }
       case "wide-spray": {
-        // Extra pellets proportional to charge progress.
-        const extraPellets = Math.ceil(tuned.base.pellets * (1 + chargeProgress));
+        // Extra pellets proportional to charge progress; chargeEffectMul
+        // (e.g. Overcharge mod) further scales pellet count.
+        const extraPellets = Math.ceil(
+          tuned.base.pellets * (1 + chargeProgress) * tuned.chargeEffectMul,
+        );
         const spreads = Array.from(
           { length: extraPellets },
           () =>
@@ -712,8 +715,9 @@ export class GameRunner {
         break;
       }
       case "arc-repeater": {
-        // 3 rapid single-pellet arcs.
-        for (let i = 0; i < 3; i++) {
+        // Default 3 arcs; cooled-coils mod can override to 5.
+        const arcs = tuned.chargeArcCount ?? 3;
+        for (let i = 0; i < arcs; i++) {
           const spreads = [
             (this.gw.rng.fork(`charge:arc:${i}:${this.now.toFixed(3)}`).next() * 2 - 1) *
               tuned.spread,
@@ -759,13 +763,11 @@ export class GameRunner {
         break;
       }
       case "napalm-pool": {
-        // Burning puddle. ttl/radius/dps scale with charge progress. Tuned
-        // so 700ms-max charge for 4 shells lands a saturated DPS that
-        // out-paces continuous tap-fire on a stationary target across the
-        // pool lifetime — without making half-charges trivially better.
-        const ttlMs = 1500 + chargeProgress * 3000; // 1.5–4.5 s
-        const radius = 28 + chargeProgress * 18; // 28–46 px
-        const dps = 28 + chargeProgress * 42; // 28–70 dps
+        // Burning puddle. ttl/radius/dps scale with charge progress + the
+        // Overcharge multiplier (chargeEffectMul) when present.
+        const ttlMs = 1500 + chargeProgress * 3000;
+        const radius = (28 + chargeProgress * 18) * tuned.chargeEffectMul;
+        const dps = (28 + chargeProgress * 42) * tuned.chargeEffectMul;
         this.gw.world.spawn(
           NapalmPool({
             x: aimX,
