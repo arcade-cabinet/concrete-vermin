@@ -49,6 +49,14 @@ For the per-PR record, see the autogen sections below.
 
 Releases are managed by [release-please](https://github.com/googleapis/release-please).
 
+## [2.0.2](https://github.com/arcade-cabinet/concrete-vermin/compare/v2.0.1...v2.0.2) (2026-05-17)
+
+
+### CI
+
+* **codeql:** switch to advanced workflow + drop default setup ([#97](https://github.com/arcade-cabinet/concrete-vermin/issues/97)) ([bcf88e0](https://github.com/arcade-cabinet/concrete-vermin/commit/bcf88e01a025bf9a023b84392b78ecd7d60804fe))
+* **codeql:** switch to advanced workflow + drop default setup ([#98](https://github.com/arcade-cabinet/concrete-vermin/issues/98)) ([1f269e8](https://github.com/arcade-cabinet/concrete-vermin/commit/1f269e8fd728692378eaaef66cf1ddaef0762656))
+
 ## [2.0.1](https://github.com/arcade-cabinet/concrete-vermin/compare/v2.0.0...v2.0.1) (2026-04-29)
 
 
