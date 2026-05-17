@@ -1,7 +1,7 @@
 import type { GameRunner } from "../runtime/runner";
 import { useGameStore } from "../runtime/store";
 import { ARCHETYPES, type ArchetypeId } from "../sim/archetypes/vermin";
-import type { WeaponArchetype } from "../sim/archetypes/weapons/_types";
+import type { TunedWeapon } from "../sim/archetypes/mods";
 import { selectHighestThreat } from "./threat";
 import { leadPoint } from "./yuka-adapters";
 
@@ -45,7 +45,13 @@ export function makeGovernorState(): GovernorState {
 
 export interface GovernorTickInput {
   runner: GameRunner;
-  weapon: WeaponArchetype;
+  /**
+   * The mod-resolved weapon the runtime actually fires with. The governor
+   * uses chargeProfile / rangeMax / spread / base for threat scoring;
+   * passing the raw archetype would miss mod effects on rangeMul or
+   * chargeShellsDelta.
+   */
+  weapon: TunedWeapon;
   profile: GovernorProfile;
   playerLineY: number;
   shooterPos: { x: number; y: number };
@@ -63,7 +69,7 @@ export interface GovernorTickInput {
 const DEFAULT_PLAYER_ORIGIN = { x: 240, y: 246 };
 
 function shouldCharge(
-  weapon: WeaponArchetype,
+  weapon: TunedWeapon,
   target: { vx: number; vy: number; maxHealth: number; archetypeId: string },
   snap: ReturnType<typeof useGameStore.getState>,
 ): boolean {
@@ -119,7 +125,7 @@ export function governorTick(input: GovernorTickInput): void {
     (v) => Math.hypot(v.x - origin.x, v.y - origin.y) <= weapon.rangeMax,
   );
 
-  const target = selectHighestThreat(reachable, weapon.damage, { playerLineY });
+  const target = selectHighestThreat(reachable, weapon.base.damage, { playerLineY });
   if (!target) {
     if (state.chargeStartedAtMs !== null) {
       runner.cancelCharge();

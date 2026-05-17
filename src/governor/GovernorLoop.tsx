@@ -1,7 +1,7 @@
 import { useTick } from "@pixi/react";
 import { useRef } from "react";
 import type { GameRunner } from "../runtime/runner";
-import type { WeaponArchetype } from "../sim/archetypes/weapons/_types";
+import type { TunedWeapon } from "../sim/archetypes/mods";
 import {
   type GovernorProfile,
   type GovernorState,
@@ -20,7 +20,7 @@ export {
 
 export interface GovernorLoopProps {
   runner: GameRunner | null;
-  weapon: WeaponArchetype;
+  weapon: TunedWeapon;
   enabled: boolean;
   profile?: GovernorProfile;
   playerLineY: number; // threat scoring origin

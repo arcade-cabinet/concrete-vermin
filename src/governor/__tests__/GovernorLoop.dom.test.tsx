@@ -3,7 +3,10 @@ import { cleanup, render } from "@testing-library/react";
 import type { GameRunner } from "../../runtime/runner";
 import { useGameStore } from "../../runtime/store";
 import { WEAPON_REGISTRY } from "../../sim/archetypes/weapons";
+import { applyLoadout } from "../../sim/archetypes/mods";
 import { GovernorLoop, PLAYTHROUGH } from "../GovernorLoop";
+
+const revolverTuned = applyLoadout(WEAPON_REGISTRY.revolver, []);
 
 let tickCb: (() => void) | null = null;
 
@@ -42,7 +45,7 @@ describe("GovernorLoop", () => {
     render(
       <GovernorLoop
         runner={runner as unknown as GameRunner}
-        weapon={WEAPON_REGISTRY.revolver}
+        weapon={revolverTuned}
         enabled={false}
         playerLineY={270}
         shooterPos={{ x: 240, y: 260 }}
@@ -59,7 +62,7 @@ describe("GovernorLoop", () => {
     render(
       <GovernorLoop
         runner={runner as unknown as GameRunner}
-        weapon={WEAPON_REGISTRY.revolver}
+        weapon={revolverTuned}
         enabled={true}
         playerLineY={270}
         shooterPos={{ x: 240, y: 260 }}
@@ -76,7 +79,7 @@ describe("GovernorLoop", () => {
     render(
       <GovernorLoop
         runner={runner as unknown as GameRunner}
-        weapon={WEAPON_REGISTRY.revolver}
+        weapon={revolverTuned}
         enabled={true}
         playerLineY={270}
         shooterPos={{ x: 240, y: 260 }}
@@ -110,7 +113,7 @@ describe("GovernorLoop", () => {
     render(
       <GovernorLoop
         runner={runner as unknown as GameRunner}
-        weapon={WEAPON_REGISTRY.revolver}
+        weapon={revolverTuned}
         enabled={true}
         playerLineY={270}
         shooterPos={{ x: 240, y: 260 }}
@@ -153,7 +156,7 @@ describe("GovernorLoop", () => {
     render(
       <GovernorLoop
         runner={runner as unknown as GameRunner}
-        weapon={WEAPON_REGISTRY.revolver}
+        weapon={revolverTuned}
         enabled={true}
         playerLineY={270}
         shooterPos={{ x: 240, y: 260 }}
@@ -189,7 +192,7 @@ describe("GovernorLoop", () => {
     render(
       <GovernorLoop
         runner={runner as unknown as GameRunner}
-        weapon={WEAPON_REGISTRY.revolver}
+        weapon={revolverTuned}
         enabled={true}
         playerLineY={270}
         shooterPos={{ x: 240, y: 260 }}
@@ -225,7 +228,7 @@ describe("GovernorLoop", () => {
     render(
       <GovernorLoop
         runner={runner as unknown as GameRunner}
-        weapon={WEAPON_REGISTRY.revolver}
+        weapon={revolverTuned}
         enabled={true}
         playerLineY={270}
         shooterPos={{ x: 240, y: 260 }}

@@ -128,7 +128,10 @@ export class GameRunner {
   private eventBarks: EventBarkSnapshot[] = [];
   private static readonly EVENT_BARK_TTL_S = 5;
   // Weapon state — the player carries one weapon for the whole mission.
-  private readonly tunedWeapon: ReturnType<typeof applyLoadout>;
+  // Public read access so the Yuka governor can plan against the same
+  // modded values the runtime actually fires with (rangeMax, spread,
+  // chargeProfile, chargeEffectMul). Mutating from outside is unsupported.
+  public readonly tunedWeapon: ReturnType<typeof applyLoadout>;
   // Ammo + reload state. mag tracks the active mag's remaining shells;
   // when zero, fire is blocked and the next queueShot triggers a reload
   // (or the player can pre-reload via queueReload).
@@ -715,8 +718,11 @@ export class GameRunner {
         break;
       }
       case "arc-repeater": {
-        // Default 3 arcs; cooled-coils mod can override to 5.
-        const arcs = tuned.chargeArcCount ?? 3;
+        // Default 3 arcs; cooled-coils mod can override base count via
+        // chargeArcCount. Overcharge scales the final count through
+        // chargeEffectMul so the mod isn't dead on Tesla. Floor at 1.
+        const baseArcs = tuned.chargeArcCount ?? 3;
+        const arcs = Math.max(1, Math.round(baseArcs * tuned.chargeEffectMul));
         for (let i = 0; i < arcs; i++) {
           const spreads = [
             (this.gw.rng.fork(`charge:arc:${i}:${this.now.toFixed(3)}`).next() * 2 - 1) *

@@ -7,11 +7,20 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import type { GameRunner } from "../../runtime/runner";
 import { INITIAL_SNAPSHOT, useGameStore, type VerminSnapshot } from "../../runtime/store";
-import { revolver } from "../../sim/archetypes/weapons/revolver";
-import { shotgun } from "../../sim/archetypes/weapons/shotgun";
-import { tesla } from "../../sim/archetypes/weapons/tesla";
-import { flamethrower } from "../../sim/archetypes/weapons/flamethrower";
+import { revolver as revolverArch } from "../../sim/archetypes/weapons/revolver";
+import { shotgun as shotgunArch } from "../../sim/archetypes/weapons/shotgun";
+import { tesla as teslaArch } from "../../sim/archetypes/weapons/tesla";
+import { flamethrower as flamethrowerArch } from "../../sim/archetypes/weapons/flamethrower";
+import { applyLoadout } from "../../sim/archetypes/mods";
 import { governorTick, makeGovernorState, STRESS } from "../decide";
+
+// Governor consumes TunedWeapon, not the raw archetype. Mod-free tuned
+// instances preserve the archetype's charge gate while exercising the
+// same code path the runtime uses.
+const shotgun = applyLoadout(shotgunArch, []);
+const revolver = applyLoadout(revolverArch, []);
+const tesla = applyLoadout(teslaArch, []);
+const flamethrower = applyLoadout(flamethrowerArch, []);
 
 interface MockRunner {
   queueShot: ReturnType<typeof vi.fn>;
