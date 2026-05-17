@@ -351,11 +351,27 @@ export function stopChargeWhine(): void {
  * meatier than half-charges. Stacks on top of playWeaponFire's regular call
  * for the per-weapon character; this one is the extra "thud."
  */
-/**
- * Fire a one-shot NoiseSynth with a custom envelope, then dispose. Used by
- * playChargeRelease so the heavier envelope doesn't poison subsequent
- * normal-fire calls of the shared _sawedOff / _smg synths.
- */
+// Per-shot allocation: shared synths are monophonic — sharing one across
+// effect cues + frequent fire would chop transients.
+function fireOneShotMembrane(note: Tone.Unit.Frequency, duration: string, volumeDb: number): void {
+  const buses = getBuses();
+  if (!buses) return;
+  const synth = new Tone.MembraneSynth({
+    pitchDecay: 0.15,
+    octaves: 6,
+    envelope: { attack: 0.005, decay: 0.5, sustain: 0, release: 0.3 },
+    volume: volumeDb,
+  }).connect(buses.sfx);
+  synth.triggerAttackRelease(note, duration);
+  setTimeout(() => {
+    try {
+      synth.dispose();
+    } catch {
+      // Tone may already be torn down in tests.
+    }
+  }, 900);
+}
+
 function fireOneShotNoise(
   noise: Tone.NoiseType,
   envelope: { attack: number; decay: number; sustain: number; release: number },
@@ -411,10 +427,10 @@ export function playChargeRelease(weaponId: string, chargeProgress: number): voi
       );
       break;
     case "flamethrower":
-      // Napalm whoomph — deep membrane thud, not the regular pink-noise roar.
-      if (_verminDeath) {
-        _verminDeath.triggerAttackRelease("D1", "4n");
-      }
+      // Dedicated whoomph synth: _verminDeath is shared with enemy-death cues
+      // that fire constantly when napalm pools kill, which would chop the
+      // release sound. Per-shot allocation keeps the layers polyphonic.
+      fireOneShotMembrane("D1", "4n", -6);
       break;
     case "tesla":
       if (_tesla) {
