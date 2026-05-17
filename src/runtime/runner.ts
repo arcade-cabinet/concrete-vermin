@@ -774,9 +774,10 @@ export class GameRunner {
         break;
       }
       case "napalm-pool": {
-        // Burning puddle. ttl/radius/dps scale with charge progress + the
-        // Overcharge multiplier (chargeEffectMul) when present.
-        const ttlMs = 1500 + chargeProgress * 3000;
+        // Burning puddle. ttl/radius/dps all scale with charge progress
+        // and the Overcharge multiplier — pool linger time matters as
+        // much as radius/dps for area denial.
+        const ttlMs = (1500 + chargeProgress * 3000) * tuned.chargeEffectMul;
         const radius = (28 + chargeProgress * 18) * tuned.chargeEffectMul;
         const dps = (28 + chargeProgress * 42) * tuned.chargeEffectMul;
         this.gw.world.spawn(
