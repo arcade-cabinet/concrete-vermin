@@ -102,4 +102,46 @@ describe("applyLoadout", () => {
     expect(t.magSize).toBe(smg.magSize + 20);
     expect(t.reloadMs).toBe(Math.round(smg.reloadMs * 1.2));
   });
+
+  describe("charge mods", () => {
+    it("fast-cap halves maxChargeMs; shells unchanged", () => {
+      const fastCap = MOD_REGISTRY.get("fast-cap")!;
+      const t = applyLoadout(shotgun, [fastCap]);
+      expect(t.chargeProfile?.maxChargeMs).toBe(
+        Math.round(shotgun.chargeProfile!.maxChargeMs * 0.5),
+      );
+      expect(t.chargeProfile?.shellsConsumed).toBe(shotgun.chargeProfile!.shellsConsumed);
+    });
+
+    it("overcharge adds +2 shells and 1.5x effect multiplier", () => {
+      const overcharge = MOD_REGISTRY.get("overcharge")!;
+      const t = applyLoadout(shotgun, [overcharge]);
+      expect(t.chargeProfile?.shellsConsumed).toBe(shotgun.chargeProfile!.shellsConsumed + 2);
+      expect(t.chargeEffectMul).toBe(1.5);
+    });
+
+    it("cooled-coils (tesla-only) sets chargeArcCount=5 and chargeTimeMul 0.75", () => {
+      const tesla = WEAPON_REGISTRY.tesla;
+      const cooled = MOD_REGISTRY.get("cooled-coils")!;
+      expect(cooled.compatibleWith).toEqual(["tesla"]);
+      expect(() => applyLoadout(shotgun, [cooled])).toThrow(/not compatible/);
+      const t = applyLoadout(tesla, [cooled]);
+      expect(t.chargeArcCount).toBe(5);
+      expect(t.chargeProfile?.maxChargeMs).toBe(
+        Math.round(tesla.chargeProfile!.maxChargeMs * 0.75),
+      );
+    });
+
+    it("two charge-slot mods rejected by one-per-slot rule", () => {
+      const fastCap = MOD_REGISTRY.get("fast-cap")!;
+      const overcharge = MOD_REGISTRY.get("overcharge")!;
+      expect(() => applyLoadout(shotgun, [fastCap, overcharge])).toThrow(/'charge'/);
+    });
+
+    it("baseline weapon: chargeEffectMul = 1 and chargeArcCount undefined", () => {
+      const t = applyLoadout(shotgun, []);
+      expect(t.chargeEffectMul).toBe(1);
+      expect(t.chargeArcCount).toBeUndefined();
+    });
+  });
 });

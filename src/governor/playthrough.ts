@@ -1,6 +1,5 @@
 import { GameRunner } from "../runtime/runner";
 import { INITIAL_SNAPSHOT, useGameStore } from "../runtime/store";
-import { WEAPON_REGISTRY } from "../sim/archetypes/weapons";
 import type { Mission } from "../sim/factories/mission";
 import { type GovernorProfile, PLAYTHROUGH, governorTick, makeGovernorState } from "./decide";
 
@@ -81,8 +80,6 @@ export function playMissionWithGovernor(
   const defaultPos = { x: 240, y: 260 };
   const shooterPos = opts.shooterPos ?? override ?? defaultPos;
   const playerLineY = opts.playerLineY ?? override?.playerLineY ?? 270;
-  const weapon = WEAPON_REGISTRY[mission.weapon];
-
   // Reset the global store so each playthrough starts from a clean
   // snapshot — without this the previous mission's `phase: "won"` leaks
   // into the new run and the loop exits on tick 1.
@@ -92,6 +89,9 @@ export function playMissionWithGovernor(
   });
 
   const runner = new GameRunner(mission, [], opts.seed);
+  // Pull the mod-resolved weapon so governor + runtime agree on
+  // rangeMax / spread / chargeProfile after mods are applied.
+  const weapon = runner.tunedWeapon;
   const state = makeGovernorState();
 
   const dt = 1 / 60;

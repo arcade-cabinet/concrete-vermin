@@ -128,7 +128,10 @@ export class GameRunner {
   private eventBarks: EventBarkSnapshot[] = [];
   private static readonly EVENT_BARK_TTL_S = 5;
   // Weapon state — the player carries one weapon for the whole mission.
-  private readonly tunedWeapon: ReturnType<typeof applyLoadout>;
+  // Public read access so the Yuka governor can plan against the same
+  // modded values the runtime actually fires with (rangeMax, spread,
+  // chargeProfile, chargeEffectMul). Mutating from outside is unsupported.
+  public readonly tunedWeapon: ReturnType<typeof applyLoadout>;
   // Ammo + reload state. mag tracks the active mag's remaining shells;
   // when zero, fire is blocked and the next queueShot triggers a reload
   // (or the player can pre-reload via queueReload).
@@ -701,8 +704,11 @@ export class GameRunner {
         break;
       }
       case "wide-spray": {
-        // Extra pellets proportional to charge progress.
-        const extraPellets = Math.ceil(tuned.base.pellets * (1 + chargeProgress));
+        // Extra pellets proportional to charge progress; chargeEffectMul
+        // (e.g. Overcharge mod) further scales pellet count.
+        const extraPellets = Math.ceil(
+          tuned.base.pellets * (1 + chargeProgress) * tuned.chargeEffectMul,
+        );
         const spreads = Array.from(
           { length: extraPellets },
           () =>
@@ -712,8 +718,12 @@ export class GameRunner {
         break;
       }
       case "arc-repeater": {
-        // 3 rapid single-pellet arcs.
-        for (let i = 0; i < 3; i++) {
+        // Default 3 arcs; cooled-coils mod can override base count via
+        // chargeArcCount. Overcharge scales the final count through
+        // chargeEffectMul so the mod isn't dead on Tesla. Floor at 1.
+        const baseArcs = tuned.chargeArcCount ?? 3;
+        const arcs = Math.max(1, Math.round(baseArcs * tuned.chargeEffectMul));
+        for (let i = 0; i < arcs; i++) {
           const spreads = [
             (this.gw.rng.fork(`charge:arc:${i}:${this.now.toFixed(3)}`).next() * 2 - 1) *
               tuned.spread,
@@ -759,13 +769,11 @@ export class GameRunner {
         break;
       }
       case "napalm-pool": {
-        // Burning puddle. ttl/radius/dps scale with charge progress. Tuned
-        // so 700ms-max charge for 4 shells lands a saturated DPS that
-        // out-paces continuous tap-fire on a stationary target across the
-        // pool lifetime — without making half-charges trivially better.
-        const ttlMs = 1500 + chargeProgress * 3000; // 1.5–4.5 s
-        const radius = 28 + chargeProgress * 18; // 28–46 px
-        const dps = 28 + chargeProgress * 42; // 28–70 dps
+        // Burning puddle. ttl/radius/dps scale with charge progress + the
+        // Overcharge multiplier (chargeEffectMul) when present.
+        const ttlMs = 1500 + chargeProgress * 3000;
+        const radius = (28 + chargeProgress * 18) * tuned.chargeEffectMul;
+        const dps = (28 + chargeProgress * 42) * tuned.chargeEffectMul;
         this.gw.world.spawn(
           NapalmPool({
             x: aimX,

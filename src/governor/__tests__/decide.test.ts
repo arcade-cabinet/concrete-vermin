@@ -7,11 +7,20 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import type { GameRunner } from "../../runtime/runner";
 import { INITIAL_SNAPSHOT, useGameStore, type VerminSnapshot } from "../../runtime/store";
-import { revolver } from "../../sim/archetypes/weapons/revolver";
-import { shotgun } from "../../sim/archetypes/weapons/shotgun";
-import { tesla } from "../../sim/archetypes/weapons/tesla";
-import { flamethrower } from "../../sim/archetypes/weapons/flamethrower";
+import { revolver as revolverArch } from "../../sim/archetypes/weapons/revolver";
+import { shotgun as shotgunArch } from "../../sim/archetypes/weapons/shotgun";
+import { tesla as teslaArch } from "../../sim/archetypes/weapons/tesla";
+import { flamethrower as flamethrowerArch } from "../../sim/archetypes/weapons/flamethrower";
+import { applyLoadout } from "../../sim/archetypes/mods";
 import { governorTick, makeGovernorState, STRESS } from "../decide";
+
+// Governor consumes TunedWeapon, not the raw archetype. Mod-free tuned
+// instances preserve the archetype's charge gate while exercising the
+// same code path the runtime uses.
+const shotgun = applyLoadout(shotgunArch, []);
+const revolver = applyLoadout(revolverArch, []);
+const tesla = applyLoadout(teslaArch, []);
+const flamethrower = applyLoadout(flamethrowerArch, []);
 
 interface MockRunner {
   queueShot: ReturnType<typeof vi.fn>;
@@ -57,6 +66,28 @@ function vermin(o: Partial<VerminSnapshot> & { id: number; archetypeId: string }
 
 beforeEach(() => {
   setSnapshot({});
+});
+
+describe("governorTick — charge gate (data-driven)", () => {
+  it("absent governorGate: charge engages on every in-tolerance target (even boss)", () => {
+    setSnapshot({
+      now: 1,
+      player: { ammoCurrent: 6, ammoMax: 6, livesRemaining: 3 },
+      // Boss, stationary, in tolerance — shotgun has NO governorGate so
+      // boss + speed-cap checks must not apply.
+      vermin: [vermin({ id: 1, archetypeId: "boss-river-mutant", maxHealth: 800, vx: 0, vy: 0 })],
+    });
+    const runner = makeMockRunner();
+    governorTick({
+      runner: runner as unknown as GameRunner,
+      weapon: shotgun,
+      profile: STRESS,
+      playerLineY: 270,
+      shooterPos: { x: 240, y: 246 },
+      state: makeGovernorState(),
+    });
+    expect(runner.queueChargeStart).toHaveBeenCalledOnce();
+  });
 });
 
 describe("governorTick — charge gate", () => {

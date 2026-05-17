@@ -26,6 +26,7 @@ export const MOD_SLOTS = [
   "scope",
   "talisman",
   "reticle",
+  "charge",
 ] as const;
 export type ModSlot = (typeof MOD_SLOTS)[number];
 
@@ -59,6 +60,12 @@ export const weaponModSchema = z
     reticleShape: z.enum(RETICLE_SHAPES).optional(),
     /** Charge-shot timing multiplier; <1 charges faster, >1 slower. */
     chargeTimeMul: z.number().positive().optional(),
+    /** Charge shells-consumed delta (signed integer added to base cost). */
+    chargeShellsDelta: z.number().int().optional(),
+    /** Charge effect damage / scale multiplier (per-effect interpretation in runner). */
+    chargeEffectMul: z.number().positive().optional(),
+    /** Tesla-only: override the arc count for arc-repeater (base=3). */
+    chargeArcCount: z.number().int().positive().optional(),
   })
   .strict();
 
@@ -282,6 +289,33 @@ const MOD_DATA: ReadonlyArray<z.input<typeof weaponModSchema>> = [
     reticleShape: "double",
     reticleRadiusMul: 0.9,
   },
+  // — Charge mods (Phase 4b) —
+  {
+    id: "fast-cap",
+    slot: "charge",
+    name: "Fast Cap",
+    cost: 140,
+    compatibleWith: [],
+    chargeTimeMul: 0.5,
+  },
+  {
+    id: "overcharge",
+    slot: "charge",
+    name: "Overcharge",
+    cost: 180,
+    compatibleWith: [],
+    chargeShellsDelta: 2,
+    chargeEffectMul: 1.5,
+  },
+  {
+    id: "cooled-coils",
+    slot: "charge",
+    name: "Cooled Coils",
+    cost: 160,
+    compatibleWith: ["tesla"],
+    chargeArcCount: 5,
+    chargeTimeMul: 0.75,
+  },
 ];
 
 // Internal mutable map kept private — `get`/`size`/iteration go through
@@ -342,10 +376,14 @@ export interface TunedWeapon {
   /** Reticle visual + behavior shape. */
   reticleShape: ReticleShape;
   /**
-   * Charge-shot profile with any chargeTimeMul from mods applied.
-   * Undefined if the weapon has no charge profile.
+   * Charge-shot profile with any chargeTimeMul / chargeShellsDelta from
+   * mods applied. Undefined if the weapon has no charge profile.
    */
   chargeProfile: WeaponArchetype["chargeProfile"];
+  /** Multiplier on charge-effect damage / size (runner-interpreted per effect). 1 = unmodified. */
+  chargeEffectMul: number;
+  /** Override arc count for arc-repeater. Undefined = use the runner default (3). */
+  chargeArcCount?: number;
 }
 
 export class LoadoutError extends Error {}
@@ -379,6 +417,9 @@ export function applyLoadout(
   let reticleRadius = weapon.reticleRadius;
   let reticleShape: ReticleShape = weapon.reticleShape;
   let chargeTimeMulAcc = 1;
+  let chargeShellsDeltaAcc = 0;
+  let chargeEffectMulAcc = 1;
+  let chargeArcCountOverride: number | undefined;
   const damageMods: number[] = [];
   const critChanceMods: number[] = [];
 
@@ -395,14 +436,19 @@ export function applyLoadout(
     if (m.damageMod !== 1) damageMods.push(m.damageMod);
     if (m.critChanceAdd > 0) critChanceMods.push(m.critChanceAdd);
     if (m.chargeTimeMul !== undefined) chargeTimeMulAcc *= m.chargeTimeMul;
+    if (m.chargeShellsDelta !== undefined) chargeShellsDeltaAcc += m.chargeShellsDelta;
+    if (m.chargeEffectMul !== undefined) chargeEffectMulAcc *= m.chargeEffectMul;
+    // Last mod wins for arc count override — multiple charge mods are blocked
+    // by the one-per-slot rule anyway.
+    if (m.chargeArcCount !== undefined) chargeArcCountOverride = m.chargeArcCount;
   }
 
-  // Apply chargeTimeMul to the weapon's chargeProfile if any mod carries one.
   let chargeProfile: WeaponArchetype["chargeProfile"] = weapon.chargeProfile;
-  if (chargeProfile !== undefined && chargeTimeMulAcc !== 1) {
+  if (chargeProfile !== undefined && (chargeTimeMulAcc !== 1 || chargeShellsDeltaAcc !== 0)) {
     chargeProfile = {
       ...chargeProfile,
       maxChargeMs: Math.round(chargeProfile.maxChargeMs * chargeTimeMulAcc),
+      shellsConsumed: Math.max(1, chargeProfile.shellsConsumed + chargeShellsDeltaAcc),
     };
   }
 
@@ -421,5 +467,7 @@ export function applyLoadout(
     reticleRadius,
     reticleShape,
     chargeProfile,
+    chargeEffectMul: chargeEffectMulAcc,
+    ...(chargeArcCountOverride !== undefined ? { chargeArcCount: chargeArcCountOverride } : {}),
   };
 }

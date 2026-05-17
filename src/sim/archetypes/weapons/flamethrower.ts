@@ -24,6 +24,13 @@ export const flamethrower: Readonly<WeaponArchetype> = Object.freeze(
     },
     reticleRadius: 20,
     reticleShape: "ring",
-    chargeProfile: { maxChargeMs: 700, shellsConsumed: 4, effect: "napalm-pool" },
+    chargeProfile: {
+      maxChargeMs: 700,
+      shellsConsumed: 4,
+      effect: "napalm-pool",
+      // Stationary AOE only pays off on slow / non-boss targets — moving
+      // bosses out-walk the pool faster than the DoT can land.
+      governorGate: { refuseIfBoss: true, maxTargetSpeed: 30 },
+    },
   }),
 );
