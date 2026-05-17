@@ -9,13 +9,39 @@
 - [x] Phase 2 — charge-shot finish: audio, governor STRESS, visual e2e, lock (PR #102 in flight)
 - [ ] [WAIT] Wait for PR #102 CI to land + reviewers — auto-merge when green; address review threads as fold-forward commits
 - [ ] [WAIT] Phase 3 — once #102 lands, drain remaining dependabot PRs (auto-merge enabled on #92/#93/#94/#95; #101 minor-and-patch group; #89/#99 gradle need inspection)
-- [ ] [WAIT-USER] Phase 4 — needs user direction (charge-shot mods? gamepad/touch charge UX? balance sweeps?)
+- [ ] Phase 4 — ALL FOUR TRACKS, ordered for minimum rework (user said "all of them" on 2026-05-17)
 
-### Phase 4 candidates (architect-review surfacing, NOT immediate work — wait for user prioritization)
+### Phase 4a — Data-driven charge gating (architect #3, smallest blast radius, unblocks Phase 4b)
 
-- [ ] [WAIT-USER] Extract ChargeVoice class so module-singleton audio state stops blocking concurrent / co-op / replay paths
-- [ ] [WAIT-USER] Move audio triggers from runner into a snapshot-subscribing audio engine — match render's pull-not-push seam
-- [ ] [WAIT-USER] Move charge-effect gating from src/governor/decide.ts onto the weapon archetype — governor becomes effect-agnostic
+- [ ] src/sim/archetypes/weapons/_types.ts: add optional `chargeProfile.governorGate: { refuseIfBoss?, maxTargetSpeed?, maxTargetMaxHealth? }`
+- [ ] Per-weapon files: encode current rules declaratively (flamethrower: refuseIfBoss + maxTargetSpeed=30; tesla: maxTargetMaxHealth=150)
+- [ ] src/governor/decide.ts: shouldCharge() reads the gate from chargeProfile, drops hard-coded effect-name switch
+- [ ] tests: src/governor/__tests__/decide.test.ts — re-pin gate behavior against the new declarative path
+- [ ] STRESS still passes every mission
+
+### Phase 4b — Charge-shot weapon mods (gameplay feature, depends on 4a)
+
+- [ ] src/sim/archetypes/mods/_types.ts: extend WeaponMod to allow chargeProfile overrides (`chargeTimeMul`, `shellsConsumedDelta`, `chargeDamageMul`)
+- [ ] applyLoadout folds mod effects into TunedWeapon.chargeProfile
+- [ ] Three new mods: `fast-cap` (50% maxChargeMs), `overcharge` (2x shells, 1.5x effect), `cooled-coils` (Tesla-only: arc-repeater 5 arcs)
+- [ ] PawnShop catalog entries — price, copy, weapon compatibility
+- [ ] Unit tests + governor STRESS coverage with mods applied
+
+### Phase 4c — Gamepad / touch charge UX
+
+- [ ] src/ui/GameStage.tsx: gamepad R2/RT hold → queueChargeStart; release → queueChargeRelease
+- [ ] Touch: long-press → charge (keep tap = quick shot)
+- [ ] e2e/gamepad.spec.ts: assert charge ring renders on gamepad hold
+- [ ] e2e/mobile-viewport.spec.ts: assert charge ring renders on long-press
+- [ ] e2e/keyboard-only.spec.ts: spacebar hold → charge
+
+### Phase 4d — Audio-engine snapshot subscription (architect #2 + #1; biggest lift, last)
+
+- [ ] Extract ChargeVoice class (architect #1) — per-call-site allocator backed by Tone primitives
+- [ ] src/audio/engine.ts: subscribes to useGameStore snapshots; emits SFX based on diffs (verminDeath count delta, fire events, charge progress transitions)
+- [ ] src/runtime/runner.ts: drop all audio imports — runner emits only data
+- [ ] Refactor existing audio tests + add engine unit tests
+- [ ] Verify replay + mute toggle now work without monkey-patching the audio module
 
 ## EXPLICIT HALT (user-issued, 2026-04-28) — SUPERSEDED 2026-05-17
 
