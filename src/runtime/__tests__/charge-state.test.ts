@@ -200,16 +200,35 @@ describe("chargeProgress in snapshot", () => {
     expect(t2 as number).toBeLessThanOrEqual(1);
   });
 
-  it("is null after charge is released", () => {
+  it("is null after charge is released, cancelled, or ghost-released", () => {
     const r = new GameRunner(mission01, [], 1);
     step(r, FRAME);
 
+    // Normal release zeroes chargeProgress.
     r.queueChargeStart();
     step(r, 0.5);
     expect(useGameStore.getState().chargeProgress).not.toBeNull();
-
     r.queueChargeRelease(240, 200);
     step(r, FRAME);
+    expect(useGameStore.getState().chargeProgress).toBeNull();
+
+    // cancelCharge is idempotent — calling it with no charge in flight
+    // is a no-op (and never throws). Guards against pause + queue race.
+    expect(() => r.cancelCharge()).not.toThrow();
+    expect(useGameStore.getState().chargeProgress).toBeNull();
+
+    // Cancel mid-build clears chargeProgress.
+    r.queueChargeStart();
+    step(r, 0.2);
+    expect(useGameStore.getState().chargeProgress).not.toBeNull();
+    r.cancelCharge();
+    step(r, FRAME);
+    expect(useGameStore.getState().chargeProgress).toBeNull();
+
+    // Ghost release path: after a cancel, queueChargeRelease is a safe
+    // no-op (governor calls this when its state.chargeStartedAtMs is set
+    // but runner.chargePending was already cleared by another path).
+    expect(() => r.queueChargeRelease(240, 200)).not.toThrow();
     expect(useGameStore.getState().chargeProgress).toBeNull();
   });
 

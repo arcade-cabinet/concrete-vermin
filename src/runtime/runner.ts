@@ -214,7 +214,12 @@ export class GameRunner {
 
   /** Player released after holding — fire the charge effect (or tap fallback). */
   queueChargeRelease(aimX: number, aimY: number): void {
-    if (!this.chargePending || this.chargeStartedAt === null) return;
+    if (!this.chargePending || this.chargeStartedAt === null) {
+      // Some other path cleared chargePending (pause, cancelCharge, weapon
+      // swap). Make sure the whine is silent before we no-op out.
+      stopChargeWhine();
+      return;
+    }
     const chargeProgress = Math.min(
       1,
       ((this.now - this.chargeStartedAt) * 1000) /
@@ -232,9 +237,11 @@ export class GameRunner {
     playChargeRelease(this.tunedWeapon.base.id, chargeProgress);
   }
 
-  /** External cancel — e.g. pause, lose focus, or weapon swap while held. */
+  /** External cancel — e.g. pause, lose focus, or weapon swap while held.
+   * Always stops the whine, even if chargePending was cleared by another
+   * path — guarantees the audio never leaks past a governor-issued cancel.
+   */
   cancelCharge(): void {
-    if (!this.chargePending) return;
     this.chargePending = false;
     this.chargeStartedAt = null;
     stopChargeWhine();
