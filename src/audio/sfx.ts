@@ -402,12 +402,7 @@ export function playChargeRelease(weaponId: string, chargeProgress: number): voi
   switch (weaponId) {
     case "shotgun":
     case "sawed-off":
-      fireOneShotNoise(
-        "brown",
-        { attack: 0.003, decay: 0.4, sustain: 0, release: 0.18 },
-        -6,
-        "4n",
-      );
+      fireOneShotNoise("brown", { attack: 0.003, decay: 0.4, sustain: 0, release: 0.18 }, -6, "4n");
       break;
     case "revolver":
       // Per-shot voice: _revolver is monophonic and shared with playRevolver,

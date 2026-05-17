@@ -81,6 +81,28 @@ export interface EventBarkSnapshot {
   at: number;
 }
 
+// Decouples sim/runtime from Tone.js: runner publishes events, engine drains.
+export type AudioEvent =
+  | { kind: "mission-start" }
+  | { kind: "mission-won-sgrade" }
+  | { kind: "mission-won" }
+  | { kind: "mission-lost" }
+  | { kind: "act-ambience"; act: "streets" | "underworld" | "above" }
+  | { kind: "weapon-fire"; weaponId: string }
+  | { kind: "weapon-reload"; weaponId: string }
+  | { kind: "weapon-empty" }
+  | { kind: "music-duck"; bus: "music" | "sfx" | "ui"; db: number; attackS: number; holdS: number }
+  | { kind: "charge-start"; weaponId: string }
+  | { kind: "charge-progress"; progress: number }
+  | { kind: "charge-stop" }
+  | { kind: "charge-release"; weaponId: string; progress: number }
+  | { kind: "vermin-spawn" }
+  | { kind: "vermin-hit"; archetypeId: string }
+  | { kind: "vermin-death"; archetypeId: string }
+  | { kind: "boss-leitmotif-start" }
+  | { kind: "boss-leitmotif-stop" }
+  | { kind: "boss-death-sting" };
+
 export interface DamageEvent {
   /** Sim seconds when the hit landed — used for ttl + rise interpolation. */
   at: number;
@@ -196,6 +218,9 @@ export interface GameState {
   killCount: number;
   /** Append-only ring of recent damage numbers for the floating HUD. */
   damageEvents: ReadonlyArray<DamageEvent>;
+  // seq is process-wide monotonic so the engine watermark survives mission
+  // restarts; re-running a mission can't replay or drop events.
+  audioEvents: ReadonlyArray<{ seq: number; event: AudioEvent }>;
   /** id increments on every call so AT re-narrates repeated text. */
   srAnnouncement: { text: string; urgency: "polite" | "assertive"; id: number };
   announceForScreenReader: (text: string, urgency?: "polite" | "assertive") => void;
@@ -224,6 +249,7 @@ export interface GameState {
         | "reticleRadius"
         | "reticleShape"
         | "chargeProgress"
+        | "audioEvents"
       >
     >,
   ) => void;
@@ -275,6 +301,7 @@ export const INITIAL_SNAPSHOT: Pick<
   | "reticleShape"
   | "reticle"
   | "chargeProgress"
+  | "audioEvents"
 > = {
   phase: "main-menu",
   now: 0,
@@ -299,6 +326,7 @@ export const INITIAL_SNAPSHOT: Pick<
   reticleShape: "cross",
   reticle: { x: 240, y: 200 },
   chargeProgress: null,
+  audioEvents: [],
 };
 
 export const useGameStore = create<GameState>((set) => ({
