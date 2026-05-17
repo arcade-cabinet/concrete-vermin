@@ -311,8 +311,14 @@ function SideRailRight() {
 function ShellsReadout() {
   const player = useGameStore((s) => s.player);
   const reload = useGameStore((s) => s.reloadProgress);
+  const charge = useGameStore((s) => s.chargeProgress);
   const empty = player.ammoCurrent === 0;
   const reduced = useReducedMotion();
+  const showReload = reload !== null && !reduced;
+  // Reload takes priority — they're physically mutually exclusive at the
+  // runner level (release-on-reload), but if both ever raced the reload
+  // bar matters more.
+  const showCharge = !showReload && charge !== null && charge > 0 && !reduced;
   return (
     <div style={{ textAlign: "center" }}>
       <div
@@ -337,11 +343,11 @@ function ShellsReadout() {
       >
         {player.ammoCurrent}/{player.ammoMax}
       </div>
-      {reload !== null && !reduced ? (
+      {showReload ? (
         <div
           role="progressbar"
           aria-label="Reloading"
-          aria-valuenow={Math.round(reload * 100)}
+          aria-valuenow={Math.round((reload as number) * 100)}
           aria-valuemin={0}
           aria-valuemax={100}
           style={{
@@ -357,8 +363,36 @@ function ShellsReadout() {
             style={{
               display: "block",
               height: "100%",
-              width: `${reload * 100}%`,
+              width: `${(reload as number) * 100}%`,
               background: COLOR.sodium,
+              transition: "width 60ms linear",
+            }}
+          />
+        </div>
+      ) : null}
+      {showCharge ? (
+        <div
+          data-testid="hud-charge-bar"
+          role="progressbar"
+          aria-label="Charging"
+          aria-valuenow={Math.round((charge as number) * 100)}
+          aria-valuemin={0}
+          aria-valuemax={100}
+          style={{
+            marginTop: 6,
+            width: "100%",
+            height: 3,
+            background: COLOR.bgConcreteDark,
+            borderRadius: 1,
+            overflow: "hidden",
+          }}
+        >
+          <span
+            style={{
+              display: "block",
+              height: "100%",
+              width: `${(charge as number) * 100}%`,
+              background: COLOR.cream,
               transition: "width 60ms linear",
             }}
           />
