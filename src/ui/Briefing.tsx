@@ -16,7 +16,7 @@ interface HowToBeat {
 const HOW_TO_BEAT: ReadonlyArray<HowToBeat> = [
   { glyph: "◎", label: "AIM + FIRE", body: "Tap the stage. Reticle snaps and fires." },
   { glyph: "↻", label: "RELOAD", body: "Press R / bumper, or just keep firing." },
-  { glyph: "⊙", label: "HOLD = CHARGE", body: "Press and hold. Release for a stronger shot." },
+  { glyph: "◐", label: "HOLD = CHARGE", body: "Press and hold. Release for a stronger shot." },
   { glyph: "♥", label: "STAY ALIVE", body: "Five lives. Vermin past the line take one." },
 ];
 
@@ -180,7 +180,7 @@ export function Briefing() {
             fontFamily: TYPE.faceMono,
             fontSize: 12,
             display: "grid",
-            gridTemplateColumns: "repeat(auto-fit, minmax(120px, 1fr))",
+            gridTemplateColumns: "repeat(auto-fit, minmax(130px, 1fr))",
             gap: 12,
           }}
         >
