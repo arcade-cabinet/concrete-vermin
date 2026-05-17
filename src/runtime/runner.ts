@@ -1,4 +1,5 @@
 import {
+  playChargeRelease,
   playChargeWhine,
   playEmpty,
   playWeaponFire,
@@ -6,6 +7,8 @@ import {
   playVerminDeath,
   playVerminHit,
   playVerminSpawn,
+  stopChargeWhine,
+  tickChargeWhine,
 } from "../audio/sfx";
 import {
   bossDeathSilenceSting,
@@ -205,7 +208,7 @@ export class GameRunner {
     if (this.mag > 0 && this.reloadStartedAt === null && !this.chargePending) {
       this.chargeStartedAt = this.now;
       this.chargePending = true;
-      playChargeWhine();
+      playChargeWhine(this.tunedWeapon.base.id);
     }
   }
 
@@ -219,16 +222,27 @@ export class GameRunner {
     );
     this.chargePending = false;
     this.chargeStartedAt = null;
+    stopChargeWhine();
     if (chargeProgress < 0.1) {
       // Too short — treat as tap
       this.queueShot(aimX, aimY);
       return;
     }
     this.applyChargeEffect(aimX, aimY, chargeProgress);
+    playChargeRelease(this.tunedWeapon.base.id, chargeProgress);
+  }
+
+  /** External cancel — e.g. pause, lose focus, or weapon swap while held. */
+  cancelCharge(): void {
+    if (!this.chargePending) return;
+    this.chargePending = false;
+    this.chargeStartedAt = null;
+    stopChargeWhine();
   }
 
   pause(): void {
     this.paused = true;
+    this.cancelCharge();
   }
 
   resume(): void {
@@ -864,6 +878,10 @@ export class GameRunner {
               (this.tunedWeapon.chargeProfile?.maxChargeMs ?? 1000),
           )
         : null;
+
+    if (chargeProgress !== null) {
+      tickChargeWhine(chargeProgress);
+    }
 
     useGameStore.getState().setSnapshot({
       vermin,

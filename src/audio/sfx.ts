@@ -244,10 +244,145 @@ export function playVerminDeath(archetypeId?: string): void {
   _verminDeath?.triggerAttackRelease(note, "8n");
 }
 
-// tesla synth at C2: capacitor charge feel, distinct from weapon-fire pitch, short enough to not clash with release SFX.
-export function playChargeWhine(): void {
+// Sustained per-weapon charge whine. Held while the player holds-to-charge;
+// stops on release / cancel via stopChargeWhine. Distinct timbre per weapon so
+// the player ear-learns which gun is charging from the audio alone.
+let _chargeOsc: Tone.Oscillator | null = null;
+let _chargeFilt: Tone.Filter | null = null;
+let _chargeAmp: Tone.Gain | null = null;
+let _chargeWeapon: string | null = null;
+
+function chargeProfileFor(weaponId: string): {
+  freq: number;
+  type: "sawtooth" | "square" | "triangle" | "sine";
+  filter: number;
+  vol: number;
+} {
+  switch (weaponId) {
+    case "shotgun":
+      return { freq: 90, type: "sawtooth", filter: 600, vol: -22 };
+    case "sawed-off":
+      return { freq: 70, type: "sawtooth", filter: 500, vol: -20 };
+    case "revolver":
+      return { freq: 140, type: "square", filter: 900, vol: -24 };
+    case "smg":
+      return { freq: 200, type: "square", filter: 1400, vol: -26 };
+    case "flamethrower":
+      return { freq: 60, type: "triangle", filter: 800, vol: -22 };
+    case "tesla":
+      return { freq: 240, type: "sawtooth", filter: 1800, vol: -22 };
+    default:
+      return { freq: 120, type: "sawtooth", filter: 900, vol: -24 };
+  }
+}
+
+export function playChargeWhine(weaponId: string): void {
+  const buses = getBuses();
+  if (!buses) return;
+  stopChargeWhine();
+  const profile = chargeProfileFor(weaponId);
+  _chargeFilt = new Tone.Filter(profile.filter, "lowpass");
+  _chargeAmp = new Tone.Gain(0).connect(buses.sfx);
+  _chargeFilt.connect(_chargeAmp);
+  _chargeOsc = new Tone.Oscillator({
+    type: profile.type,
+    frequency: profile.freq,
+    volume: profile.vol,
+  }).connect(_chargeFilt);
+  _chargeOsc.start();
+  // Ramp gain in over 30 ms so the start isn't a click; ramp pitch up over
+  // the expected charge window (handled by tickChargeWhine).
+  _chargeAmp.gain.linearRampTo(1, 0.03);
+  _chargeWeapon = weaponId;
+}
+
+/**
+ * Update the whine to reflect current charge progress (0..1). Pitch ramps
+ * up by an octave and filter opens as charge saturates — sonic feedback
+ * the player can lean on without looking at the reticle ring.
+ */
+export function tickChargeWhine(chargeProgress: number): void {
+  if (!_chargeOsc || !_chargeFilt || !_chargeWeapon) return;
+  const profile = chargeProfileFor(_chargeWeapon);
+  const targetFreq = profile.freq * (1 + chargeProgress); // up to +1 octave
+  const targetFilter = profile.filter * (1 + chargeProgress * 2); // open the lid
+  _chargeOsc.frequency.rampTo(targetFreq, 0.04);
+  _chargeFilt.frequency.rampTo(targetFilter, 0.04);
+}
+
+export function stopChargeWhine(): void {
+  if (_chargeAmp) {
+    _chargeAmp.gain.cancelScheduledValues(Tone.now());
+    _chargeAmp.gain.linearRampTo(0, 0.02);
+  }
+  // Defer disposal until after the ramp-down so we don't audibly cut.
+  const osc = _chargeOsc;
+  const filt = _chargeFilt;
+  const amp = _chargeAmp;
+  _chargeOsc = null;
+  _chargeFilt = null;
+  _chargeAmp = null;
+  _chargeWeapon = null;
+  setTimeout(() => {
+    try {
+      osc?.stop();
+      osc?.dispose();
+      filt?.dispose();
+      amp?.dispose();
+    } catch {
+      // Tone may already be torn down in tests — ignore.
+    }
+  }, 40);
+}
+
+/**
+ * Release punch — plays the regular weapon fire SFX but pitched down (heavier)
+ * by an amount proportional to chargeProgress, so saturated releases sound
+ * meatier than half-charges. Stacks on top of playWeaponFire's regular call
+ * for the per-weapon character; this one is the extra "thud."
+ */
+export function playChargeRelease(weaponId: string, chargeProgress: number): void {
   ensureInstruments();
-  _tesla?.triggerAttackRelease("C2", "32n");
+  // chargeProgress: 0..1 → detune semitones in [0, -7] (down a fifth at full).
+  const detuneSemis = -7 * Math.max(0, Math.min(1, chargeProgress));
+  const detuneCents = detuneSemis * 100;
+  switch (weaponId) {
+    case "shotgun":
+    case "sawed-off":
+      if (_sawedOff) {
+        _sawedOff.set({ envelope: { attack: 0.003, decay: 0.4, sustain: 0, release: 0.18 } });
+        _sawedOff.triggerAttackRelease("4n");
+      }
+      break;
+    case "revolver":
+      if (_revolver) {
+        _revolver.detune.value = detuneCents;
+        _revolver.triggerAttackRelease("A1", "8n");
+        _revolver.detune.value = 0;
+      }
+      break;
+    case "smg":
+      if (_smg) {
+        _smg.set({ envelope: { attack: 0.001, decay: 0.12, sustain: 0, release: 0.04 } });
+        _smg.triggerAttackRelease("8n");
+      }
+      break;
+    case "flamethrower":
+      // Napalm whoomph — deep membrane thud, not the regular pink-noise roar.
+      if (_verminDeath) {
+        _verminDeath.triggerAttackRelease("D1", "4n");
+      }
+      break;
+    case "tesla":
+      if (_tesla) {
+        _tesla.detune.value = detuneCents;
+        _tesla.triggerAttackRelease("E3", "16n");
+        _tesla.detune.value = 0;
+      }
+      break;
+    default:
+      break;
+  }
 }
 
 /**
