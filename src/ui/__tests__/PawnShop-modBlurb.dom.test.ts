@@ -1,11 +1,3 @@
-/**
- * modBlurb formatting contract — pins the sign-handling and field
- * coverage that the pawn-shop mod cards display.
- *
- * Lives in __tests__/ alongside the dom suite even though it's a pure
- * function — the function is colocated with the component in
- * PawnShop.tsx, so the test belongs next to the UI it powers.
- */
 import { describe, expect, it } from "vitest";
 import { modBlurb } from "../PawnShop";
 
