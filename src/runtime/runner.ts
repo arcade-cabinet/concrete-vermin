@@ -1,4 +1,5 @@
 import {
+  playChargeRelease,
   playChargeWhine,
   playEmpty,
   playWeaponFire,
@@ -6,6 +7,8 @@ import {
   playVerminDeath,
   playVerminHit,
   playVerminSpawn,
+  stopChargeWhine,
+  tickChargeWhine,
 } from "../audio/sfx";
 import {
   bossDeathSilenceSting,
@@ -205,13 +208,16 @@ export class GameRunner {
     if (this.mag > 0 && this.reloadStartedAt === null && !this.chargePending) {
       this.chargeStartedAt = this.now;
       this.chargePending = true;
-      playChargeWhine();
+      playChargeWhine(this.tunedWeapon.base.id);
     }
   }
 
-  /** Player released after holding — fire the charge effect (or tap fallback). */
   queueChargeRelease(aimX: number, aimY: number): void {
-    if (!this.chargePending || this.chargeStartedAt === null) return;
+    if (!this.chargePending || this.chargeStartedAt === null) {
+      // chargePending cleared by another path; silence the whine and bail.
+      stopChargeWhine();
+      return;
+    }
     const chargeProgress = Math.min(
       1,
       ((this.now - this.chargeStartedAt) * 1000) /
@@ -219,16 +225,26 @@ export class GameRunner {
     );
     this.chargePending = false;
     this.chargeStartedAt = null;
+    stopChargeWhine();
     if (chargeProgress < 0.1) {
-      // Too short — treat as tap
       this.queueShot(aimX, aimY);
       return;
     }
     this.applyChargeEffect(aimX, aimY, chargeProgress);
+    playChargeRelease(this.tunedWeapon.base.id, chargeProgress);
+  }
+
+  // Unconditional stopChargeWhine: chargePending may have been cleared by
+  // pause / weapon-swap; whine still needs silencing.
+  cancelCharge(): void {
+    this.chargePending = false;
+    this.chargeStartedAt = null;
+    stopChargeWhine();
   }
 
   pause(): void {
     this.paused = true;
+    this.cancelCharge();
   }
 
   resume(): void {
@@ -743,10 +759,13 @@ export class GameRunner {
         break;
       }
       case "napalm-pool": {
-        // Spawn a burning puddle. Radius and DPS scale with charge progress.
-        const ttlMs = 1000 + chargeProgress * 3000; // 1–4 s
-        const radius = 24 + chargeProgress * 16; // 24–40 px
-        const dps = 15 + chargeProgress * 25; // 15–40 dps
+        // Burning puddle. ttl/radius/dps scale with charge progress. Tuned
+        // so 700ms-max charge for 4 shells lands a saturated DPS that
+        // out-paces continuous tap-fire on a stationary target across the
+        // pool lifetime — without making half-charges trivially better.
+        const ttlMs = 1500 + chargeProgress * 3000; // 1.5–4.5 s
+        const radius = 28 + chargeProgress * 18; // 28–46 px
+        const dps = 28 + chargeProgress * 42; // 28–70 dps
         this.gw.world.spawn(
           NapalmPool({
             x: aimX,
@@ -864,6 +883,10 @@ export class GameRunner {
               (this.tunedWeapon.chargeProfile?.maxChargeMs ?? 1000),
           )
         : null;
+
+    if (chargeProgress !== null) {
+      tickChargeWhine(chargeProgress);
+    }
 
     useGameStore.getState().setSnapshot({
       vermin,

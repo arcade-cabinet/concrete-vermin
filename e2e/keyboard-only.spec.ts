@@ -3,10 +3,7 @@ import { expect, test } from "@playwright/test";
 test.describe("keyboard-only navigation", () => {
   test.skip(({ browserName }) => browserName !== "chromium", "Chromium-only");
 
-  test("Tab + Enter navigates MainMenu → Briefing → MissionSelect", async (
-    { page },
-    testInfo,
-  ) => {
+  test("Tab + Enter navigates MainMenu → Briefing → MissionSelect", async ({ page }, testInfo) => {
     test.skip(testInfo.project.name !== "desktop", "desktop only");
 
     await page.addInitScript(() => {

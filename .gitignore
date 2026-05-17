@@ -29,3 +29,13 @@ android/capacitor.settings.gradle
 ios/App/Pods/
 ios/App/build/
 .claude/scheduled_tasks.lock
+
+# agent-state cache (per CLAUDE.md — derivable from directive + git history)
+.agent-state/state/
+.agent-state/digest.md
+.agent-state/cursor.md
+.agent-state/batch.json
+.agent-state/.indexed-sha
+.agent-state/.last-stop-sha
+.agent-state/.last-compaction
+

@@ -6,6 +6,8 @@
  */
 import { describe, expect, it } from "vitest";
 import {
+  playChargeRelease,
+  playChargeWhine,
   playEmpty,
   playFlame,
   playReload,
@@ -19,6 +21,8 @@ import {
   playVerminSpawn,
   playWeaponFire,
   playWeaponReload,
+  stopChargeWhine,
+  tickChargeWhine,
 } from "../sfx";
 
 describe("audio/sfx", () => {
@@ -67,5 +71,31 @@ describe("audio/sfx", () => {
     expect(() => playWeaponReload("flamethrower")).not.toThrow();
     expect(() => playWeaponReload("tesla")).not.toThrow();
     expect(() => playWeaponReload("unknown-weapon-id")).not.toThrow();
+  });
+
+  it("charge whine lifecycle: start → tick → stop is callable for every weapon without throwing", () => {
+    const weapons = ["shotgun", "smg", "revolver", "sawed-off", "flamethrower", "tesla", "unknown"];
+    for (const w of weapons) {
+      expect(() => playChargeWhine(w)).not.toThrow();
+      expect(() => tickChargeWhine(0)).not.toThrow();
+      expect(() => tickChargeWhine(0.5)).not.toThrow();
+      expect(() => tickChargeWhine(1)).not.toThrow();
+      expect(() => stopChargeWhine()).not.toThrow();
+    }
+  });
+
+  it("tickChargeWhine and stopChargeWhine are safe when no whine is active", () => {
+    expect(() => tickChargeWhine(0.5)).not.toThrow();
+    expect(() => stopChargeWhine()).not.toThrow();
+    expect(() => stopChargeWhine()).not.toThrow();
+  });
+
+  it("playChargeRelease dispatches per-weapon across chargeProgress range", () => {
+    const weapons = ["shotgun", "smg", "revolver", "sawed-off", "flamethrower", "tesla", "unknown"];
+    for (const w of weapons) {
+      expect(() => playChargeRelease(w, 0)).not.toThrow();
+      expect(() => playChargeRelease(w, 0.5)).not.toThrow();
+      expect(() => playChargeRelease(w, 1)).not.toThrow();
+    }
   });
 });

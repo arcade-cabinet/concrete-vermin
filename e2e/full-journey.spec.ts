@@ -14,14 +14,10 @@ import { expect, test } from "@playwright/test";
 test.describe("full player journey", () => {
   test.skip(({ browserName }) => browserName !== "chromium", "Chromium-only smoke");
 
-  test("MainMenu → MissionSelect → Briefing → Mission → MissionResult", async (
-    { page },
-    testInfo,
-  ) => {
-    test.skip(
-      testInfo.project.name !== "desktop",
-      "full-journey runs on the desktop project only",
-    );
+  test("MainMenu → MissionSelect → Briefing → Mission → MissionResult", async ({
+    page,
+  }, testInfo) => {
+    test.skip(testInfo.project.name !== "desktop", "full-journey runs on the desktop project only");
 
     // Suppress opening interstitial before first navigation.
     await page.addInitScript(() => {

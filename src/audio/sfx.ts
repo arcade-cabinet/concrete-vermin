@@ -244,10 +244,197 @@ export function playVerminDeath(archetypeId?: string): void {
   _verminDeath?.triggerAttackRelease(note, "8n");
 }
 
-// tesla synth at C2: capacitor charge feel, distinct from weapon-fire pitch, short enough to not clash with release SFX.
-export function playChargeWhine(): void {
+// Per-weapon timbre: ear-learnable charge identity without looking at the ring.
+let _chargeOsc: Tone.Oscillator | null = null;
+let _chargeFilt: Tone.Filter | null = null;
+let _chargeAmp: Tone.Gain | null = null;
+let _chargeWeapon: string | null = null;
+
+type ChargeProfile = {
+  freq: number;
+  type: "sawtooth" | "square" | "triangle" | "sine";
+  filter: number;
+  vol: number;
+};
+
+const CHARGE_PROFILES: Record<string, ChargeProfile> = {
+  shotgun: { freq: 90, type: "sawtooth", filter: 600, vol: -22 },
+  "sawed-off": { freq: 70, type: "sawtooth", filter: 500, vol: -20 },
+  revolver: { freq: 140, type: "square", filter: 900, vol: -24 },
+  smg: { freq: 200, type: "square", filter: 1400, vol: -26 },
+  flamethrower: { freq: 60, type: "triangle", filter: 800, vol: -22 },
+  tesla: { freq: 240, type: "sawtooth", filter: 1800, vol: -22 },
+};
+
+const DEFAULT_CHARGE_PROFILE: ChargeProfile = {
+  freq: 120,
+  type: "sawtooth",
+  filter: 900,
+  vol: -24,
+};
+
+function chargeProfileFor(weaponId: string): ChargeProfile {
+  return CHARGE_PROFILES[weaponId] ?? DEFAULT_CHARGE_PROFILE;
+}
+
+export function playChargeWhine(weaponId: string): void {
+  const buses = getBuses();
+  if (!buses) return;
+  stopChargeWhine();
+  const profile = chargeProfileFor(weaponId);
+  _chargeFilt = new Tone.Filter(profile.filter, "lowpass");
+  _chargeAmp = new Tone.Gain(0).connect(buses.sfx);
+  _chargeFilt.connect(_chargeAmp);
+  _chargeOsc = new Tone.Oscillator({
+    type: profile.type,
+    frequency: profile.freq,
+    volume: profile.vol,
+  }).connect(_chargeFilt);
+  _chargeOsc.start();
+  // Ramp gain in over 30 ms so the start isn't a click; ramp pitch up over
+  // the expected charge window (handled by tickChargeWhine).
+  _chargeAmp.gain.linearRampTo(1, 0.03);
+  _chargeWeapon = weaponId;
+}
+
+/**
+ * Update the whine to reflect current charge progress (0..1). Pitch ramps
+ * up by an octave and filter opens as charge saturates — sonic feedback
+ * the player can lean on without looking at the reticle ring.
+ */
+export function tickChargeWhine(chargeProgress: number): void {
+  if (!_chargeOsc || !_chargeFilt || !_chargeWeapon) return;
+  const profile = chargeProfileFor(_chargeWeapon);
+  const targetFreq = profile.freq * (1 + chargeProgress); // up to +1 octave
+  const targetFilter = profile.filter * (1 + chargeProgress * 2); // open the lid
+  _chargeOsc.frequency.rampTo(targetFreq, 0.04);
+  _chargeFilt.frequency.rampTo(targetFilter, 0.04);
+}
+
+export function stopChargeWhine(): void {
+  if (!_chargeOsc && !_chargeAmp && !_chargeFilt) return;
+  if (_chargeAmp) {
+    _chargeAmp.gain.cancelScheduledValues(Tone.now());
+    _chargeAmp.gain.linearRampTo(0, 0.02);
+  }
+  // Capture the OLD graph locally before detaching the module refs.
+  // The locals are the only handles to these AudioNodes once the refs
+  // are nulled, so disposal must run unconditionally — a new
+  // playChargeWhine in between is safe because it builds a fresh graph
+  // on its own variables, not these locals.
+  const osc = _chargeOsc;
+  const filt = _chargeFilt;
+  const amp = _chargeAmp;
+  _chargeOsc = null;
+  _chargeFilt = null;
+  _chargeAmp = null;
+  _chargeWeapon = null;
+  setTimeout(() => {
+    try {
+      osc?.stop();
+      osc?.dispose();
+      filt?.dispose();
+      amp?.dispose();
+    } catch {
+      // Tone may already be torn down in tests — ignore.
+    }
+  }, 40);
+}
+
+/**
+ * Release punch — plays the regular weapon fire SFX but pitched down (heavier)
+ * by an amount proportional to chargeProgress, so saturated releases sound
+ * meatier than half-charges. Stacks on top of playWeaponFire's regular call
+ * for the per-weapon character; this one is the extra "thud."
+ */
+// Per-shot allocation: shared synths are monophonic — sharing one across
+// effect cues + frequent fire would chop transients.
+function fireOneShotMembrane(note: Tone.Unit.Frequency, duration: string, volumeDb: number): void {
+  const buses = getBuses();
+  if (!buses) return;
+  const synth = new Tone.MembraneSynth({
+    pitchDecay: 0.15,
+    octaves: 6,
+    envelope: { attack: 0.005, decay: 0.5, sustain: 0, release: 0.3 },
+    volume: volumeDb,
+  }).connect(buses.sfx);
+  synth.triggerAttackRelease(note, duration);
+  setTimeout(() => {
+    try {
+      synth.dispose();
+    } catch {
+      // Tone may already be torn down in tests.
+    }
+  }, 900);
+}
+
+function fireOneShotNoise(
+  noise: Tone.NoiseType,
+  envelope: { attack: number; decay: number; sustain: number; release: number },
+  volumeDb: number,
+  duration: string,
+): void {
+  const buses = getBuses();
+  if (!buses) return;
+  const synth = new Tone.NoiseSynth({
+    noise: { type: noise },
+    envelope,
+    volume: volumeDb,
+  }).connect(buses.sfx);
+  synth.triggerAttackRelease(duration);
+  // Tail = decay + release + 100ms safety. Dispose after to free the AudioNode.
+  const tailS = envelope.decay + envelope.release + 0.1;
+  setTimeout(() => {
+    try {
+      synth.dispose();
+    } catch {
+      // Tone may already be torn down in tests — ignore.
+    }
+  }, tailS * 1000);
+}
+
+export function playChargeRelease(weaponId: string, chargeProgress: number): void {
   ensureInstruments();
-  _tesla?.triggerAttackRelease("C2", "32n");
+  // 0..1 → down up to 7 semitones at saturation. Transpose at trigger
+  // time because triggerAttackRelease is async and a synchronous detune
+  // reset would fire before the synth used it.
+  const semis = -7 * chargeProgress;
+  switch (weaponId) {
+    case "shotgun":
+    case "sawed-off":
+      fireOneShotNoise(
+        "brown",
+        { attack: 0.003, decay: 0.4, sustain: 0, release: 0.18 },
+        -6,
+        "4n",
+      );
+      break;
+    case "revolver":
+      // Per-shot voice: _revolver is monophonic and shared with playRevolver,
+      // so retriggering it here would steal the regular shot in mid-charge.
+      fireOneShotMembrane(Tone.Frequency("A1").transpose(semis).toFrequency() as number, "8n", -4);
+      break;
+    case "smg":
+      fireOneShotNoise(
+        "white",
+        { attack: 0.001, decay: 0.12, sustain: 0, release: 0.04 },
+        -10,
+        "8n",
+      );
+      break;
+    case "flamethrower":
+      // Dedicated whoomph synth: _verminDeath is shared with enemy-death cues
+      // that fire constantly when napalm pools kill, which would chop the
+      // release sound. Per-shot allocation keeps the layers polyphonic.
+      fireOneShotMembrane("D1", "4n", -6);
+      break;
+    case "tesla":
+      // Per-shot voice — _tesla is shared with playTesla.
+      fireOneShotMembrane(Tone.Frequency("E3").transpose(semis).toFrequency() as number, "16n", -8);
+      break;
+    default:
+      break;
+  }
 }
 
 /**

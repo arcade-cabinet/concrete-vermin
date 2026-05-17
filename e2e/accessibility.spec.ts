@@ -20,22 +20,19 @@ type AxeResults = {
   violations: { id: string; impact: string | null; description: string }[];
 };
 
-async function checkA11y(
-  page: import("@playwright/test").Page,
-  label: string,
-): Promise<void> {
+async function checkA11y(page: import("@playwright/test").Page, label: string): Promise<void> {
   const results: AxeResults = await page.evaluate((src) => {
     // new Function is the only way to execute the injected axe-core bundle.
-    return new Function(`${src}\n; return axe.run(document, {runOnly: ['wcag2a','wcag2aa','best-practice']});`)() as Promise<AxeResults>;
+    return new Function(
+      `${src}\n; return axe.run(document, {runOnly: ['wcag2a','wcag2aa','best-practice']});`,
+    )() as Promise<AxeResults>;
   }, axeSource);
 
   const blocking = results.violations.filter(
     (v) => v.impact === "critical" || v.impact === "serious",
   );
   if (blocking.length > 0) {
-    const summary = blocking
-      .map((v) => `  [${v.impact}] ${v.id}: ${v.description}`)
-      .join("\n");
+    const summary = blocking.map((v) => `  [${v.impact}] ${v.id}: ${v.description}`).join("\n");
     throw new Error(`a11y violations on ${label}:\n${summary}`);
   }
 }

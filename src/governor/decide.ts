@@ -62,6 +62,33 @@ export interface GovernorTickInput {
 // zone.maxX/2=240, zone.maxY-24=246 — center of player hitbox at ground level.
 const DEFAULT_PLAYER_ORIGIN = { x: 240, y: 246 };
 
+// Above these caps, charge is strictly worse than sustained tap; tuned per
+// docs/plans/governor-and-charge-shot.md §2.7 — never weaken tap to compensate.
+const NAPALM_TARGET_SPEED_MAX = 30;
+const ARC_REPEATER_TARGET_HEALTH_MAX = 150;
+
+function shouldCharge(
+  weapon: WeaponArchetype,
+  target: { vx: number; vy: number; maxHealth: number; archetypeId: string },
+  snap: ReturnType<typeof useGameStore.getState>,
+): boolean {
+  const profile = weapon.chargeProfile;
+  if (!profile) return false;
+  if (snap.player.ammoCurrent < profile.shellsConsumed) return false;
+
+  const isBoss = target.archetypeId.startsWith("boss-");
+  const targetSpeed = Math.hypot(target.vx, target.vy);
+  switch (profile.effect) {
+    case "napalm-pool":
+      if (isBoss) return false;
+      return targetSpeed <= NAPALM_TARGET_SPEED_MAX;
+    case "arc-repeater":
+      return target.maxHealth <= ARC_REPEATER_TARGET_HEALTH_MAX;
+    default:
+      return true;
+  }
+}
+
 export function governorTick(input: GovernorTickInput): void {
   const { runner, weapon, profile, playerLineY, shooterPos, state } = input;
   const snap = useGameStore.getState();
@@ -69,6 +96,10 @@ export function governorTick(input: GovernorTickInput): void {
 
   if (snap.reloadProgress !== null) {
     state.reloadQueued = false;
+    if (state.chargeStartedAtMs !== null) {
+      runner.cancelCharge();
+      state.chargeStartedAtMs = null;
+    }
     return;
   }
 
@@ -76,6 +107,10 @@ export function governorTick(input: GovernorTickInput): void {
     if (!state.reloadQueued) {
       runner.queueReload();
       state.reloadQueued = true;
+    }
+    if (state.chargeStartedAtMs !== null) {
+      runner.cancelCharge();
+      state.chargeStartedAtMs = null;
     }
     return;
   }
@@ -91,7 +126,13 @@ export function governorTick(input: GovernorTickInput): void {
   );
 
   const target = selectHighestThreat(reachable, weapon.damage, { playerLineY });
-  if (!target) return;
+  if (!target) {
+    if (state.chargeStartedAtMs !== null) {
+      runner.cancelCharge();
+      state.chargeStartedAtMs = null;
+    }
+    return;
+  }
 
   const archetype = ARCHETYPES[target.archetypeId as ArchetypeId];
   const headOffset = archetype?.hitbox.headOffset;
@@ -111,7 +152,7 @@ export function governorTick(input: GovernorTickInput): void {
   const aim = applyOffset(leadOnly, headOffset);
 
   if (leadOvershoot <= tolerance) {
-    if (profile.useChargeShot && weapon.chargeProfile) {
+    if (profile.useChargeShot && weapon.chargeProfile && shouldCharge(weapon, target, snap)) {
       const chargeProgress = snap.chargeProgress;
       if (chargeProgress === null && state.chargeStartedAtMs === null) {
         runner.queueChargeStart();
@@ -127,6 +168,17 @@ export function governorTick(input: GovernorTickInput): void {
       return;
     }
 
+    // No charge — but if we were charging and the target moved out of
+    // the charge-eligible window, release the held charge so the whine
+    // doesn't loop forever and the shells aren't burned by the
+    // shouldCharge guard's gate flip.
+    if (state.chargeStartedAtMs !== null) {
+      runner.queueChargeRelease(aim.x, aim.y);
+      state.chargeStartedAtMs = null;
+      state.lastShotAtMs = nowMs;
+      return;
+    }
+
     runner.queueShot(aim.x, aim.y);
     state.lastShotAtMs = nowMs;
     return;
@@ -134,8 +186,14 @@ export function governorTick(input: GovernorTickInput): void {
 
   // Velocity lead overshoots: take the certain body-center shot rather than skipping.
   const fallback = applyOffset({ x: target.x, y: target.y }, headOffset);
-  // Don't interrupt a charge mid-build — wait for release condition on next in-tolerance tick.
-  if (profile.useChargeShot && weapon.chargeProfile && state.chargeStartedAtMs !== null) {
+  // If a charge was started but the target's now out of tolerance, release
+  // at the fallback aim — otherwise the chargePending flag stays true
+  // forever if the target dies / gets culled / leaves range mid-charge,
+  // and queueChargeStart is blocked for the rest of the mission.
+  if (state.chargeStartedAtMs !== null) {
+    runner.queueChargeRelease(fallback.x, fallback.y);
+    state.chargeStartedAtMs = null;
+    state.lastShotAtMs = nowMs;
     return;
   }
   runner.queueShot(fallback.x, fallback.y);

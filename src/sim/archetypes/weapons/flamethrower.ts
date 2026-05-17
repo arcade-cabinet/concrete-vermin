@@ -24,6 +24,6 @@ export const flamethrower: Readonly<WeaponArchetype> = Object.freeze(
     },
     reticleRadius: 20,
     reticleShape: "ring",
-    chargeProfile: { maxChargeMs: 1500, shellsConsumed: 8, effect: "napalm-pool" },
+    chargeProfile: { maxChargeMs: 700, shellsConsumed: 4, effect: "napalm-pool" },
   }),
 );
