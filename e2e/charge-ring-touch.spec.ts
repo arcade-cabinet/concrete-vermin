@@ -108,6 +108,23 @@ test.describe("charge-ring visual via touch", () => {
       ({ x, y }) => {
         const el = document.querySelector<HTMLElement>('[data-testid="game-stage"]');
         if (!el) return;
+        // Fire touchend BEFORE pointerup — libraries (and our own input
+        // adapters) listening for either should both see the release.
+        const touch = new Touch({
+          identifier: 1,
+          target: el,
+          clientX: x,
+          clientY: y,
+        });
+        el.dispatchEvent(
+          new TouchEvent("touchend", {
+            touches: [],
+            targetTouches: [],
+            changedTouches: [touch],
+            bubbles: true,
+            cancelable: true,
+          }),
+        );
         el.dispatchEvent(
           new PointerEvent("pointerup", {
             pointerType: "touch",
