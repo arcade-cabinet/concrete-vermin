@@ -81,12 +81,7 @@ export interface EventBarkSnapshot {
   at: number;
 }
 
-/**
- * Audio events the runner appends to the snapshot each tick. The audio
- * engine subscribes and drains, decoupling sim/runtime from Tone.js
- * side effects. Append-only per-tick; engine is responsible for not
- * re-firing the same event across snapshot publishes (uses idx).
- */
+// Decouples sim/runtime from Tone.js: runner publishes events, engine drains.
 export type AudioEvent =
   | { kind: "mission-start" }
   | { kind: "mission-won-sgrade" }
@@ -223,11 +218,8 @@ export interface GameState {
   killCount: number;
   /** Append-only ring of recent damage numbers for the floating HUD. */
   damageEvents: ReadonlyArray<DamageEvent>;
-  /**
-   * Audio events emitted by the runner this tick. The audio engine
-   * subscribes and drains; the seq counter strictly increases so
-   * drained events are never re-fired across snapshot publishes.
-   */
+  // seq is process-wide monotonic so the engine watermark survives mission
+  // restarts; re-running a mission can't replay or drop events.
   audioEvents: ReadonlyArray<{ seq: number; event: AudioEvent }>;
   /** id increments on every call so AT re-narrates repeated text. */
   srAnnouncement: { text: string; urgency: "polite" | "assertive"; id: number };

@@ -1,9 +1,3 @@
-// Audio engine: subscribes to useGameStore.audioEvents and dispatches to
-// the Tone.js sfx/music modules. Runner emits data only; engine owns the
-// side-effects. Enables replay (drive snapshots without invoking the runner),
-// mute (engine ignores all events when settings.muted), and isolated tests
-// (subscribe a mock engine instead of patching the audio module).
-
 import { useGameStore, type AudioEvent } from "../runtime/store";
 import {
   playChargeRelease,
@@ -91,14 +85,7 @@ export function dispatchAudioEvent(event: AudioEvent): void {
   }
 }
 
-/**
- * Install the audio engine. Returns an uninstall function that detaches
- * the subscription. Engine tracks the highest seq drained so re-renders
- * never re-fire an event the runner emitted on a prior tick.
- *
- * Optional `dispatcher` injection makes the engine testable without a
- * Tone AudioContext — tests pass a spy and assert call shape.
- */
+// dispatcher param exists so tests can pass a spy without booting Tone.
 export function installAudioEngine(
   dispatcher: (e: AudioEvent) => void = dispatchAudioEvent,
 ): () => void {
@@ -106,11 +93,10 @@ export function installAudioEngine(
   const unsubscribe = useGameStore.subscribe((state, prev) => {
     if (state.audioEvents === prev.audioEvents) return;
     if (state.settings.muted) {
-      // Drain seq pointer even while muted so unmuting doesn't replay
-      // the entire backlog.
-      for (const ev of state.audioEvents) {
-        if (ev.seq > lastSeq) lastSeq = ev.seq;
-      }
+      // Drain pointer so unmuting doesn't replay the backlog. seq is
+      // monotonic so the last entry is the new high-water mark.
+      const last = state.audioEvents[state.audioEvents.length - 1];
+      if (last && last.seq > lastSeq) lastSeq = last.seq;
       return;
     }
     for (const { seq, event } of state.audioEvents) {

@@ -84,6 +84,27 @@ describe("audio engine", () => {
     expect(dispatchSpy).toHaveBeenCalledTimes(1);
   });
 
+  it("survives a mission restart driven by process-wide monotonic seq", async () => {
+    // Regression: when audioSeq was per-runner it reset to 0 on each new
+    // mission and the engine's lastSeq watermark from the previous mission
+    // silently dropped every event. With process-wide monotonic seq the
+    // new mission's events have strictly higher seq values and fire.
+    const uninstall = installAudioEngine(dispatchSpy);
+    try {
+      const { GameRunner } = await import("../../runtime/runner");
+      const { getMission } = await import("../../sim/content/missions");
+      const mission = getMission("streets-01-bodega");
+      new GameRunner(mission, [], 1);
+      const firstCount = dispatchSpy.mock.calls.length;
+      expect(firstCount).toBeGreaterThan(0);
+      // Per-runner seq used to reset and the engine would drop seq <= lastSeq.
+      new GameRunner(mission, [], 2);
+      expect(dispatchSpy.mock.calls.length).toBeGreaterThan(firstCount);
+    } finally {
+      uninstall();
+    }
+  });
+
   it("every AudioEvent kind can round-trip through publish → dispatcher", () => {
     const uninstall = installAudioEngine(dispatchSpy);
     try {

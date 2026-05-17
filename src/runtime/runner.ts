@@ -53,6 +53,11 @@ import type {
 const MUZZLE_FLASH_POOL = 32;
 const DAMAGE_EVENT_POOL = 96;
 
+// Process-wide monotonic audio sequence shared across GameRunner instances.
+// The audio engine's lastSeq survives mission transitions; per-runner seqs
+// would restart at 1 and the engine would drop the new mission's events.
+let nextAudioSeq = 0;
+
 /**
  * GameRunner: holds the Koota world + sim clock and ticks the
  * end-to-end loop. The Pixi ticker calls `step()` once per frame.
@@ -130,16 +135,14 @@ export class GameRunner {
   );
   private static readonly DAMAGE_TTL_S = 0.4;
 
-  // Audio events emitted this tick; the snapshot exposes a slice with
-  // monotonic seq so the audio engine can drain without re-firing.
+  // Audio sequence is process-wide monotonic — the engine's lastSeq
+  // persists across mission boundaries, so a per-runner counter would
+  // start each new mission at 1 and the engine would treat the events
+  // as already-played and drop them.
   private audioEventBuf: { seq: number; event: AudioEvent }[] = [];
-  private audioSeq = 0;
   private emitAudio(event: AudioEvent): void {
-    this.audioSeq++;
-    this.audioEventBuf.push({ seq: this.audioSeq, event });
-    // Cap buffer so a long mission can't grow it unbounded. Audio engine
-    // drains every animation frame, so 64 is comfortably above worst-case
-    // backlog (boss spawn + flood + per-shot fire on a busy tick).
+    nextAudioSeq++;
+    this.audioEventBuf.push({ seq: nextAudioSeq, event });
     if (this.audioEventBuf.length > 64) this.audioEventBuf.shift();
   }
 
