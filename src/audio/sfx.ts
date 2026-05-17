@@ -410,9 +410,9 @@ export function playChargeRelease(weaponId: string, chargeProgress: number): voi
       );
       break;
     case "revolver":
-      if (_revolver) {
-        _revolver.triggerAttackRelease(Tone.Frequency("A1").transpose(semis).toFrequency(), "8n");
-      }
+      // Per-shot voice: _revolver is monophonic and shared with playRevolver,
+      // so retriggering it here would steal the regular shot in mid-charge.
+      fireOneShotMembrane(Tone.Frequency("A1").transpose(semis).toFrequency() as number, "8n", -4);
       break;
     case "smg":
       fireOneShotNoise(
@@ -429,9 +429,8 @@ export function playChargeRelease(weaponId: string, chargeProgress: number): voi
       fireOneShotMembrane("D1", "4n", -6);
       break;
     case "tesla":
-      if (_tesla) {
-        _tesla.triggerAttackRelease(Tone.Frequency("E3").transpose(semis).toFrequency(), "16n");
-      }
+      // Per-shot voice — _tesla is shared with playTesla.
+      fireOneShotMembrane(Tone.Frequency("E3").transpose(semis).toFrequency() as number, "16n", -8);
       break;
     default:
       break;
