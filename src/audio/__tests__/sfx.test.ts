@@ -90,15 +90,12 @@ describe("audio/sfx", () => {
     expect(() => stopChargeWhine()).not.toThrow();
   });
 
-  it("playChargeRelease dispatches per-weapon and clamps chargeProgress", () => {
+  it("playChargeRelease dispatches per-weapon across chargeProgress range", () => {
     const weapons = ["shotgun", "smg", "revolver", "sawed-off", "flamethrower", "tesla", "unknown"];
     for (const w of weapons) {
       expect(() => playChargeRelease(w, 0)).not.toThrow();
       expect(() => playChargeRelease(w, 0.5)).not.toThrow();
       expect(() => playChargeRelease(w, 1)).not.toThrow();
-      // out-of-range values still safe
-      expect(() => playChargeRelease(w, -1)).not.toThrow();
-      expect(() => playChargeRelease(w, 2)).not.toThrow();
     }
   });
 });

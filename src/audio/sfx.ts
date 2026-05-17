@@ -251,29 +251,37 @@ let _chargeOsc: Tone.Oscillator | null = null;
 let _chargeFilt: Tone.Filter | null = null;
 let _chargeAmp: Tone.Gain | null = null;
 let _chargeWeapon: string | null = null;
+// Generation counter — each call to stopChargeWhine bumps it, so deferred
+// disposal closures only run against the graph they captured. Without this,
+// a release→recharge cycle within the 40 ms ramp window would leave two
+// oscillator chains feeding the sfx bus simultaneously.
+let _chargeGen = 0;
 
-function chargeProfileFor(weaponId: string): {
+type ChargeProfile = {
   freq: number;
   type: "sawtooth" | "square" | "triangle" | "sine";
   filter: number;
   vol: number;
-} {
-  switch (weaponId) {
-    case "shotgun":
-      return { freq: 90, type: "sawtooth", filter: 600, vol: -22 };
-    case "sawed-off":
-      return { freq: 70, type: "sawtooth", filter: 500, vol: -20 };
-    case "revolver":
-      return { freq: 140, type: "square", filter: 900, vol: -24 };
-    case "smg":
-      return { freq: 200, type: "square", filter: 1400, vol: -26 };
-    case "flamethrower":
-      return { freq: 60, type: "triangle", filter: 800, vol: -22 };
-    case "tesla":
-      return { freq: 240, type: "sawtooth", filter: 1800, vol: -22 };
-    default:
-      return { freq: 120, type: "sawtooth", filter: 900, vol: -24 };
-  }
+};
+
+const CHARGE_PROFILES: Record<string, ChargeProfile> = {
+  shotgun: { freq: 90, type: "sawtooth", filter: 600, vol: -22 },
+  "sawed-off": { freq: 70, type: "sawtooth", filter: 500, vol: -20 },
+  revolver: { freq: 140, type: "square", filter: 900, vol: -24 },
+  smg: { freq: 200, type: "square", filter: 1400, vol: -26 },
+  flamethrower: { freq: 60, type: "triangle", filter: 800, vol: -22 },
+  tesla: { freq: 240, type: "sawtooth", filter: 1800, vol: -22 },
+};
+
+const DEFAULT_CHARGE_PROFILE: ChargeProfile = {
+  freq: 120,
+  type: "sawtooth",
+  filter: 900,
+  vol: -24,
+};
+
+function chargeProfileFor(weaponId: string): ChargeProfile {
+  return CHARGE_PROFILES[weaponId] ?? DEFAULT_CHARGE_PROFILE;
 }
 
 export function playChargeWhine(weaponId: string): void {
@@ -311,19 +319,25 @@ export function tickChargeWhine(chargeProgress: number): void {
 }
 
 export function stopChargeWhine(): void {
+  if (!_chargeOsc && !_chargeAmp && !_chargeFilt) return;
   if (_chargeAmp) {
     _chargeAmp.gain.cancelScheduledValues(Tone.now());
     _chargeAmp.gain.linearRampTo(0, 0.02);
   }
-  // Defer disposal until after the ramp-down so we don't audibly cut.
   const osc = _chargeOsc;
   const filt = _chargeFilt;
   const amp = _chargeAmp;
+  const myGen = ++_chargeGen;
+  // Detach the current refs immediately so a subsequent playChargeWhine
+  // builds a fresh graph without contention. Disposal of the OLD graph
+  // happens after the gain ramp finishes; the generation guard ensures
+  // we never dispose a graph that a later call already reused.
   _chargeOsc = null;
   _chargeFilt = null;
   _chargeAmp = null;
   _chargeWeapon = null;
   setTimeout(() => {
+    if (myGen !== _chargeGen) return; // a newer cycle is alive — never touched these refs
     try {
       osc?.stop();
       osc?.dispose();
@@ -343,9 +357,10 @@ export function stopChargeWhine(): void {
  */
 export function playChargeRelease(weaponId: string, chargeProgress: number): void {
   ensureInstruments();
-  // chargeProgress: 0..1 → detune semitones in [0, -7] (down a fifth at full).
-  const detuneSemis = -7 * Math.max(0, Math.min(1, chargeProgress));
-  const detuneCents = detuneSemis * 100;
+  // 0..1 → down up to 7 semitones at saturation. Transpose the note we
+  // trigger rather than poking detune.value: triggerAttackRelease is async,
+  // and resetting detune synchronously fires before the synth uses it.
+  const semis = -7 * chargeProgress;
   switch (weaponId) {
     case "shotgun":
     case "sawed-off":
@@ -356,9 +371,7 @@ export function playChargeRelease(weaponId: string, chargeProgress: number): voi
       break;
     case "revolver":
       if (_revolver) {
-        _revolver.detune.value = detuneCents;
-        _revolver.triggerAttackRelease("A1", "8n");
-        _revolver.detune.value = 0;
+        _revolver.triggerAttackRelease(Tone.Frequency("A1").transpose(semis).toFrequency(), "8n");
       }
       break;
     case "smg":
@@ -375,9 +388,7 @@ export function playChargeRelease(weaponId: string, chargeProgress: number): voi
       break;
     case "tesla":
       if (_tesla) {
-        _tesla.detune.value = detuneCents;
-        _tesla.triggerAttackRelease("E3", "16n");
-        _tesla.detune.value = 0;
+        _tesla.triggerAttackRelease(Tone.Frequency("E3").transpose(semis).toFrequency(), "16n");
       }
       break;
     default:
