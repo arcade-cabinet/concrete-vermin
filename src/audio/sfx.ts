@@ -249,9 +249,6 @@ let _chargeOsc: Tone.Oscillator | null = null;
 let _chargeFilt: Tone.Filter | null = null;
 let _chargeAmp: Tone.Gain | null = null;
 let _chargeWeapon: string | null = null;
-// Bumped by stopChargeWhine; deferred-disposal closures gate on this so a
-// release→recharge inside the 40ms ramp window doesn't double-connect the bus.
-let _chargeGen = 0;
 
 type ChargeProfile = {
   freq: number;
@@ -320,20 +317,19 @@ export function stopChargeWhine(): void {
     _chargeAmp.gain.cancelScheduledValues(Tone.now());
     _chargeAmp.gain.linearRampTo(0, 0.02);
   }
+  // Capture the OLD graph locally before detaching the module refs.
+  // The locals are the only handles to these AudioNodes once the refs
+  // are nulled, so disposal must run unconditionally — a new
+  // playChargeWhine in between is safe because it builds a fresh graph
+  // on its own variables, not these locals.
   const osc = _chargeOsc;
   const filt = _chargeFilt;
   const amp = _chargeAmp;
-  const myGen = ++_chargeGen;
-  // Detach the current refs immediately so a subsequent playChargeWhine
-  // builds a fresh graph without contention. Disposal of the OLD graph
-  // happens after the gain ramp finishes; the generation guard ensures
-  // we never dispose a graph that a later call already reused.
   _chargeOsc = null;
   _chargeFilt = null;
   _chargeAmp = null;
   _chargeWeapon = null;
   setTimeout(() => {
-    if (myGen !== _chargeGen) return; // a newer cycle is alive — never touched these refs
     try {
       osc?.stop();
       osc?.dispose();
