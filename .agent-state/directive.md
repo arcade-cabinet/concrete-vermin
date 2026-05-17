@@ -1,9 +1,16 @@
 # Continuous Work Directive — Concrete Vermin
 
-**Status:** RELEASED — halt condition met 2026-04-28 when PR #81 (which folded #77/#79/#80) merged after #78. Loop is stopped pending user direction on the Yuka governor + charge-shot exploration listed below.
+**Status:** ACTIVE (2026-05-17) — user said "Both, governor first" after the 2026-04-28 halt. Phase 1 (Yuka governor) shipped via PR #83. Phase 2 (charge-shot finish) in flight as PR #102.
 **Owner:** Claude (this agent)
 
-## EXPLICIT HALT (user-issued, 2026-04-28) — TRIGGERED
+## Active queue (post-halt direction)
+
+- [x] Phase 1 — Yuka governor + playthrough harness (PR #83 merged)
+- [x] Phase 2 — charge-shot finish: audio, governor STRESS, visual e2e, lock (PR #102 in flight)
+- [ ] Phase 3 — once #102 lands, drain dependabot PRs (7 open) so we're back on a clean base
+- [ ] Phase 4 — onward per the next user direction (charge-shot mods? gamepad/touch charge UX? balance sweeps?)
+
+## EXPLICIT HALT (user-issued, 2026-04-28) — SUPERSEDED 2026-05-17
 
 The four named PRs all landed on main:
 - **#77** — secret missions S-grade unlock — folded into #81 (merged)
