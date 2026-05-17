@@ -1,26 +1,3 @@
-import {
-  playChargeRelease,
-  playChargeWhine,
-  playEmpty,
-  playWeaponFire,
-  playWeaponReload,
-  playVerminDeath,
-  playVerminHit,
-  playVerminSpawn,
-  stopChargeWhine,
-  tickChargeWhine,
-} from "../audio/sfx";
-import {
-  bossDeathSilenceSting,
-  playLossSting,
-  playMissionStartSting,
-  playSGradeFanfare,
-  playWinSting,
-  setActAmbience,
-  startBossLeitmotif,
-  stopBossLeitmotif,
-} from "../audio/music";
-import { duckBus } from "../audio/setup";
 import { bossDisplayName, srBossSpawn } from "./sr-only";
 import { bossDamageHaptic, hitHaptic, killHaptic } from "../platform/haptics";
 import { fireWeapon } from "../ecs/actions";
@@ -58,6 +35,7 @@ import { createObjectPool, type ObjectPool } from "./objectPool";
 import { pushShake } from "./screenShake";
 import { useGameStore } from "./store";
 import type {
+  AudioEvent,
   DamageEvent,
   EventBarkSnapshot,
   NapalmPoolSnapshot,
@@ -152,6 +130,19 @@ export class GameRunner {
   );
   private static readonly DAMAGE_TTL_S = 0.4;
 
+  // Audio events emitted this tick; the snapshot exposes a slice with
+  // monotonic seq so the audio engine can drain without re-firing.
+  private audioEventBuf: { seq: number; event: AudioEvent }[] = [];
+  private audioSeq = 0;
+  private emitAudio(event: AudioEvent): void {
+    this.audioSeq++;
+    this.audioEventBuf.push({ seq: this.audioSeq, event });
+    // Cap buffer so a long mission can't grow it unbounded. Audio engine
+    // drains every animation frame, so 64 is comfortably above worst-case
+    // backlog (boss spawn + flood + per-shot fire on a busy tick).
+    if (this.audioEventBuf.length > 64) this.audioEventBuf.shift();
+  }
+
   constructor(mission: Readonly<Mission>, modIds: ReadonlyArray<string> = [], seed?: number) {
     this.mission = mission;
     this.gw = createGameWorld(seed ?? mission.seed ?? Date.now() & 0x7fffffff);
@@ -166,8 +157,8 @@ export class GameRunner {
     this.mag = this.tunedWeapon.magSize;
     this.livesRemaining = mission.livesAllowance;
     this.playerHp = this.maxHpPerLife;
-    setActAmbience(mission.act);
-    playMissionStartSting();
+    this.emitAudio({ kind: "act-ambience", act: mission.act });
+    this.emitAudio({ kind: "mission-start" });
     this.startEncounter(0);
     // Publish an initial snapshot so the renderer/UI sees the correct
     // reticleRadius/Shape (and ammo / lives) on frame 0, before the first
@@ -211,14 +202,14 @@ export class GameRunner {
     if (this.mag > 0 && this.reloadStartedAt === null && !this.chargePending) {
       this.chargeStartedAt = this.now;
       this.chargePending = true;
-      playChargeWhine(this.tunedWeapon.base.id);
+      this.emitAudio({ kind: "charge-start", weaponId: this.tunedWeapon.base.id });
     }
   }
 
   queueChargeRelease(aimX: number, aimY: number): void {
     if (!this.chargePending || this.chargeStartedAt === null) {
       // chargePending cleared by another path; silence the whine and bail.
-      stopChargeWhine();
+      this.emitAudio({ kind: "charge-stop" });
       return;
     }
     const chargeProgress = Math.min(
@@ -228,21 +219,25 @@ export class GameRunner {
     );
     this.chargePending = false;
     this.chargeStartedAt = null;
-    stopChargeWhine();
+    this.emitAudio({ kind: "charge-stop" });
     if (chargeProgress < 0.1) {
       this.queueShot(aimX, aimY);
       return;
     }
     this.applyChargeEffect(aimX, aimY, chargeProgress);
-    playChargeRelease(this.tunedWeapon.base.id, chargeProgress);
+    this.emitAudio({
+      kind: "charge-release",
+      weaponId: this.tunedWeapon.base.id,
+      progress: chargeProgress,
+    });
   }
 
-  // Unconditional stopChargeWhine: chargePending may have been cleared by
-  // pause / weapon-swap; whine still needs silencing.
+  // Unconditional charge-stop emit: chargePending may have been cleared
+  // by pause / weapon-swap; engine still needs to silence the whine.
   cancelCharge(): void {
     this.chargePending = false;
     this.chargeStartedAt = null;
-    stopChargeWhine();
+    this.emitAudio({ kind: "charge-stop" });
   }
 
   pause(): void {
@@ -291,7 +286,7 @@ export class GameRunner {
       this.mag < this.tunedWeapon.magSize
     ) {
       this.reloadStartedAt = this.now;
-      playWeaponReload(this.tunedWeapon.base.id);
+      this.emitAudio({ kind: "weapon-reload", weaponId: this.tunedWeapon.base.id });
     }
     this.pendingReload = false;
 
@@ -304,13 +299,15 @@ export class GameRunner {
       this.pendingSpawns,
     );
     const spawnedAfter = this.pendingSpawns.filter((p) => p.spawned).length;
-    for (let i = 0; i < spawnedAfter - spawnedBefore; i++) playVerminSpawn();
+    for (let i = 0; i < spawnedAfter - spawnedBefore; i++) {
+      this.emitAudio({ kind: "vermin-spawn" });
+    }
     // Boss spawn detection: scan freshly-spawned vermin for a boss
     // archetype id, fire the leitmotif once.
     if (!this.bossLeitmotifActive && spawnedAfter > spawnedBefore) {
       const bossArche = this.bossArchetypeAlive();
       if (bossArche) {
-        startBossLeitmotif();
+        this.emitAudio({ kind: "boss-leitmotif-start" });
         this.bossLeitmotifActive = true;
         useGameStore
           .getState()
@@ -353,15 +350,20 @@ export class GameRunner {
         flash.ttlS = 0.08;
         this.mag--;
         shotFired = true;
-        playWeaponFire(tuned.base.id);
-        // Per-shot music duck so weapon fire punches through the bed.
-        duckBus("music", 4, 0.18, 0.25);
+        this.emitAudio({ kind: "weapon-fire", weaponId: tuned.base.id });
+        this.emitAudio({
+          kind: "music-duck",
+          bus: "music",
+          db: 4,
+          attackS: 0.18,
+          holdS: 0.25,
+        });
         if (this.mag === 0 && this.reloadStartedAt === null) {
           this.reloadStartedAt = this.now;
-          playWeaponReload(this.tunedWeapon.base.id);
+          this.emitAudio({ kind: "weapon-reload", weaponId: this.tunedWeapon.base.id });
         }
       } else {
-        playEmpty();
+        this.emitAudio({ kind: "weapon-empty" });
       }
       this.pendingShot = null;
     }
@@ -444,21 +446,21 @@ export class GameRunner {
       dmg.crit = e.isCrit;
       dmg.headshot = e.isHeadshot;
       if (e.kind === "kill") {
-        playVerminDeath(e.archetypeId);
+        this.emitAudio({ kind: "vermin-death", archetypeId: e.archetypeId });
         if (e.archetypeId.startsWith("boss-")) {
           void bossDamageHaptic();
           pushShake("bossDeath");
           if (this.bossLeitmotifActive) {
-            stopBossLeitmotif();
+            this.emitAudio({ kind: "boss-leitmotif-stop" });
             this.bossLeitmotifActive = false;
-            bossDeathSilenceSting();
+            this.emitAudio({ kind: "boss-death-sting" });
           }
         } else {
           void killHaptic();
           pushShake("kill");
         }
       } else {
-        playVerminHit(e.archetypeId);
+        this.emitAudio({ kind: "vermin-hit", archetypeId: e.archetypeId });
         if (e.archetypeId.startsWith("boss-")) {
           pushShake("bossHit");
           void bossDamageHaptic();
@@ -522,12 +524,12 @@ export class GameRunner {
           this.livesRemaining === this.mission.livesAllowance &&
           this.playerHp === this.maxHpPerLife
         ) {
-          playSGradeFanfare();
+          this.emitAudio({ kind: "mission-won-sgrade" });
         } else {
-          playWinSting();
+          this.emitAudio({ kind: "mission-won" });
         }
         if (this.bossLeitmotifActive) {
-          stopBossLeitmotif();
+          this.emitAudio({ kind: "boss-leitmotif-stop" });
           this.bossLeitmotifActive = false;
         }
       }
@@ -535,9 +537,9 @@ export class GameRunner {
     if (this.livesRemaining <= 0 && !this.ended) {
       this.ended = true;
       useGameStore.getState().endMission(false);
-      playLossSting();
+      this.emitAudio({ kind: "mission-lost" });
       if (this.bossLeitmotifActive) {
-        stopBossLeitmotif();
+        this.emitAudio({ kind: "boss-leitmotif-stop" });
         this.bossLeitmotifActive = false;
       }
     }
@@ -788,13 +790,12 @@ export class GameRunner {
       }
     }
 
-    playWeaponFire(tuned.base.id);
-    duckBus("music", 4, 0.18, 0.25);
+    this.emitAudio({ kind: "weapon-fire", weaponId: tuned.base.id });
+    this.emitAudio({ kind: "music-duck", bus: "music", db: 4, attackS: 0.18, holdS: 0.25 });
 
-    // Auto-reload if mag is now empty.
     if (this.mag === 0 && this.reloadStartedAt === null) {
       this.reloadStartedAt = this.now;
-      playWeaponReload(tuned.base.id);
+      this.emitAudio({ kind: "weapon-reload", weaponId: tuned.base.id });
     }
   }
 
@@ -893,8 +894,11 @@ export class GameRunner {
         : null;
 
     if (chargeProgress !== null) {
-      tickChargeWhine(chargeProgress);
+      this.emitAudio({ kind: "charge-progress", progress: chargeProgress });
     }
+
+    const audioEventsOut = this.audioEventBuf.slice();
+    this.audioEventBuf.length = 0;
 
     useGameStore.getState().setSnapshot({
       vermin,
@@ -918,6 +922,7 @@ export class GameRunner {
       reticleRadius: this.tunedWeapon.reticleRadius,
       reticleShape: this.tunedWeapon.reticleShape,
       chargeProgress,
+      audioEvents: audioEventsOut,
     });
   }
 }

@@ -22,6 +22,7 @@ import { srMissionComplete, srMissionFailed, srMissionStart } from "../runtime/s
 import { usePlayerProgress } from "./PlayerProgress";
 import { autoPersistPlayerProgress, loadPlayerProgress } from "./PlayerProgressPersistence";
 import { installAchievementsTracker } from "../runtime/achievementsTracker";
+import { installAudioEngine } from "../audio/engine";
 
 // Lazy-loaded — these screens / overlays are reached after Press Start
 // or only on specific player choices, so deferring their JS shaves the
@@ -56,9 +57,11 @@ export function App() {
     loadPlayerProgress();
     const teardownPersist = autoPersistPlayerProgress();
     const teardownAchievements = installAchievementsTracker();
+    const teardownAudioEngine = installAudioEngine();
     return () => {
       teardownPersist();
       teardownAchievements();
+      teardownAudioEngine();
     };
   }, []);
 
