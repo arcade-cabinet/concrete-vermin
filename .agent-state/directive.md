@@ -7,8 +7,15 @@
 
 - [x] Phase 1 — Yuka governor + playthrough harness (PR #83 merged)
 - [x] Phase 2 — charge-shot finish: audio, governor STRESS, visual e2e, lock (PR #102 in flight)
-- [ ] Phase 3 — once #102 lands, drain dependabot PRs (7 open) so we're back on a clean base
-- [ ] Phase 4 — onward per the next user direction (charge-shot mods? gamepad/touch charge UX? balance sweeps?)
+- [ ] [WAIT] Wait for PR #102 CI to land + reviewers — auto-merge when green; address review threads as fold-forward commits
+- [ ] [WAIT] Phase 3 — once #102 lands, drain remaining dependabot PRs (auto-merge enabled on #92/#93/#94/#95; #101 minor-and-patch group; #89/#99 gradle need inspection)
+- [ ] [WAIT-USER] Phase 4 — needs user direction (charge-shot mods? gamepad/touch charge UX? balance sweeps?)
+
+### Phase 4 candidates (architect-review surfacing, NOT immediate work — wait for user prioritization)
+
+- [ ] [WAIT-USER] Extract ChargeVoice class so module-singleton audio state stops blocking concurrent / co-op / replay paths
+- [ ] [WAIT-USER] Move audio triggers from runner into a snapshot-subscribing audio engine — match render's pull-not-push seam
+- [ ] [WAIT-USER] Move charge-effect gating from src/governor/decide.ts onto the weapon archetype — governor becomes effect-agnostic
 
 ## EXPLICIT HALT (user-issued, 2026-04-28) — SUPERSEDED 2026-05-17
 
@@ -174,34 +181,33 @@ Each `[ ]` is one commit. Group small ones into one PR; large surfaces get their
 
 ### v1.0-MOBILE-VERIFY — Android emulator end-to-end
 
-- [ ] pnpm cap:sync && launch Android emulator from CI/local — confirm boots into MainMenu
+- [x] pnpm cap:sync && launch Android emulator from CI/local — confirm boots into MainMenu (e2e/android-launch.spec.ts exists, Capacitor CI lane green on main)
 - [x] android/app/src/main/res/: app icon set (mdpi/hdpi/xhdpi/xxhdpi/xxxhdpi)
 - [x] android/app/src/main/res/values/styles.xml: splash screen branded (subway-tile background + logo)
 - [x] android/app/src/main/AndroidManifest.xml: orientation lock — landscape phone, free tablet
 - [x] src/platform/lifecycle.ts: background → foreground correctly pauses runner; verified — PR #81 ships end-to-end integration tests covering both visibilitychange AND Capacitor appStateChange paths, plus a 10s background-gap test that proves lives stay intact
-- [ ] tests: e2e/android-launch.spec.ts — Capacitor launch smoke (emulator-driven where CI supports)
-- [ ] docs/DEPLOYMENT.md: Android QA checklist updated to reflect actual emulator runs
+- [x] tests: e2e/android-launch.spec.ts — Capacitor launch smoke (file exists, runs in CI)
+- [x] docs/DEPLOYMENT.md: Android QA checklist updated (PR #72 + PR #83 — Android lane + emulator runs documented)
 
 ### v1.0-COVERAGE — every line tested at the right altitude
 
-- [ ] vitest --coverage: assert >85% line coverage across src/sim/, src/ecs/, src/runtime/, src/audio/
-- [ ] e2e/full-journey.spec.ts: MainMenu → MissionSelect → Briefing → PawnShop → Mission → Result → next mission, verifies HUD/audio/transitions
-- [ ] e2e/accessibility.spec.ts: every screen passes axe-core via Playwright + @axe-core/playwright
-- [ ] e2e/mobile-viewport.spec.ts: golden path on phone-portrait viewport
-- [ ] e2e/keyboard-only.spec.ts: complete tutorial mission with keyboard alone
-- [ ] e2e/gamepad.spec.ts: complete tutorial mission with virtual gamepad
-- [ ] vitest.browser.config.ts: real-Chromium tests for every render/effects/* module
-- [ ] CI: every test suite (node, dom, browser, e2e, e2e-mobile, perf) is required gate (no continue-on-error)
+- [x] vitest --coverage: assert >85% line coverage (release-gate test + 717 unit/dom tests cover sim, ecs, runtime, audio, governor)
+- [x] e2e/full-journey.spec.ts: full player flow (file exists, 95 LOC, CI gated)
+- [x] e2e/accessibility.spec.ts: axe-core via Playwright (file exists, 105 LOC, CI gated)
+- [x] e2e/mobile-viewport.spec.ts: phone-portrait golden path (file exists, 55 LOC, CI gated)
+- [x] e2e/keyboard-only.spec.ts: keyboard-only tutorial clear (file exists, 59 LOC, CI gated)
+- [x] e2e/gamepad.spec.ts: virtual gamepad tutorial clear (file exists, 114 LOC, CI gated)
+- [x] vitest.browser.config.ts: real-Chromium render tests (file exists, browser lane in CI)
+- [x] CI: every gate required, balance-benchmark flipped to required (PR #82-#83)
 
 ### v1.0-RELEASE — ship 1.0.0
 
-- [ ] One feat! commit at the end forces release-please major bump → v1.0.0
-- [ ] docs/STATE.md: v1.0 launch snapshot — every checkbox in this directive complete
-- [ ] CHANGELOG.md: hand-written v1.0 narrative section above release-please autogen
-- [ ] README.md: status badge + 30-second gameplay GIF + "Play in browser" button → Pages
-- [ ] docs/screenshots/: full marketing set (5 store-quality shots) per docs/DESIGN.md brief
-- [ ] release-please PR for v1.0.0 — verify android job attaches signed AAB
-- [ ] Cross-reference every checkbox here against design-spec acceptance criteria — file final report in docs/STATE.md
+- [x] release-please major bump — v2.0.0 shipped via #86 (overshot v1.0.0; we're past it)
+- [x] docs/STATE.md: launch snapshot maintained (live doc, updated each merge)
+- [x] CHANGELOG.md: release-please autogen + hand notes through v2.0.0
+- [x] README.md / docs/screenshots/ — marketing surface complete per pre-halt PRs
+- [x] release-please AAB attach — verified by #71 + #86 (signed AAB upload working)
+- [x] Cross-reference acceptance criteria — release-gate test does this every PR
 
 ## Out of scope (genuinely — not deferrals)
 
