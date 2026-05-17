@@ -62,6 +62,41 @@ export interface GovernorTickInput {
 // zone.maxX/2=240, zone.maxY-24=246 — center of player hitbox at ground level.
 const DEFAULT_PLAYER_ORIGIN = { x: 240, y: 246 };
 
+// Speed cap above which a stationary-AOE charge effect (napalm-pool) is
+// counterproductive — the target out-walks the pool before the DoT pays
+// for the charge-time. Tap-fire is strictly better above this threshold.
+const NAPALM_TARGET_SPEED_MAX = 30; // sim units / sec
+// Health cap above which boss-class targets out-tank an arc-repeater's
+// 3 rapid arcs vs sustained tap from a charged-up mag. Bosses ≥150 HP
+// are better killed by tap; below that, the burst clears trash quickly.
+const ARC_REPEATER_TARGET_HEALTH_MAX = 150;
+
+function shouldCharge(
+  weapon: WeaponArchetype,
+  target: { vx: number; vy: number; maxHealth: number; archetypeId: string },
+  snap: ReturnType<typeof useGameStore.getState>,
+): boolean {
+  const profile = weapon.chargeProfile;
+  if (!profile) return false;
+  // Don't engage charge until ammo is at least the cost — otherwise we
+  // burn the whine + 80% wait for a tap-fallback.
+  if (snap.player.ammoCurrent < profile.shellsConsumed) return false;
+
+  const isBoss = target.archetypeId.startsWith("boss-");
+  const targetSpeed = Math.hypot(target.vx, target.vy);
+  switch (profile.effect) {
+    case "napalm-pool":
+      // Stationary pool can't catch a moving boss; sustained tap wins.
+      if (isBoss) return false;
+      return targetSpeed <= NAPALM_TARGET_SPEED_MAX;
+    case "arc-repeater":
+      // Three rapid arcs lose to sustained tap on heavy bosses.
+      return target.maxHealth <= ARC_REPEATER_TARGET_HEALTH_MAX;
+    default:
+      return true;
+  }
+}
+
 export function governorTick(input: GovernorTickInput): void {
   const { runner, weapon, profile, playerLineY, shooterPos, state } = input;
   const snap = useGameStore.getState();
@@ -111,7 +146,7 @@ export function governorTick(input: GovernorTickInput): void {
   const aim = applyOffset(leadOnly, headOffset);
 
   if (leadOvershoot <= tolerance) {
-    if (profile.useChargeShot && weapon.chargeProfile) {
+    if (profile.useChargeShot && weapon.chargeProfile && shouldCharge(weapon, target, snap)) {
       const chargeProgress = snap.chargeProgress;
       if (chargeProgress === null && state.chargeStartedAtMs === null) {
         runner.queueChargeStart();
@@ -124,6 +159,17 @@ export function governorTick(input: GovernorTickInput): void {
         state.lastShotAtMs = nowMs;
         return;
       }
+      return;
+    }
+
+    // No charge — but if we were charging and the target moved out of
+    // the charge-eligible window, release the held charge so the whine
+    // doesn't loop forever and the shells aren't burned by the
+    // shouldCharge guard's gate flip.
+    if (state.chargeStartedAtMs !== null) {
+      runner.queueChargeRelease(aim.x, aim.y);
+      state.chargeStartedAtMs = null;
+      state.lastShotAtMs = nowMs;
       return;
     }
 

@@ -70,8 +70,12 @@ export function playMissionWithGovernor(
   opts: PlaythroughOpts = {},
 ): PlaythroughResult {
   const profileOverride = MISSION_PROFILE_OVERRIDES[mission.id];
-  const profile =
-    opts.profile ?? (profileOverride ? { ...PLAYTHROUGH, ...profileOverride } : PLAYTHROUGH);
+  // Caller-supplied profile (e.g. STRESS) still gets the per-mission overlay
+  // applied — those overrides exist because of mission-specific weapon
+  // mechanics (flamethrower fire-rate, etc.), and the caller's tap-vs-charge
+  // toggle shouldn't undo them.
+  const profileBase = opts.profile ?? PLAYTHROUGH;
+  const profile = profileOverride ? { ...profileBase, ...profileOverride } : profileBase;
   const maxSimSeconds = opts.maxSimSeconds ?? 180;
   const override = MISSION_SHOOTER_OVERRIDES[mission.id];
   const defaultPos = { x: 240, y: 260 };

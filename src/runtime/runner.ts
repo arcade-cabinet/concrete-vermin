@@ -757,10 +757,13 @@ export class GameRunner {
         break;
       }
       case "napalm-pool": {
-        // Spawn a burning puddle. Radius and DPS scale with charge progress.
-        const ttlMs = 1000 + chargeProgress * 3000; // 1–4 s
-        const radius = 24 + chargeProgress * 16; // 24–40 px
-        const dps = 15 + chargeProgress * 25; // 15–40 dps
+        // Burning puddle. ttl/radius/dps scale with charge progress. Tuned
+        // so 700ms-max charge for 4 shells lands a saturated DPS that
+        // out-paces continuous tap-fire on a stationary target across the
+        // pool lifetime — without making half-charges trivially better.
+        const ttlMs = 1500 + chargeProgress * 3000; // 1.5–4.5 s
+        const radius = 28 + chargeProgress * 18; // 28–46 px
+        const dps = 28 + chargeProgress * 42; // 28–70 dps
         this.gw.world.spawn(
           NapalmPool({
             x: aimX,
