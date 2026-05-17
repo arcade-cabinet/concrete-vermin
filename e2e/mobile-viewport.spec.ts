@@ -27,7 +27,9 @@ test.describe("mobile viewport", () => {
     await expect(mainMenu).toBeVisible({ timeout: 20_000 });
 
     // No horizontal overflow on main menu.
-    const overflowMain = await page.evaluate(() => document.documentElement.scrollWidth > document.documentElement.clientWidth);
+    const overflowMain = await page.evaluate(
+      () => document.documentElement.scrollWidth > document.documentElement.clientWidth,
+    );
     expect(overflowMain).toBe(false);
 
     // Navigate into the game.
@@ -45,7 +47,9 @@ test.describe("mobile viewport", () => {
     await expect(missionSelect).toBeVisible({ timeout: 15_000 });
 
     // No horizontal overflow on mission select.
-    const overflowMs = await page.evaluate(() => document.documentElement.scrollWidth > document.documentElement.clientWidth);
+    const overflowMs = await page.evaluate(
+      () => document.documentElement.scrollWidth > document.documentElement.clientWidth,
+    );
     expect(overflowMs).toBe(false);
   });
 });

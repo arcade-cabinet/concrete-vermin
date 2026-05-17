@@ -41,7 +41,9 @@ test.describe("gamepad smoke", () => {
       // not suppress the event (dispatching a non-GamepadEvent CustomEvent
       // with the same name still reaches registered listeners).
       let fired = false;
-      const sentinel = () => { fired = true; };
+      const sentinel = () => {
+        fired = true;
+      };
       window.addEventListener("gamepadconnected", sentinel);
       window.dispatchEvent(new Event("gamepadconnected"));
       window.removeEventListener("gamepadconnected", sentinel);
