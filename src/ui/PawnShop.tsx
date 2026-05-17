@@ -322,7 +322,7 @@ export function PawnShop({ onContinue, onBack }: { onContinue: () => void; onBac
   );
 }
 
-function modBlurb(mod: {
+export function modBlurb(mod: {
   slot: string;
   damageMod?: number | undefined;
   spreadMul?: number | undefined;
